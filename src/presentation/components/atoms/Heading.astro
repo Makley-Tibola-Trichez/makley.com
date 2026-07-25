@@ -1,0 +1,41 @@
+---
+/**
+ * Heading — atom. Renders `h1`–`h6` from a numeric level.
+ *
+ * Why this exists
+ * ---------------
+ * A correct document outline needs the same visual heading at different levels
+ * depending on nesting (an `h2` in a page section, an `h3` inside a card).
+ * Astro's usual `<Tag>` trick — assigning a string union to a capitalised const
+ * and using it as an element — type-checks badly: TypeScript cannot resolve a
+ * string-literal union as a JSX element type, which silently collapses the
+ * *whole component's* `Props` to `IntrinsicAttributes` and disables prop
+ * checking for every caller. Astro's `Polymorphic` helper fixes that, but only
+ * for components whose root element *is* the dynamic tag (see `Eyebrow.astro`);
+ * it does not help for a heading nested inside a card or a section header.
+ *
+ * So the branching happens once, here, and everyone else gets a typed API.
+ *
+ * `...rest` matters more than it looks: Astro passes the *parent's*
+ * `data-astro-cid-*` scope marker down as a prop, and spreading it onto the
+ * rendered element is what keeps the parent's scoped styles applying to this
+ * heading. Without it, every `.card__title`-style rule silently stops matching.
+ */
+interface Props {
+  /** 1–6. Pick the level the document outline needs, not the size you want. */
+  level?: 1 | 2 | 3 | 4 | 5 | 6;
+  class?: string;
+  id?: string;
+  /** Forwarded attributes, including Astro's style-scope marker. */
+  [key: string]: unknown;
+}
+
+const { level = 2, class: className, id, ...rest } = Astro.props as Props;
+---
+
+{level === 1 && <h1 class={className} id={id} {...rest}><slot /></h1>}
+{level === 2 && <h2 class={className} id={id} {...rest}><slot /></h2>}
+{level === 3 && <h3 class={className} id={id} {...rest}><slot /></h3>}
+{level === 4 && <h4 class={className} id={id} {...rest}><slot /></h4>}
+{level === 5 && <h5 class={className} id={id} {...rest}><slot /></h5>}
+{level === 6 && <h6 class={className} id={id} {...rest}><slot /></h6>}

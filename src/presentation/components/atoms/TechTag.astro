@@ -1,0 +1,60 @@
+---
+/**
+ * TechTag — atom. A single technology label.
+ *
+ * `core` technologies get slightly more visual weight. A flat wall of forty
+ * identical chips communicates nothing about depth; hierarchy is the message.
+ */
+interface Props {
+  core?: boolean;
+  size?: 'sm' | 'md';
+  class?: string;
+}
+
+const { core = false, size = 'md', class: className } = Astro.props as Props;
+---
+
+<li class:list={['tech-tag', core && 'tech-tag--core', `tech-tag--${size}`, className]}>
+  <slot />
+</li>
+
+<style>
+  .tech-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem var(--space-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0;
+    white-space: nowrap;
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      border-color var(--duration-fast) var(--ease-out-quart),
+      background-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .tech-tag--sm {
+    padding: 0.15rem var(--space-2);
+    font-size: var(--fs-2xs);
+  }
+
+  .tech-tag--core {
+    border-color: color-mix(in oklab, var(--color-accent) 26%, transparent);
+    background-color: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  .tech-tag:hover {
+    border-color: var(--border-strong);
+    color: var(--color-text);
+  }
+
+  .tech-tag--core:hover {
+    border-color: color-mix(in oklab, var(--color-accent) 55%, transparent);
+    color: var(--color-accent-hover);
+  }
+</style>

@@ -1,0 +1,30 @@
+company: Dinabox
+role: Desenvolvedor Full-stack
+seniority: Júnior
+start: 2021-01
+end: 2021-11
+location: Marau, RS · Brasil
+employmentType: clt
+
+summary: >-
+  Primeira experiência profissional, atuando de ponta a ponta no desenvolvimento de um
+  sistema de gestão para marcenarias — do banco de dados à interface.
+
+responsibilities:
+  - Desenvolvimento de um sistema de gestão para marcenarias, incluindo checkout de mercadorias.
+  - Implementação de APIs em PHP e integração entre back-end e front-end.
+  - Análise de logs de erro e pré-avaliação de problemas para resolução.
+  - Modelagem e manutenção de banco de dados MySQL.
+
+achievements:
+  - value: Full-stack
+    label: Do banco de dados à interface
+  - value: "1"
+    label: Sistema de gestão entregue
+
+technologies:
+  - PHP
+  - JavaScript
+  - HTML
+  - CSS
+  - MySQL

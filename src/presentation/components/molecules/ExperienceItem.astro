@@ -1,0 +1,354 @@
+---
+/**
+ * ExperienceItem — molecule. One position in the professional timeline.
+ *
+ * UX decision: responsibilities are behind a native `<details>` disclosure.
+ * A recruiter scanning the timeline wants company, period, and outcomes — the
+ * full duty list is depth they opt into. Using `<details>` rather than a custom
+ * accordion means it is keyboard accessible, announced correctly, searchable by
+ * the browser's find-in-page, and costs zero JavaScript.
+ */
+import type { Experience } from '@domain/experience/experience.entity';
+import Badge from '@atoms/Badge.astro';
+import Icon from '@atoms/Icon.astro';
+import TechTag from '@atoms/TechTag.astro';
+
+interface Props {
+  experience: Experience;
+}
+
+const { experience } = Astro.props as Props;
+---
+
+<li class="xp" data-reveal>
+  <div class="xp__marker" aria-hidden="true">
+    <span class:list={['xp__dot', experience.isCurrent && 'xp__dot--current']}></span>
+  </div>
+
+  <div class="xp__content">
+    <div class="xp__period">
+      <time datetime={experience.period.startISO}>{experience.periodLabel}</time>
+      <span class="xp__duration">· {experience.durationLabel}</span>
+    </div>
+
+    <div class="xp__heading">
+      <h3 class="xp__role">{experience.fullRole}</h3>
+      <p class="xp__company">
+        {
+          experience.companyUrl ? (
+            <a href={experience.companyUrl} target="_blank" rel="noopener noreferrer">
+              {experience.company}
+              <Icon name="arrow-up-right" size={13} />
+            </a>
+          ) : (
+            experience.company
+          )
+        }
+        <span class="xp__separator" aria-hidden="true">·</span>
+        <span class="xp__location">{experience.location}</span>
+      </p>
+    </div>
+
+    {experience.isCurrent && <Badge tone="positive" size="sm" pulse>Atual</Badge>}
+
+    <p class="xp__summary">{experience.summary}</p>
+
+    {
+      experience.achievements.length > 0 && (
+        <ul class="xp__achievements u-list-reset">
+          {experience.achievements.map((achievement) => (
+            <li class="xp__achievement">
+              <span class="xp__achievement-value">{achievement.value}</span>
+              <span class="xp__achievement-label">{achievement.label}</span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+
+    <details class="xp__details">
+      <summary class="xp__summary-toggle">
+        <Icon name="chevron-right" size={15} class="xp__chevron" />
+        <span>Responsabilidades e tecnologias</span>
+      </summary>
+
+      <div class="xp__disclosure">
+        <ul class="xp__responsibilities">
+          {experience.responsibilities.map((item) => <li>{item}</li>)}
+        </ul>
+
+        {
+          experience.technologies.length > 0 && (
+            <ul
+              class="xp__tech u-list-reset"
+              aria-label={`Tecnologias utilizadas na ${experience.company}`}
+            >
+              {experience.technologies.map((tech) => (
+                <TechTag size="sm">{tech}</TechTag>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+    </details>
+  </div>
+</li>
+
+<style>
+  .xp {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-5);
+    padding-block-end: var(--space-12);
+  }
+
+  .xp:last-child {
+    padding-block-end: 0;
+  }
+
+  /* ---------------------------------------------------------------- rail */
+
+  .xp__marker {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: 1.25rem;
+  }
+
+  .xp__marker::before {
+    content: '';
+    position: absolute;
+    inset-block: 0.9rem -0.5rem;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      var(--border-default),
+      color-mix(in oklab, var(--border-default) 30%, transparent)
+    );
+  }
+
+  .xp:last-child .xp__marker::before {
+    display: none;
+  }
+
+  .xp__dot {
+    position: relative;
+    z-index: 1;
+    width: 9px;
+    height: 9px;
+    margin-block-start: 0.5rem;
+    border-radius: var(--radius-full);
+    background-color: var(--border-strong);
+    outline: 4px solid var(--color-bg);
+  }
+
+  .xp__dot--current {
+    background-color: var(--color-accent);
+    box-shadow: 0 0 0 4px var(--color-accent-soft);
+  }
+
+  /* -------------------------------------------------------------- content */
+
+  .xp__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+
+  .xp__period {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .xp__duration {
+    color: var(--color-text-faint);
+  }
+
+  .xp__heading {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .xp__role {
+    margin: 0;
+    font-size: var(--fs-xl);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .xp__company {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--fs-base);
+  }
+
+  .xp__company a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 3px;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .xp__company a:hover {
+    color: var(--color-accent);
+    text-decoration-color: currentColor;
+  }
+
+  .xp__separator,
+  .xp__location {
+    color: var(--color-text-faint);
+  }
+
+  .xp__summary {
+    max-width: 62ch;
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: var(--lh-relaxed);
+  }
+
+  /* --------------------------------------------------------- achievements */
+
+  .xp__achievements {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: var(--space-3);
+    width: 100%;
+    margin-block-start: var(--space-2);
+  }
+
+  .xp__achievement {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    box-shadow: var(--highlight-top);
+  }
+
+  .xp__achievement-value {
+    font-size: var(--fs-base);
+    font-weight: 560;
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .xp__achievement-label {
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
+    color: var(--color-text-muted);
+    text-wrap: pretty;
+  }
+
+  /* ------------------------------------------------------------ disclosure */
+
+  .xp__details {
+    width: 100%;
+    margin-block-start: var(--space-1);
+  }
+
+  .xp__summary-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    margin-inline-start: calc(var(--space-3) * -1);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    cursor: pointer;
+    list-style: none;
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      background-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .xp__summary-toggle::-webkit-details-marker {
+    display: none;
+  }
+
+  .xp__summary-toggle:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface);
+  }
+
+  .xp__details[open] .xp__summary-toggle {
+    color: var(--color-text);
+  }
+
+  .xp__details :global(.xp__chevron) {
+    transition: transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .xp__details[open] :global(.xp__chevron) {
+    transform: rotate(90deg);
+  }
+
+  .xp__disclosure {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-block-start: var(--space-4);
+  }
+
+  .xp__responsibilities {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-width: 64ch;
+    margin: 0;
+    padding-inline-start: var(--space-5);
+    color: var(--color-text-muted);
+    font-size: var(--fs-base);
+    line-height: var(--lh-relaxed);
+  }
+
+  .xp__responsibilities li::marker {
+    color: var(--color-accent);
+  }
+
+  .xp__tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  /* Content reveal on open, kept short so it never feels sluggish. */
+  @media (prefers-reduced-motion: no-preference) {
+    .xp__details[open] .xp__disclosure {
+      animation: xp-disclose var(--duration-base) var(--ease-out-quart);
+    }
+  }
+
+  @keyframes xp-disclose {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .xp {
+      gap: var(--space-8);
+    }
+  }
+</style>

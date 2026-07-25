@@ -1,0 +1,336 @@
+---
+/**
+ * CommandPalette — organism. ⌘K / Ctrl+K quick navigation.
+ *
+ * Why include it: for the audience this site targets (recruiters and technical
+ * managers), a palette is both a genuine navigation shortcut and a small proof
+ * of front-end craft. It is strictly an *enhancement* — every destination it
+ * offers is also reachable through the normal nav, so nothing depends on it.
+ *
+ * Accessibility: implemented as a native `<dialog>` (focus trap, Esc, backdrop)
+ * following the ARIA combobox pattern — `aria-activedescendant` moves a virtual
+ * cursor through the list while real focus stays in the input, and results are
+ * announced through a polite live region.
+ */
+import type { Project } from '@domain/projects/project.entity';
+import Icon from '@atoms/Icon.astro';
+import Kbd from '@atoms/Kbd.astro';
+
+interface Props {
+  projects: readonly Project[];
+  resumePath: string;
+  email: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+}
+
+const { projects, resumePath, email, githubUrl, linkedinUrl } = Astro.props as Props;
+
+type PaletteItem = {
+  id: string;
+  label: string;
+  hint?: string;
+  href?: string;
+  action?: string;
+  icon: Parameters<typeof Icon>[0]['name'];
+  group: string;
+  keywords: string;
+};
+
+const items: PaletteItem[] = [
+  // ---------------------------------------------------------------- navigate
+  { id: 'nav-home', label: 'Início', href: '/', icon: 'sparkles', group: 'Navegar', keywords: 'home inicio principal' },
+  { id: 'nav-about', label: 'Sobre', href: '/#sobre', icon: 'users', group: 'Navegar', keywords: 'sobre bio quem perfil' },
+  { id: 'nav-stack', label: 'Stack tecnológica', href: '/#stack', icon: 'layers', group: 'Navegar', keywords: 'stack tecnologias skills habilidades' },
+  { id: 'nav-projects', label: 'Projetos', href: '/projetos', icon: 'code', group: 'Navegar', keywords: 'projetos trabalhos cases portfolio' },
+  { id: 'nav-timeline', label: 'Trajetória', href: '/#trajetoria', icon: 'briefcase', group: 'Navegar', keywords: 'experiencia carreira timeline trajetoria empresas' },
+  { id: 'nav-education', label: 'Formação', href: '/#formacao', icon: 'graduation-cap', group: 'Navegar', keywords: 'formacao academico faculdade certificacoes cursos' },
+  { id: 'nav-contact', label: 'Contato', href: '/#contato', icon: 'mail', group: 'Navegar', keywords: 'contato email falar conversar' },
+
+  // ---------------------------------------------------------------- projects
+  ...projects.map((project) => ({
+    id: `project-${project.slug.value}`,
+    label: project.title,
+    hint: project.categoryLabel,
+    href: project.href,
+    icon: 'arrow-up-right' as const,
+    group: 'Projetos',
+    keywords: `${project.title} ${project.categoryLabel} ${project.technologies.join(' ')}`.toLowerCase(),
+  })),
+
+  // ----------------------------------------------------------------- actions
+  { id: 'action-resume-online', label: 'Ver currículo online', href: '/curriculo', icon: 'file-text', group: 'Currículo', keywords: 'curriculo cv resume online' },
+  { id: 'action-resume-pdf', label: 'Baixar currículo (PDF)', href: resumePath, icon: 'download', group: 'Currículo', keywords: 'curriculo cv resume pdf baixar download' },
+  { id: 'action-copy-email', label: 'Copiar e-mail', hint: email, action: 'copy-email', icon: 'copy', group: 'Ações', keywords: 'copiar email contato' },
+  { id: 'action-theme', label: 'Alternar tema claro/escuro', action: 'toggle-theme', icon: 'moon', group: 'Ações', keywords: 'tema dark light claro escuro modo' },
+  { id: 'action-theme-system', label: 'Usar o tema do sistema', action: 'system-theme', icon: 'monitor', group: 'Ações', keywords: 'tema sistema automatico system' },
+
+  // ------------------------------------------------------------------ social
+  ...(githubUrl
+    ? [{ id: 'social-github', label: 'GitHub', href: githubUrl, icon: 'github' as const, group: 'Links', keywords: 'github codigo repositorio' }]
+    : []),
+  ...(linkedinUrl
+    ? [{ id: 'social-linkedin', label: 'LinkedIn', href: linkedinUrl, icon: 'linkedin' as const, group: 'Links', keywords: 'linkedin rede profissional' }]
+    : []),
+];
+
+const groups = [...new Set(items.map((item) => item.group))];
+---
+
+<dialog class="palette" data-palette aria-label="Busca e navegação rápida">
+  <div class="palette__panel">
+    <div class="palette__search">
+      <Icon name="search" size={17} class="palette__search-icon" />
+      <input
+        type="text"
+        class="palette__input"
+        data-palette-input
+        placeholder="Buscar projetos, seções e ações…"
+        aria-label="Buscar no site"
+        role="combobox"
+        aria-expanded="true"
+        aria-controls="palette-listbox"
+        aria-autocomplete="list"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button type="button" class="palette__close" data-palette-close aria-label="Fechar busca">
+        <Kbd>esc</Kbd>
+      </button>
+    </div>
+
+    <div class="palette__results" data-palette-results>
+      <ul id="palette-listbox" role="listbox" class="u-list-reset" aria-label="Resultados">
+        {
+          groups.map((group) => (
+            <li role="presentation" class="palette__group" data-palette-group={group}>
+              <span class="palette__group-title" aria-hidden="true">
+                {group}
+              </span>
+              <ul role="group" aria-label={group} class="u-list-reset">
+                {items
+                  .filter((item) => item.group === group)
+                  .map((item) => (
+                    <li
+                      role="option"
+                      id={item.id}
+                      class="palette__item"
+                      aria-selected="false"
+                      data-palette-item
+                      data-href={item.href}
+                      data-action={item.action}
+                      data-keywords={item.keywords}
+                    >
+                      <Icon name={item.icon} size={16} class="palette__item-icon" />
+                      <span class="palette__item-label">{item.label}</span>
+                      {item.hint && <span class="palette__item-hint">{item.hint}</span>}
+                      <Icon name="arrow-right" size={14} class="palette__item-go" />
+                    </li>
+                  ))}
+              </ul>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="palette__empty" data-palette-empty hidden>
+        Nenhum resultado. Tente “projetos”, “currículo” ou “contato”.
+      </p>
+    </div>
+
+    <footer class="palette__foot">
+      <span><Kbd>↑</Kbd><Kbd>↓</Kbd> navegar</span>
+      <span><Kbd>↵</Kbd> abrir</span>
+      <span><Kbd>esc</Kbd> fechar</span>
+    </footer>
+  </div>
+
+  {/* Announces result counts without moving focus. */}
+  <p class="u-visually-hidden" role="status" aria-live="polite" data-palette-status></p>
+</dialog>
+
+<script>
+  import { initCommandPalette } from '@presentation/scripts/command-palette';
+
+  initCommandPalette();
+</script>
+
+<style>
+  .palette {
+    width: min(38rem, calc(100vw - 2rem));
+    max-height: min(32rem, calc(100dvh - 6rem));
+    margin: clamp(3rem, 12vh, 8rem) auto auto;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xl);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-lg), var(--highlight-top);
+    overflow: hidden;
+  }
+
+  .palette__panel {
+    display: flex;
+    flex-direction: column;
+    max-height: inherit;
+  }
+
+  /* ---------------------------------------------------------------- search */
+
+  .palette__search {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    border-block-end: 1px solid var(--border-subtle);
+  }
+
+  .palette :global(.palette__search-icon) {
+    color: var(--color-text-faint);
+    flex-shrink: 0;
+  }
+
+  .palette__input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: none;
+    color: var(--color-text);
+    font-size: var(--fs-md);
+    outline: none;
+  }
+
+  .palette__input::placeholder {
+    color: var(--color-text-faint);
+  }
+
+  .palette__close {
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  .palette__close:hover {
+    opacity: 1;
+  }
+
+  /* --------------------------------------------------------------- results */
+
+  .palette__results {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-2);
+    overscroll-behavior: contain;
+  }
+
+  .palette__group[hidden] {
+    display: none;
+  }
+
+  .palette__group-title {
+    display: block;
+    padding: var(--space-3) var(--space-3) var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  .palette__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    font-size: var(--fs-base);
+    cursor: pointer;
+    scroll-margin: var(--space-8);
+  }
+
+  .palette__item[hidden] {
+    display: none;
+  }
+
+  .palette__item[aria-selected='true'] {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text);
+  }
+
+  .palette :global(.palette__item-icon) {
+    color: var(--color-text-faint);
+    flex-shrink: 0;
+  }
+
+  .palette__item[aria-selected='true'] :global(.palette__item-icon) {
+    color: var(--color-accent);
+  }
+
+  .palette__item-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .palette__item-hint {
+    font-size: var(--fs-xs);
+    color: var(--color-text-faint);
+    white-space: nowrap;
+  }
+
+  .palette :global(.palette__item-go) {
+    opacity: 0;
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .palette__item[aria-selected='true'] :global(.palette__item-go) {
+    opacity: 1;
+  }
+
+  .palette__empty {
+    padding: var(--space-8) var(--space-4);
+    margin: 0;
+    text-align: center;
+    color: var(--color-text-faint);
+    font-size: var(--fs-base);
+  }
+
+  /* ------------------------------------------------------------------ foot */
+
+  .palette__foot {
+    display: flex;
+    gap: var(--space-5);
+    padding: var(--space-3) var(--space-5);
+    border-block-start: 1px solid var(--border-subtle);
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text-faint);
+    font-size: var(--fs-xs);
+  }
+
+  .palette__foot span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  /* The keyboard hints are meaningless on touch, where there is no keyboard. */
+  @media (max-width: 40rem) {
+    .palette__foot {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .palette[open] {
+      animation: palette-in var(--duration-base) var(--ease-out-expo);
+    }
+  }
+
+  @keyframes palette-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+    }
+  }
+</style>

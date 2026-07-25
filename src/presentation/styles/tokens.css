@@ -1,0 +1,224 @@
+/**
+ * Design tokens — the only place raw values are allowed to exist.
+ *
+ * Two tiers, on purpose:
+ *  1. **Primitives** (`--gray-*`, `--ember-*`, `--space-*`) — a raw palette/scale.
+ *     Components must never reference these directly.
+ *  2. **Semantic tokens** (`--color-bg`, `--color-text`, `--border-subtle`) —
+ *     what components consume. Theming is then a matter of remapping tier 2,
+ *     which is why dark/light support costs ~40 lines instead of a second sheet.
+ *
+ * This is the Dependency Inversion Principle applied to CSS: components depend
+ * on the semantic abstraction, not on the concrete colour.
+ */
+
+:root {
+  /* ---------------------------------------------------------------- palette */
+  /* Cool graphite neutrals — never pure black, never pure white. */
+  --gray-0: #08090a;
+  --gray-1: #0c0e0f;
+  --gray-2: #111315;
+  --gray-3: #17191c;
+  --gray-4: #1f2226;
+  --gray-5: #2a2e33;
+  --gray-6: #3a3f46;
+  --gray-7: #6e747d;
+  --gray-8: #9ba1aa;
+  --gray-9: #c9cdd3;
+  --gray-10: #f2f3f5;
+  --white: #ffffff;
+
+  /* Ember — the single brand accent. Deliberately warm to stand apart from the
+     blue/violet monoculture of developer portfolios. */
+  --ember-300: #ffb199;
+  --ember-400: #ff8a63;
+  --ember-500: #ff6a3d;
+  --ember-600: #ed4f1c;
+  --ember-700: #d2400f;
+  --ember-800: #a3320c;
+
+  /* Decorative-only hues. Never used for text — gradients and halos only. */
+  --aurora-violet: #8b5cf6;
+  --aurora-rose: #f43f5e;
+  --aurora-amber: #fbbf24;
+
+  --positive-500: #3ddc97;
+  --positive-700: #0f7d52;
+
+  /* ------------------------------------------------------------ typography */
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo,
+    Consolas, 'Liberation Mono', monospace;
+  --font-serif: 'Instrument Serif', ui-serif, Georgia, Cambria, 'Times New Roman',
+    serif;
+
+  /* Fluid scale: min value at 360px, max at 1440px. No media queries needed. */
+  --fs-2xs: 0.6875rem;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.9375rem;
+  --fs-md: clamp(1rem, 0.96rem + 0.18vw, 1.0625rem);
+  --fs-lg: clamp(1.0625rem, 0.99rem + 0.32vw, 1.1875rem);
+  --fs-xl: clamp(1.25rem, 1.14rem + 0.48vw, 1.5rem);
+  --fs-2xl: clamp(1.5rem, 1.28rem + 0.95vw, 2rem);
+  --fs-3xl: clamp(1.875rem, 1.5rem + 1.6vw, 2.75rem);
+  --fs-4xl: clamp(2.25rem, 1.6rem + 2.9vw, 4rem);
+  --fs-5xl: clamp(2.75rem, 1.55rem + 5.3vw, 6rem);
+
+  --lh-tight: 1.05;
+  --lh-snug: 1.2;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.7;
+
+  --tracking-tighter: -0.04em;
+  --tracking-tight: -0.02em;
+  --tracking-normal: -0.011em;
+  --tracking-wide: 0.02em;
+  --tracking-widest: 0.16em;
+
+  /* ---------------------------------------------------------------- space */
+  /* 4px base grid. Named by step so rhythm stays consistent across components. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* Vertical rhythm between page sections, fluid across breakpoints. */
+  --space-section: clamp(4.5rem, 3rem + 8vw, 9rem);
+
+  /* ---------------------------------------------------------------- shape */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-full: 999px;
+
+  /* --------------------------------------------------------------- layout */
+  --container-max: 68rem; /* 1088px — comfortable 60-75ch measure at body size */
+  --container-wide: 78rem;
+  --container-pad: clamp(1.25rem, 0.9rem + 1.8vw, 2.5rem);
+  --measure: 68ch;
+  --header-height: 4rem;
+
+  /* --------------------------------------------------------------- motion */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  --duration-instant: 90ms;
+  --duration-fast: 160ms;
+  --duration-base: 240ms;
+  --duration-slow: 420ms;
+  --duration-slower: 720ms;
+
+  --z-base: 1;
+  --z-sticky: 50;
+  --z-header: 60;
+  --z-overlay: 90;
+  --z-modal: 100;
+  --z-toast: 110;
+}
+
+/* ==========================================================================
+   Semantic layer — dark (default)
+   ========================================================================== */
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-bg: var(--gray-0);
+  --color-bg-subtle: var(--gray-1);
+  --color-surface: var(--gray-2);
+  --color-surface-raised: var(--gray-3);
+  --color-surface-hover: var(--gray-4);
+
+  --color-text: var(--gray-10);
+  --color-text-secondary: var(--gray-9);
+  --color-text-muted: var(--gray-8);
+  /* 4.25:1 — decorative and large text only, never body copy. */
+  --color-text-faint: var(--gray-7);
+
+  --color-accent: var(--ember-500);
+  --color-accent-hover: var(--ember-400);
+  --color-accent-contrast: #1a0a04;
+  --color-accent-soft: color-mix(in oklab, var(--ember-500) 14%, transparent);
+  --color-accent-ring: color-mix(in oklab, var(--ember-500) 45%, transparent);
+
+  --color-positive: var(--positive-500);
+
+  --border-subtle: color-mix(in oklab, var(--white) 8%, transparent);
+  --border-default: color-mix(in oklab, var(--white) 12%, transparent);
+  --border-strong: color-mix(in oklab, var(--white) 20%, transparent);
+
+  /* The "premium" detail: a 1px inner highlight on the top edge of surfaces,
+     mimicking how physical materials catch light. */
+  --highlight-top: inset 0 1px 0 0 color-mix(in oklab, var(--white) 7%, transparent);
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 16px -4px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 16px 48px -12px rgb(0 0 0 / 0.65);
+  --shadow-glow: 0 0 0 1px var(--color-accent-ring),
+    0 8px 32px -8px color-mix(in oklab, var(--ember-500) 35%, transparent);
+
+  --grid-line: color-mix(in oklab, var(--white) 4%, transparent);
+  --selection-bg: color-mix(in oklab, var(--ember-500) 30%, transparent);
+  --selection-fg: var(--gray-10);
+}
+
+/* ==========================================================================
+   Semantic layer — light
+   ========================================================================== */
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --color-bg: #fbfbfa;
+  --color-bg-subtle: #f4f4f2;
+  --color-surface: var(--white);
+  --color-surface-raised: var(--white);
+  --color-surface-hover: #f4f4f2;
+
+  --color-text: #16181a;
+  --color-text-secondary: #35393e;
+  --color-text-muted: #5c626b;
+  --color-text-faint: #868d96;
+
+  /* Darker cut of the accent: 4.69:1 on the light background (WCAG AA). */
+  --color-accent: var(--ember-700);
+  --color-accent-hover: var(--ember-800);
+  --color-accent-contrast: #ffffff;
+  --color-accent-soft: color-mix(in oklab, var(--ember-700) 10%, transparent);
+  --color-accent-ring: color-mix(in oklab, var(--ember-700) 40%, transparent);
+
+  --color-positive: var(--positive-700);
+
+  --border-subtle: color-mix(in oklab, #16181a 9%, transparent);
+  --border-default: color-mix(in oklab, #16181a 14%, transparent);
+  --border-strong: color-mix(in oklab, #16181a 26%, transparent);
+
+  --highlight-top: inset 0 1px 0 0 color-mix(in oklab, var(--white) 80%, transparent);
+
+  --shadow-sm: 0 1px 2px rgb(16 18 26 / 0.06);
+  --shadow-md: 0 4px 16px -4px rgb(16 18 26 / 0.1);
+  --shadow-lg: 0 16px 48px -12px rgb(16 18 26 / 0.14);
+  --shadow-glow: 0 0 0 1px var(--color-accent-ring),
+    0 8px 32px -8px color-mix(in oklab, var(--ember-700) 25%, transparent);
+
+  --grid-line: color-mix(in oklab, #16181a 5%, transparent);
+  --selection-bg: color-mix(in oklab, var(--ember-700) 22%, transparent);
+  --selection-fg: #16181a;
+}

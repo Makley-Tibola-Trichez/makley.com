@@ -1,0 +1,23 @@
+company: Sicredi
+companyUrl: https://www.sicredi.com.br
+role: Desenvolvedor de Sistemas
+start: 2025-10
+end: null
+location: Rio Grande do Sul, Brasil
+employmentType: clt
+
+summary: >-
+  Desenvolvimento de sistemas em uma das maiores instituições financeiras cooperativas do
+  país, atuando na Sicredi Aliança PR/SP/RJ.
+
+responsibilities:
+  - Desenvolvimento e manutenção de sistemas internos utilizados pelas cooperativas.
+  - Colaboração com times multidisciplinares em ambiente corporativo de larga escala.
+  - Aplicação de padrões de qualidade, revisão de código e testes automatizados.
+
+achievements: []
+
+technologies:
+  - TypeScript
+  - React
+  - Git

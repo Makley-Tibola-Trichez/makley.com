@@ -1,0 +1,33 @@
+company: Produto próprio · Gestão escolar
+role: Co-fundador & Desenvolvedor Front-end
+start: 2024-01
+end: null
+location: Remoto · Brasil
+employmentType: proprio
+
+summary: >-
+  Desenvolvimento de um produto de gestão escolar e análise de desempenho de estudantes,
+  junto com outros dois sócios. Responsável pelo front-end e pelas decisões de arquitetura
+  de interface.
+
+responsibilities:
+  - Definição da arquitetura de front-end e das escolhas de stack do produto.
+  - Desenvolvimento das interfaces de acompanhamento de desempenho acadêmico.
+  - Prototipação e decisões de produto em conjunto com os sócios.
+  - Cobertura de fluxos críticos com testes end-to-end.
+
+achievements:
+  - value: "3"
+    label: Sócios fundadores
+  - value: "2024"
+    label: Início do desenvolvimento
+
+technologies:
+  - React
+  - TypeScript
+  - Tailwind CSS
+  - HeroUI
+  - TanStack Query
+  - Cypress
+  - Figma
+  - GitHub

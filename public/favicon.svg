@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!--
+    Theme-aware favicon: the tile follows the OS colour scheme so the icon never
+    sits as a dark square on a dark browser chrome (or vice versa). The mark
+    itself keeps the brand ember in both themes.
+  -->
+  <style>
+    .tile { fill: #08090a; }
+    .edge { stroke: rgba(255, 255, 255, 0.14); }
+    @media (prefers-color-scheme: light) {
+      .tile { fill: #fbfbfa; }
+      .edge { stroke: rgba(0, 0, 0, 0.12); }
+    }
+  </style>
+
+  <rect class="tile" width="512" height="512" rx="112" />
+  <rect class="edge" x="3" y="3" width="506" height="506" rx="110" fill="none" stroke-width="6" />
+
+  <path
+    d="M150 350 V 172 L 256 288 L 362 172 V 350"
+    fill="none"
+    stroke="#ff6a3d"
+    stroke-width="38"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

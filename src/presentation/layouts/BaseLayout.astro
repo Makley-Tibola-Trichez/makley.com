@@ -1,0 +1,111 @@
+---
+/**
+ * BaseLayout — the document shell every route renders inside.
+ *
+ * Fetches the profile and project list itself (through the composition root)
+ * rather than requiring each page to thread them down to the header, footer and
+ * command palette. The repositories memoise, so this costs one read per build.
+ */
+import { SITE } from '@config/site';
+import { useCases } from '@infrastructure/container';
+import BaseHead from '@presentation/components/templates/BaseHead.astro';
+import SiteHeader from '@organisms/SiteHeader.astro';
+import SiteFooter from '@organisms/SiteFooter.astro';
+import CommandPalette from '@organisms/CommandPalette.astro';
+
+import '@styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article' | 'profile';
+  jsonLd?: string;
+  noindex?: boolean;
+  isHome?: boolean;
+}
+
+const {
+  title,
+  description,
+  path,
+  image,
+  imageAlt,
+  type,
+  jsonLd,
+  noindex,
+  isHome = false,
+} = Astro.props as Props;
+
+const { profile, allProjects } = await useCases.getPortfolioOverview.execute();
+
+const github = profile.social('github');
+const linkedin = profile.social('linkedin');
+---
+
+<!doctype html>
+<html lang={SITE.locale} data-theme="dark">
+  <head>
+    <BaseHead
+      title={title}
+      description={description}
+      path={path}
+      image={image}
+      imageAlt={imageAlt}
+      type={type}
+      jsonLd={jsonLd}
+      noindex={noindex}
+    />
+
+    {/*
+      Theme bootstrap. Must be inline and blocking: any deferred alternative
+      paints the default theme first, producing a visible flash for visitors who
+      chose the opposite one. It is a handful of bytes and runs in microseconds.
+    */}
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem('theme');
+          const theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: light)').matches
+                ? 'light'
+                : 'dark';
+
+          document.documentElement.dataset.theme = theme;
+        } catch {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <SiteHeader profile={profile} isHome={isHome} />
+
+    <main id="conteudo">
+      <slot />
+    </main>
+
+    <SiteFooter profile={profile} />
+
+    <CommandPalette
+      projects={allProjects}
+      resumePath={profile.resumePath}
+      email={profile.email}
+      githubUrl={github?.url}
+      linkedinUrl={linkedin?.url}
+    />
+
+    <script>
+      import { initReveal } from '@presentation/scripts/reveal';
+      import { initSpotlight } from '@presentation/scripts/spotlight';
+
+      initReveal();
+      initSpotlight();
+    </script>
+  </body>
+</html>

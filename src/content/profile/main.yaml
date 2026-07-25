@@ -1,0 +1,123 @@
+name: Makley Tibola Trichez
+shortName: Makley
+title: Software Engineer
+headline: Software Engineer especializado em front-end, design systems e performance.
+
+# A palavra em `emphasis` é destacada em serifa itálica no título principal.
+heroStatement:
+  lead: Construo produtos digitais que
+  emphasis: escalam
+  trail: para milhares de pessoas.
+
+heroIntro: >-
+  Construo produtos SaaS que milhares de pessoas usam para trabalhar todos os dias.
+  Cinco anos entre React, TypeScript e design systems — com obsessão por interfaces
+  rápidas, acessíveis e fáceis de manter.
+
+bio:
+  - >-
+    Sou desenvolvedor há mais de cinco anos e passei quase todos eles dentro de produtos
+    SaaS reais: sistemas fiscais, financeiros e logísticos usados diariamente por
+    produtores rurais, transportadoras e escritórios de contabilidade em todo o Brasil.
+    É um contexto que não perdoa interface lenta nem fluxo confuso — se a emissão de um
+    documento falha, o caminhão não sai.
+  - >-
+    Meu trabalho vai além de entregar telas. Fui responsável pela manutenção de dois
+    design systems usados por múltiplos produtos, liderei a migração de Next.js para
+    Vite reduzindo custos de infraestrutura, e derrubei o tempo de deploy de 25 para 4
+    minutos. Gosto de atacar o que trava o time inteiro, não só a minha própria task.
+  - >-
+    Sou bacharel em Ciência da Computação pela Atitus Educação, onde conduzi uma
+    pesquisa sobre a viabilidade de executar grandes modelos de IA diretamente em
+    dispositivos móveis. Hoje divido meu tempo entre o desenvolvimento de sistemas no
+    Sicredi e um produto próprio de gestão escolar que estou construindo com dois sócios.
+
+location: Marau, Rio Grande do Sul, Brasil
+locality: Marau
+region: RS
+country: BR
+
+email: tibolamakley1@gmail.com
+phone: "+5554991127790"
+
+# 'open' | 'selective' | 'closed' — controla o selo de disponibilidade no header.
+availability: selective
+availabilityNote: >-
+  Atualmente atuo como desenvolvedor de sistemas no Sicredi, mas estou aberto a conversar
+  sobre oportunidades desafiadoras em produto e front-end — além de projetos freelance
+  pontuais.
+
+specialties:
+  - React & TypeScript
+  - Design Systems
+  - Performance web
+  - Arquitetura front-end
+  - Experiência do usuário
+  - DevOps para front-end
+
+focusAreas:
+  - title: Produto SaaS
+    description: >-
+      Interfaces para sistemas complexos — fiscal, financeiro e logístico — onde a
+      densidade de informação é alta e o erro custa dinheiro ao usuário.
+  - title: Design Systems
+    description: >-
+      Bibliotecas de componentes versionadas, documentadas e consumidas por vários
+      produtos, com contratos de API estáveis e ciclo de release automatizado.
+  - title: Performance & Core Web Vitals
+    description: >-
+      Diagnóstico e correção de gargalos reais: bundle, renderização, cache e pipeline
+      de build. Menos JavaScript, mais percepção de velocidade.
+  - title: Qualidade & DX
+    description: >-
+      Testes automatizados, padrões de código acordados com o time, code review e
+      pipelines de CI/CD que encurtam o caminho entre o commit e a produção.
+
+goals:
+  - Evoluir para posições de sênior e liderança técnica em produtos de alto impacto.
+  - Aprofundar arquitetura de front-end em escala e sistemas distribuídos.
+  - Levar meu produto próprio de gestão escolar ao mercado.
+
+languages:
+  - name: Português
+    level: Nativo
+  - name: Inglês
+    level: Conversacional — B1
+
+stats:
+  - value: 5+
+    label: anos de experiência
+    detail: Desde 2021, sempre em produtos em produção
+  - value: 22 mil+
+    label: clientes ativos
+    detail: Somados os produtos AgroNota e SimplesCTe
+  - value: "2"
+    label: design systems
+    detail: Mantidos e evoluídos para múltiplos produtos
+  - value: −84%
+    label: tempo de deploy
+    detail: De 25 para 4 minutos no design system
+
+socials:
+  - platform: github
+    url: https://github.com/Makley-Tibola-Trichez
+    handle: Makley-Tibola-Trichez
+    primary: true
+  - platform: linkedin
+    url: https://www.linkedin.com/in/makley-/
+    handle: makley-
+    primary: true
+  - platform: instagram
+    url: https://www.instagram.com/makley__/
+    handle: "@makley__"
+    primary: false
+  - platform: hackerrank
+    url: https://www.hackerrank.com/tibolamakley1
+    handle: tibolamakley1
+    primary: false
+  - platform: email
+    url: mailto:tibolamakley1@gmail.com
+    handle: tibolamakley1@gmail.com
+    primary: true
+
+resumePath: /curriculo/makley-trichez-cv-pt-br.pdf

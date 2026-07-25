@@ -1,0 +1,73 @@
+# Stack tecnológica exibida na seção "Stack".
+#
+# `core: true` destaca visualmente as tecnologias com que você realmente lidera —
+# o resto aparece como apoio. Uma lista plana de 40 chips não diz nada a um
+# recrutador; a hierarquia é o que comunica profundidade.
+#
+# REVISE ESTA LISTA antes de publicar: remova o que não domina e adicione o que faltar.
+# Ver CONTEUDO-PENDENTE.md → "Stack tecnológica".
+
+technologies:
+  # ------------------------------------------------------------------ front-end
+  - { id: react, name: React, category: frontend, core: true, note: 5 anos em produção }
+  - { id: typescript, name: TypeScript, category: frontend, core: true, note: Linguagem principal }
+  - { id: nextjs, name: Next.js, category: frontend, core: true }
+  - { id: astro, name: Astro, category: frontend, core: true }
+  - { id: javascript, name: JavaScript, category: frontend, core: true }
+  - { id: vite, name: Vite, category: frontend }
+  - { id: zustand, name: Zustand, category: frontend }
+  - { id: redux, name: Redux, category: frontend }
+  - { id: tanstack-query, name: TanStack Query, category: frontend }
+  - { id: react-hook-form, name: React Hook Form, category: frontend }
+  - { id: zod, name: Zod, category: frontend }
+  - { id: styled-components, name: Styled Components, category: frontend }
+  - { id: emotion, name: Emotion, category: frontend }
+  - { id: tailwind-css, name: Tailwind CSS, category: frontend }
+  - { id: material-ui, name: Material UI, category: frontend }
+  - { id: heroui, name: HeroUI, category: frontend }
+  - { id: html, name: HTML semântico, category: frontend }
+  - { id: css, name: CSS moderno, category: frontend }
+
+  # ------------------------------------------------------------------- back-end
+  - { id: nodejs, name: Node.js, category: backend }
+  - { id: golang, name: Go, category: backend }
+  - { id: php, name: PHP, category: backend }
+  - { id: rest-apis, name: APIs REST, category: backend, core: true }
+
+  # --------------------------------------------------------------------- mobile
+  - { id: kotlin, name: Kotlin, category: mobile }
+
+  # ----------------------------------------------------------- banco de dados
+  - { id: postgresql, name: PostgreSQL, category: database }
+  - { id: mysql, name: MySQL, category: database }
+
+  # ---------------------------------------------------------------------- cloud
+  - { id: linux, name: Linux, category: cloud }
+  - { id: vercel, name: Vercel, category: cloud }
+
+  # --------------------------------------------------------------------- devops
+  - { id: docker, name: Docker, category: devops }
+  - { id: gitlab-ci, name: GitLab CI/CD, category: devops, core: true }
+  - { id: git, name: Git, category: devops, core: true }
+  - { id: monorepo, name: Monorepo, category: devops }
+
+  # ------------------------------------------------------------ testes/qualidade
+  - { id: vitest, name: Vitest, category: testing }
+  - { id: jest, name: Jest, category: testing }
+  - { id: cypress, name: Cypress, category: testing, core: true }
+  - { id: testing-library, name: Testing Library, category: testing }
+  - { id: postman, name: Postman, category: testing }
+
+  # ------------------------------------------------------- observabilidade/produto
+  - { id: sentry, name: Sentry, category: observability }
+  - { id: posthog, name: PostHog, category: observability }
+  - { id: clarity, name: Microsoft Clarity, category: observability }
+
+  # ---------------------------------------------------------------- ferramentas
+  - { id: figma, name: Figma, category: tooling }
+  - { id: jira, name: Jira, category: tooling }
+  - { id: github, name: GitHub, category: tooling }
+
+  # -------------------------------------------------------------------------- ia
+  - { id: llms, name: LLMs, category: ai, note: Pesquisa acadêmica em inferência on-device }
+  - { id: ai-assisted-dev, name: Desenvolvimento assistido por IA, category: ai }

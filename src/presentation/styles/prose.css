@@ -1,0 +1,139 @@
+/**
+ * Long-form content styling for markdown-rendered case studies.
+ *
+ * These rules are global (not Astro-scoped) on purpose: markdown compiled by
+ * `render()` produces plain HTML without the component's scope attribute, so
+ * scoped selectors would never match it. Everything is namespaced under
+ * `.prose` to keep the blast radius contained.
+ */
+
+.prose {
+  max-width: 68ch;
+  margin-block-end: var(--space-16);
+  color: var(--color-text-muted);
+  font-size: var(--fs-md);
+  line-height: var(--lh-relaxed);
+}
+
+.prose > * + * {
+  margin-block-start: var(--space-5);
+}
+
+.prose h2 {
+  margin-block-start: var(--space-12);
+  margin-block-end: var(--space-4);
+  font-size: var(--fs-xl);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text);
+  scroll-margin-block-start: calc(var(--header-height) + var(--space-8));
+}
+
+.prose h3 {
+  margin-block-start: var(--space-8);
+  margin-block-end: var(--space-3);
+  font-size: var(--fs-lg);
+  color: var(--color-text);
+}
+
+.prose p {
+  text-wrap: pretty;
+}
+
+.prose strong {
+  color: var(--color-text-secondary);
+  font-weight: 560;
+}
+
+.prose a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color var(--duration-fast) var(--ease-out-quart);
+}
+
+.prose a:hover {
+  color: var(--color-accent-hover);
+}
+
+.prose ul,
+.prose ol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-inline-start: var(--space-6);
+}
+
+.prose li::marker {
+  color: var(--color-accent);
+}
+
+.prose blockquote {
+  margin-inline: 0;
+  padding: var(--space-4) var(--space-6);
+  border-inline-start: 2px solid var(--color-accent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.prose blockquote p {
+  margin: 0;
+}
+
+.prose code {
+  padding: 0.15em 0.4em;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 0.88em;
+}
+
+.prose pre {
+  padding: var(--space-5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-subtle) !important;
+  /* Long lines scroll inside the block instead of widening the page. */
+  overflow-x: auto;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+}
+
+.prose pre code {
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: inherit;
+}
+
+.prose img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.prose hr {
+  margin-block: var(--space-10);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-base);
+}
+
+.prose th,
+.prose td {
+  padding: var(--space-3);
+  border-block-end: 1px solid var(--border-subtle);
+  text-align: start;
+}
+
+.prose th {
+  color: var(--color-text-secondary);
+  font-weight: 560;
+}

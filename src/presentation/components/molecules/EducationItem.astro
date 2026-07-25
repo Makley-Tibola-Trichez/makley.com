@@ -1,0 +1,172 @@
+---
+/**
+ * EducationItem — molecule. One entry in the academic timeline.
+ *
+ * Deliberately lighter than {@link ExperienceItem}: degrees, courses,
+ * certifications and events share one compact card so the section stays
+ * scannable. The `kind` drives both the icon and the badge, which is why the
+ * domain models it as an enum instead of free text.
+ */
+import type { Education, EducationKind } from '@domain/education/education.entity';
+import Badge from '@atoms/Badge.astro';
+import Icon, { type IconName } from '@atoms/Icon.astro';
+
+interface Props {
+  item: Education;
+}
+
+const { item } = Astro.props as Props;
+
+const KIND_ICONS: Record<EducationKind, IconName> = {
+  graduacao: 'graduation-cap',
+  certificacao: 'award',
+  curso: 'book-open',
+  evento: 'users',
+  publicacao: 'file-text',
+};
+---
+
+<li class="edu" data-education-item data-kind={item.kind} data-reveal>
+  <span class="edu__icon" aria-hidden="true">
+    <Icon name={KIND_ICONS[item.kind]} size={17} />
+  </span>
+
+  <div class="edu__content">
+    <div class="edu__meta">
+      <Badge tone={item.kind === 'graduacao' ? 'accent' : 'neutral'} size="sm">
+        {item.kindLabel}
+      </Badge>
+      <time class="edu__period" datetime={item.period.startISO}>{item.periodLabel}</time>
+    </div>
+
+    <h3 class="edu__credential">
+      {
+        item.credentialUrl ? (
+          <a href={item.credentialUrl} target="_blank" rel="noopener noreferrer">
+            {item.credential}
+            <Icon name="arrow-up-right" size={13} />
+            <span class="u-visually-hidden">(abre em nova aba)</span>
+          </a>
+        ) : (
+          item.credential
+        )
+      }
+    </h3>
+
+    <p class="edu__institution">{item.institution}</p>
+
+    {item.description && <p class="edu__description">{item.description}</p>}
+
+    {
+      item.highlights.length > 0 && (
+        <ul class="edu__highlights">
+          {item.highlights.map((highlight) => (
+            <li>{highlight}</li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</li>
+
+<style>
+  .edu {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--highlight-top);
+    transition:
+      border-color var(--duration-base) var(--ease-out-quart),
+      transform var(--duration-base) var(--ease-out-expo);
+  }
+
+  .edu:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+  }
+
+  .edu__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-subtle);
+    color: var(--color-accent);
+  }
+
+  .edu__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .edu__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .edu__period {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  .edu__credential {
+    margin: 0;
+    font-size: var(--fs-lg);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .edu__credential a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .edu__credential a:hover {
+    color: var(--color-accent);
+  }
+
+  .edu__institution {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--fs-base);
+  }
+
+  .edu__description {
+    max-width: 62ch;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--fs-base);
+    line-height: var(--lh-relaxed);
+  }
+
+  .edu__highlights {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-width: 62ch;
+    margin: var(--space-1) 0 0;
+    padding-inline-start: var(--space-5);
+    color: var(--color-text-muted);
+    font-size: var(--fs-base);
+    line-height: var(--lh-relaxed);
+  }
+
+  .edu__highlights li::marker {
+    color: var(--color-accent);
+  }
+</style>

@@ -1,0 +1,152 @@
+---
+/**
+ * ResumeSection — organism. A band offering the résumé two ways.
+ *
+ * Both paths matter and serve different people: an ATS or a hiring manager
+ * wants the PDF, while a curious visitor on a phone would rather read it in the
+ * page than download a file. Offering only one loses the other.
+ */
+import type { Profile } from '@domain/profile/profile.entity';
+import Button from '@atoms/Button.astro';
+import Icon from '@atoms/Icon.astro';
+
+interface Props {
+  profile: Profile;
+}
+
+const { profile } = Astro.props as Props;
+---
+
+<section class="resume-cta" aria-labelledby="resume-cta-title">
+  <div class="u-container">
+    <div class="resume-cta__panel u-grid-backdrop" data-reveal>
+      <div class="resume-cta__content">
+        <span class="u-eyebrow">Currículo</span>
+        <h2 class="resume-cta__title" id="resume-cta-title">
+          Leia online ou leve o PDF
+        </h2>
+        <p class="resume-cta__text">
+          A versão online é sempre a mais atual e está estruturada com dados
+          semânticos. O PDF segue o formato tradicional, pronto para processos
+          seletivos.
+        </p>
+
+        <div class="resume-cta__actions">
+          <Button href="/curriculo" variant="primary" icon="file-text" iconPosition="start">
+            Ver currículo online
+          </Button>
+          <Button href={profile.resumePath} variant="secondary" icon="download" download>
+            Baixar PDF
+          </Button>
+        </div>
+      </div>
+
+      <ul class="resume-cta__facts u-list-reset" aria-label="Resumo do currículo">
+        <li>
+          <Icon name="briefcase" size={16} />
+          <span>{profile.title}</span>
+        </li>
+        <li>
+          <Icon name="graduation-cap" size={16} />
+          <span>Bacharel em Ciência da Computação</span>
+        </li>
+        <li>
+          <Icon name="map-pin" size={16} />
+          <span>{profile.location}</span>
+        </li>
+        <li>
+          <Icon name="globe" size={16} />
+          <span>
+            {profile.languages.map((language) => `${language.name} (${language.level})`).join(' · ')}
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .resume-cta {
+    padding-block: var(--space-8);
+  }
+
+  .resume-cta__panel {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    padding: clamp(var(--space-8), 5vw, var(--space-16));
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-2xl);
+    background:
+      radial-gradient(
+        ellipse 80% 120% at 12% 0%,
+        color-mix(in oklab, var(--color-accent) 10%, transparent),
+        transparent 62%
+      ),
+      var(--color-surface);
+    box-shadow: var(--highlight-top), var(--shadow-md);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .resume-cta__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .resume-cta__title {
+    margin: 0;
+    font-size: var(--fs-2xl);
+    letter-spacing: var(--tracking-tighter);
+  }
+
+  .resume-cta__text {
+    max-width: 46ch;
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: var(--lh-relaxed);
+  }
+
+  .resume-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-block-start: var(--space-2);
+  }
+
+  .resume-cta__facts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-self: center;
+    padding: var(--space-6);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-bg-subtle);
+  }
+
+  .resume-cta__facts li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    color: var(--color-text-secondary);
+    font-size: var(--fs-base);
+    line-height: var(--lh-normal);
+  }
+
+  .resume-cta__facts :global(.icon) {
+    margin-block-start: 0.15rem;
+    color: var(--color-accent);
+  }
+
+  @media (min-width: 62rem) {
+    .resume-cta__panel {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: var(--space-12);
+      align-items: center;
+    }
+  }
+</style>

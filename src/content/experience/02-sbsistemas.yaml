@@ -1,0 +1,52 @@
+company: SBSistemas
+role: Desenvolvedor Front-end
+seniority: Pleno
+start: 2021-11
+end: 2025-10
+location: Marau, RS · Brasil
+employmentType: clt
+
+summary: >-
+  Quatro anos construindo produtos SaaS fiscais e logísticos usados em todo o Brasil,
+  em parceria com a Smarten Venture Builder. Além da entrega de funcionalidades, assumi a
+  manutenção dos design systems da empresa e a otimização do pipeline de entrega.
+
+responsibilities:
+  - Desenvolvimento de novas funcionalidades e telas para os produtos AgroNota e SimplesCTe.
+  - Manutenção e evolução de dois design systems consumidos por múltiplos produtos.
+  - Definição de padrões de estrutura de código e de bibliotecas front-end entre projetos.
+  - Integração com APIs REST e tratamento de regras fiscais complexas na camada de interface.
+  - Manutenção de código legado em React e Next.js, com refatoração contínua.
+  - Testes unitários e end-to-end, code review e pair programming com o time.
+  - Organização e refinamento de demandas no Jira junto ao time de produto.
+
+achievements:
+  - value: 25 → 4 min
+    label: Deploy do design system
+  - value: 15 → 3 min
+    label: Deploy dos produtos
+  - value: Next.js → Vite
+    label: Migração que reduziu custo de cloud
+  - value: "2"
+    label: Design systems sob minha manutenção
+
+technologies:
+  - React
+  - TypeScript
+  - Next.js
+  - Vite
+  - Redux
+  - Zustand
+  - TanStack Query
+  - React Hook Form
+  - Zod
+  - Styled Components
+  - Emotion
+  - Material UI
+  - Vitest
+  - Jest
+  - Cypress
+  - GitLab CI/CD
+  - Docker
+  - Sentry
+  - Jira

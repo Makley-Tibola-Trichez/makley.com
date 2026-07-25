@@ -1,0 +1,47 @@
+---
+/**
+ * ExperienceSection — organism. The professional timeline.
+ *
+ * Semantically an ordered list: the sequence carries meaning (most recent
+ * first), and screen readers announce position and count, which is exactly the
+ * orientation a linear timeline needs.
+ */
+import type { Experience } from '@domain/experience/experience.entity';
+import Button from '@atoms/Button.astro';
+import SectionHeader from '@molecules/SectionHeader.astro';
+import ExperienceItem from '@molecules/ExperienceItem.astro';
+
+interface Props {
+  experiences: readonly Experience[];
+  resumePath: string;
+}
+
+const { experiences, resumePath } = Astro.props as Props;
+---
+
+<section id="trajetoria" class="u-section experience" aria-labelledby="experience-title">
+  <div class="u-container">
+    <SectionHeader
+      index="04"
+      eyebrow="Trajetória"
+      title="Onde estive e o que entreguei"
+      description="Da primeira experiência full-stack ao trabalho em produtos usados por dezenas de milhares de clientes."
+      id="experience-title"
+    >
+      <Button href={resumePath} variant="secondary" icon="download" download slot="action">
+        Currículo em PDF
+      </Button>
+    </SectionHeader>
+
+    <ol class="experience__timeline u-list-reset">
+      {experiences.map((experience) => <ExperienceItem experience={experience} />)}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .experience__timeline {
+    display: flex;
+    flex-direction: column;
+  }
+</style>

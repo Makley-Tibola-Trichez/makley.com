@@ -1,0 +1,24 @@
+# build
+dist/
+.astro/
+
+# deps
+node_modules/
+
+# ambiente — nunca commitar; use .env.example como referência
+.env
+.env.production
+.env.local
+
+# cache de imagens do Astro (regenerável)
+node_modules/.astro/
+
+# editores / SO
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+
+# hospedagem
+.vercel
+.netlify

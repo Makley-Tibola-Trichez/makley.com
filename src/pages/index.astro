@@ -1,0 +1,73 @@
+---
+/**
+ * Home — the single page that has to do the whole job.
+ *
+ * Section order is the argument being made, not an arbitrary list:
+ * who → how I work → what I know → what I built → where I've been →
+ * where I studied → take the CV → talk to me.
+ *
+ * The page pulls one use case and passes slices of it down. It contains no data
+ * access and no business rules, which is exactly the amount of logic a route
+ * should have.
+ */
+import { SITE } from '@config/site';
+import { useCases } from '@infrastructure/container';
+import BaseLayout from '@presentation/layouts/BaseLayout.astro';
+import HeroSection from '@organisms/HeroSection.astro';
+import AboutSection from '@organisms/AboutSection.astro';
+import StackSection from '@organisms/StackSection.astro';
+import ProjectsSection from '@organisms/ProjectsSection.astro';
+import ExperienceSection from '@organisms/ExperienceSection.astro';
+import EducationSection from '@organisms/EducationSection.astro';
+import ResumeSection from '@organisms/ResumeSection.astro';
+import ContactSection from '@organisms/ContactSection.astro';
+import {
+  buildGraph,
+  buildPersonNode,
+  buildProfilePageNode,
+  buildWebSiteNode,
+} from '@presentation/seo/structured-data';
+
+const { profile, featuredProjects, experiences, education, techGroups, yearsOfExperience } =
+  await useCases.getPortfolioOverview.execute();
+
+const { filters } = await useCases.getProjectCatalog.execute();
+
+/** `knowsAbout` gets the core stack — a 40-item list dilutes the signal. */
+const coreSkills = techGroups
+  .flatMap((group) => group.technologies)
+  .filter((technology) => technology.isCore)
+  .map((technology) => technology.name);
+
+const jsonLd = buildGraph([
+  buildPersonNode(profile, experiences, education, coreSkills),
+  buildWebSiteNode(profile),
+  buildProfilePageNode(profile),
+]);
+---
+
+<BaseLayout
+  title={SITE.title}
+  description={SITE.description}
+  path="/"
+  type="profile"
+  jsonLd={jsonLd}
+  isHome
+>
+  <HeroSection profile={profile} yearsOfExperience={yearsOfExperience} />
+  <AboutSection profile={profile} />
+  <StackSection groups={techGroups} />
+
+  <ProjectsSection
+    projects={featuredProjects}
+    filters={filters}
+    showFilters={false}
+    showAllLink
+    description="Estudos de caso com problema, solução, desafios e resultados. Cada um deles rodou em produção."
+  />
+
+  <ExperienceSection experiences={experiences} resumePath={profile.resumePath} />
+  <EducationSection education={education} />
+  <ResumeSection profile={profile} />
+  <ContactSection profile={profile} />
+</BaseLayout>

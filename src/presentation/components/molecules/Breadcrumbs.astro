@@ -1,0 +1,78 @@
+---
+/**
+ * Breadcrumbs — molecule.
+ *
+ * Rendered on inner pages only; a breadcrumb on the home page would point at
+ * itself. The visual trail and the `BreadcrumbList` JSON-LD are built from the
+ * same array passed by the page, so they cannot fall out of sync.
+ */
+import type { Breadcrumb } from '@presentation/seo/structured-data';
+import Icon from '@atoms/Icon.astro';
+
+interface Props {
+  items: readonly Breadcrumb[];
+  class?: string;
+}
+
+const { items, class: className } = Astro.props as Props;
+---
+
+<nav class:list={['breadcrumbs', className]} aria-label="Trilha de navegação">
+  <ol class="breadcrumbs__list u-list-reset">
+    {
+      items.map((item, index) => {
+        const isLast = index === items.length - 1;
+
+        return (
+          <li class="breadcrumbs__item">
+            {isLast ? (
+              <span aria-current="page">{item.name}</span>
+            ) : (
+              <>
+                <a href={item.url}>{item.name}</a>
+                <Icon name="chevron-right" size={13} class="breadcrumbs__sep" />
+              </>
+            )}
+          </li>
+        );
+      })
+    }
+  </ol>
+</nav>
+
+<style>
+  .breadcrumbs__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--fs-sm);
+  }
+
+  .breadcrumbs__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--color-text-faint);
+  }
+
+  .breadcrumbs__item a {
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-xs);
+    color: var(--color-text-muted);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .breadcrumbs__item a:hover {
+    color: var(--color-accent);
+  }
+
+  .breadcrumbs__item [aria-current='page'] {
+    padding: var(--space-1) var(--space-2);
+    color: var(--color-text-secondary);
+  }
+
+  .breadcrumbs :global(.breadcrumbs__sep) {
+    opacity: 0.5;
+  }
+</style>

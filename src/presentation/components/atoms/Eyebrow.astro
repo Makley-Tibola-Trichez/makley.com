@@ -1,0 +1,57 @@
+---
+/**
+ * Eyebrow — atom. The small mono label above a section heading.
+ *
+ * Uses Astro's `Polymorphic` helper because the dynamic tag *is* this
+ * component's root element. (Where a dynamic tag is nested inside other markup,
+ * use the `Heading` atom instead — see the note in `Heading.astro` for why a
+ * bare string union cannot be used as a JSX tag.)
+ *
+ * The numeric index is decorative wayfinding, so it is `aria-hidden`: a screen
+ * reader announcing "zero two Projetos" adds noise, not orientation.
+ */
+import type { HTMLTag, Polymorphic } from 'astro/types';
+
+type Props<Tag extends HTMLTag> = Polymorphic<{
+  as: Tag;
+  index?: string;
+}>;
+
+const { as: Tag = 'p', index, class: className, ...rest } = Astro.props;
+---
+
+<Tag class:list={['eyebrow', className]} {...rest}>
+  {index && <span class="eyebrow__index" aria-hidden="true">{index}</span>}
+  <span class="eyebrow__text"><slot /></span>
+</Tag>
+
+<style>
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .eyebrow__index {
+    color: var(--color-accent);
+  }
+
+  /* Hairline that grows out of the label and fades — a quiet way to anchor the
+     section without adding a hard divider. */
+  .eyebrow__text::after {
+    content: '';
+    display: inline-block;
+    width: clamp(1.5rem, 6vw, 4rem);
+    height: 1px;
+    margin-inline-start: var(--space-3);
+    vertical-align: middle;
+    background: linear-gradient(90deg, var(--border-strong), transparent);
+  }
+</style>

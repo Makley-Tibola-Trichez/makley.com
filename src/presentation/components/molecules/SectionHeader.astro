@@ -1,0 +1,117 @@
+---
+/**
+ * SectionHeader — molecule. Eyebrow + title + optional description/action.
+ *
+ * Every section on the site uses this, which is what makes the vertical rhythm
+ * feel deliberate: one component owns the spacing between label, heading and
+ * lede, so no two sections can drift apart.
+ */
+import Eyebrow from '@atoms/Eyebrow.astro';
+import Heading from '@atoms/Heading.astro';
+
+interface Props {
+  index?: string;
+  eyebrow: string;
+  title: string;
+  description?: string;
+  /** Sections use h2; nested blocks pass 3 to keep the document outline valid. */
+  level?: 1 | 2 | 3;
+  align?: 'start' | 'center';
+  id?: string;
+  class?: string;
+}
+
+const {
+  index,
+  eyebrow,
+  title,
+  description,
+  level = 2,
+  align = 'start',
+  id,
+  class: className,
+} = Astro.props as Props;
+---
+
+<header class:list={['section-header', `section-header--${align}`, className]} data-reveal>
+  <Eyebrow index={index}>{eyebrow}</Eyebrow>
+
+  <Heading level={level} class="section-header__title" id={id}>{title}</Heading>
+
+  {description && <p class="section-header__description">{description}</p>}
+
+  {
+    Astro.slots.has('action') && (
+      <div class="section-header__action">
+        <slot name="action" />
+      </div>
+    )
+  }
+</header>
+
+<style>
+  .section-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-block-end: var(--space-12);
+  }
+
+  .section-header--center {
+    align-items: center;
+    text-align: center;
+  }
+
+  .section-header__title {
+    max-width: 22ch;
+    margin: 0;
+  }
+
+  .section-header--center .section-header__title {
+    max-width: 26ch;
+  }
+
+  .section-header__description {
+    max-width: 58ch;
+    color: var(--color-text-muted);
+    font-size: var(--fs-lg);
+    line-height: var(--lh-relaxed);
+  }
+
+  .section-header__action {
+    margin-block-start: var(--space-2);
+  }
+
+  /* On wide viewports the action sits inline with the heading block instead of
+     stacking, which keeps the header from eating vertical space. */
+  @media (min-width: 48rem) {
+    .section-header--start {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        'eyebrow action'
+        'title   action'
+        'desc    action';
+      align-items: end;
+      column-gap: var(--space-8);
+    }
+
+    .section-header--start > :global(.eyebrow) {
+      grid-area: eyebrow;
+    }
+
+    .section-header--start .section-header__title {
+      grid-area: title;
+    }
+
+    .section-header--start .section-header__description {
+      grid-area: desc;
+    }
+
+    .section-header--start .section-header__action {
+      grid-area: action;
+      margin: 0;
+      align-self: end;
+    }
+  }
+</style>

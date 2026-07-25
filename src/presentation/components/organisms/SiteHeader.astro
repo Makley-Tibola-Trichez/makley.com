@@ -1,0 +1,476 @@
+---
+/**
+ * SiteHeader — organism.
+ *
+ * Structure decisions
+ * -------------------
+ * - Desktop: inline nav + ⌘K palette. Mobile: a conventional menu button that
+ *   opens a native `<dialog>`. A `<dialog>` opened with `showModal()` gives us
+ *   focus trapping, `Esc` to dismiss, inert background and a backdrop for free —
+ *   all the things hand-rolled mobile menus routinely get wrong.
+ * - The scroll-progress bar uses a scroll-driven CSS animation, so it costs zero
+ *   JavaScript where supported and simply does not render where it is not.
+ */
+import type { Profile } from '@domain/profile/profile.entity';
+import Button from '@atoms/Button.astro';
+import Icon from '@atoms/Icon.astro';
+import Kbd from '@atoms/Kbd.astro';
+import ThemeToggle from '@molecules/ThemeToggle.astro';
+import SocialLinks from '@molecules/SocialLinks.astro';
+
+interface Props {
+  profile: Profile;
+  /** Anchor links only work on the home page; inner pages link back to `/#…`. */
+  isHome?: boolean;
+}
+
+const { profile, isHome = false } = Astro.props as Props;
+
+const NAV_ITEMS = [
+  { label: 'Sobre', hash: '#sobre' },
+  { label: 'Stack', hash: '#stack' },
+  { label: 'Projetos', hash: '#projetos' },
+  { label: 'Trajetória', hash: '#trajetoria' },
+  { label: 'Contato', hash: '#contato' },
+] as const;
+
+const href = (hash: string) => (isHome ? hash : `/${hash}`);
+---
+
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="header" data-site-header>
+  <div class="header__progress" aria-hidden="true"></div>
+
+  <div class="header__inner u-container u-container--wide">
+    <a href="/" class="brand" aria-label={`${profile.name} — página inicial`}>
+      <span class="brand__mark" aria-hidden="true">M</span>
+      <span class="brand__text">
+        <span class="brand__name">{profile.shortName}</span>
+        <span class="brand__role">{profile.title}</span>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="Navegação principal">
+      <ul class="nav__list u-list-reset">
+        {
+          NAV_ITEMS.map((item) => (
+            <li>
+              <a href={href(item.hash)} class="nav__link" data-nav-link={item.hash}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <button
+        type="button"
+        class="palette-trigger"
+        data-palette-open
+        aria-label="Abrir busca e navegação rápida"
+      >
+        <Icon name="search" size={15} />
+        <span class="palette-trigger__label">Buscar</span>
+        <Kbd class="palette-trigger__kbd">⌘K</Kbd>
+      </button>
+
+      <ThemeToggle />
+
+      <Button href={profile.resumePath} variant="primary" size="sm" icon="download" class="header__cv">
+        Currículo
+      </Button>
+
+      <button
+        type="button"
+        class="menu-trigger"
+        data-menu-open
+        aria-label="Abrir menu"
+        aria-haspopup="dialog"
+      >
+        <Icon name="command" size={18} />
+      </button>
+    </div>
+  </div>
+</header>
+
+{/* ------------------------------------------------------------ mobile menu */}
+<dialog class="menu" data-menu aria-label="Menu de navegação">
+  <div class="menu__panel">
+    <div class="menu__head">
+      <span class="u-eyebrow">Navegação</span>
+      <button type="button" class="menu__close" data-menu-close aria-label="Fechar menu">
+        <Icon name="x" size={20} />
+      </button>
+    </div>
+
+    <nav aria-label="Navegação do menu">
+      <ul class="menu__list u-list-reset">
+        {
+          NAV_ITEMS.map((item) => (
+            <li>
+              <a href={href(item.hash)} class="menu__link" data-menu-link>
+                <span>{item.label}</span>
+                <Icon name="arrow-up-right" size={16} />
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a href="/curriculo" class="menu__link" data-menu-link>
+            <span>Currículo</span>
+            <Icon name="arrow-up-right" size={16} />
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <footer class="menu__foot">
+      <SocialLinks profile={profile} scope="all" size="sm" />
+    </footer>
+  </div>
+</dialog>
+
+<script>
+  import { initHeader } from '@presentation/scripts/header';
+
+  initHeader();
+</script>
+
+<style>
+  /* ------------------------------------------------------------- skip link */
+
+  .skip-link {
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-3);
+    z-index: calc(var(--z-header) + 10);
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-md);
+    background-color: var(--color-accent);
+    color: var(--color-accent-contrast);
+    font-size: var(--fs-sm);
+    font-weight: 560;
+    transform: translateY(-160%);
+    transition: transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+
+  /* ---------------------------------------------------------------- header */
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    height: var(--header-height);
+    border-block-end: 1px solid transparent;
+    transition:
+      background-color var(--duration-base) var(--ease-out-quart),
+      border-color var(--duration-base) var(--ease-out-quart),
+      backdrop-filter var(--duration-base) var(--ease-out-quart);
+  }
+
+  /* Only frost the bar once the page has scrolled — at the top it should feel
+     like part of the hero, not a separate chrome element. */
+  .header[data-scrolled] {
+    background-color: color-mix(in oklab, var(--color-bg) 78%, transparent);
+    border-block-end-color: var(--border-subtle);
+    backdrop-filter: blur(14px) saturate(160%);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    height: 100%;
+  }
+
+  /* ------------------------------------------------------ scroll progress */
+
+  .header__progress {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    width: 100%;
+    height: 2px;
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, var(--color-accent), var(--aurora-violet));
+    opacity: 0;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .header__progress {
+        opacity: 1;
+        scale: 0 1;
+        animation: header-progress linear both;
+        animation-timeline: scroll(root block);
+      }
+    }
+  }
+
+  @keyframes header-progress {
+    to {
+      scale: 1 1;
+    }
+  }
+
+  /* ----------------------------------------------------------------- brand */
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-1);
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+  }
+
+  .brand__mark {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    background: linear-gradient(150deg, var(--color-surface-raised), var(--color-surface));
+    box-shadow: var(--highlight-top);
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: 1;
+    transition: border-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .brand:hover .brand__mark {
+    border-color: var(--color-accent-ring);
+  }
+
+  .brand__text {
+    display: none;
+    flex-direction: column;
+    line-height: 1.25;
+  }
+
+  .brand__name {
+    font-size: var(--fs-base);
+    font-weight: 560;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .brand__role {
+    font-size: var(--fs-2xs);
+    color: var(--color-text-faint);
+  }
+
+  /* ------------------------------------------------------------------- nav */
+
+  .nav {
+    display: none;
+  }
+
+  .nav__list {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .nav__link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    height: 2.25rem;
+    padding-inline: var(--space-3);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    font-size: var(--fs-base);
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      background-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .nav__link:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface);
+  }
+
+  /* Set by the scroll spy so the visitor always knows where they are. */
+  .nav__link[data-active] {
+    color: var(--color-text);
+  }
+
+  .nav__link[data-active]::after {
+    content: '';
+    position: absolute;
+    inset-block-end: 0.15rem;
+    inset-inline: 50%;
+    width: 3px;
+    height: 3px;
+    translate: -50% 0;
+    border-radius: var(--radius-full);
+    background-color: var(--color-accent);
+  }
+
+  /* --------------------------------------------------------------- actions */
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .palette-trigger {
+    display: none;
+    align-items: center;
+    gap: var(--space-2);
+    height: 2.5rem;
+    padding-inline: var(--space-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text-faint);
+    font-size: var(--fs-sm);
+    transition:
+      border-color var(--duration-fast) var(--ease-out-quart),
+      color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .palette-trigger:hover {
+    border-color: var(--border-strong);
+    color: var(--color-text-muted);
+  }
+
+  .palette-trigger__label {
+    min-width: 4rem;
+    text-align: start;
+  }
+
+  .menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+  }
+
+  .menu-trigger:hover {
+    color: var(--color-text);
+  }
+
+  /* ------------------------------------------------------------ responsive */
+
+  @media (min-width: 30rem) {
+    .brand__text {
+      display: flex;
+    }
+  }
+
+  @media (min-width: 62rem) {
+    .nav {
+      display: block;
+    }
+
+    .palette-trigger {
+      display: inline-flex;
+    }
+
+    .menu-trigger {
+      display: none;
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .header__cv {
+      display: none;
+    }
+  }
+
+  /* ------------------------------------------------------------ menu dialog */
+
+  .menu {
+    width: min(24rem, 100vw);
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0 0 0 auto;
+    background-color: var(--color-bg-subtle);
+    border-inline-start: 1px solid var(--border-subtle);
+  }
+
+  .menu__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    height: 100%;
+    padding: var(--space-6);
+  }
+
+  .menu__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .menu__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+  }
+
+  .menu__close:hover {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .menu__list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menu__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-2);
+    border-block-end: 1px solid var(--border-subtle);
+    color: var(--color-text-secondary);
+    font-size: var(--fs-xl);
+    letter-spacing: var(--tracking-tight);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .menu__link:hover {
+    color: var(--color-accent);
+  }
+
+  .menu__foot {
+    margin-block-start: auto;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .menu[open] {
+      animation: menu-in var(--duration-base) var(--ease-out-expo);
+    }
+  }
+
+  @keyframes menu-in {
+    from {
+      transform: translateX(100%);
+    }
+  }
+</style>

@@ -1,0 +1,381 @@
+---
+/**
+ * ContactSection — organism.
+ *
+ * Progressive enhancement, three layers deep:
+ *  1. **No JavaScript, endpoint configured** — a normal `POST` to the form
+ *     provider. Works.
+ *  2. **No JavaScript, no endpoint** — the form action is a `mailto:` with
+ *     `enctype="text/plain"`, which opens the visitor's mail client prefilled.
+ *     Works.
+ *  3. **JavaScript available** — submission is intercepted, posted via `fetch`
+ *     and answered inline without a page change.
+ *
+ * A portfolio's contact form failing silently is the worst possible bug on the
+ * site, so the fallback path is never a dead end. The endpoint is configured via
+ * `PUBLIC_CONTACT_ENDPOINT` (see CONTEUDO-PENDENTE.md).
+ */
+import type { Profile } from '@domain/profile/profile.entity';
+import { FEATURES } from '@config/site';
+import Button from '@atoms/Button.astro';
+import Icon from '@atoms/Icon.astro';
+import SectionHeader from '@molecules/SectionHeader.astro';
+import SocialLinks from '@molecules/SocialLinks.astro';
+
+interface Props {
+  profile: Profile;
+}
+
+const { profile } = Astro.props as Props;
+
+const hasEndpoint = FEATURES.contactEndpoint.length > 0;
+
+/** Layer-2 fallback: a plain-text mail composition. */
+const mailtoAction = `mailto:${profile.email}`;
+---
+
+<section id="contato" class="u-section contact" aria-labelledby="contact-title">
+  <div class="u-container">
+    <div class="contact__shell">
+      <div class="contact__aside" data-reveal>
+        <SectionHeader
+          index="06"
+          eyebrow="Contato"
+          title="Vamos conversar sobre o seu próximo projeto"
+          description={profile.availabilityNote}
+          id="contact-title"
+        />
+
+        <div class="contact__direct">
+          <a href={profile.mailto} class="contact__email-link">
+            <Icon name="mail" size={18} />
+            <span>{profile.email}</span>
+          </a>
+
+          <button
+            type="button"
+            class="contact__copy"
+            data-copy-email
+            data-value={profile.email}
+            aria-label={`Copiar o e-mail ${profile.email}`}
+          >
+            <Icon name="copy" size={15} />
+            <span data-copy-label>Copiar</span>
+          </button>
+        </div>
+
+        <p class="contact__location">
+          <Icon name="map-pin" size={14} />
+          {profile.location} — disponível para trabalho remoto
+        </p>
+
+        <div class="contact__socials">
+          <h3 class="contact__socials-title">Ou me encontre em</h3>
+          <SocialLinks profile={profile} scope="all" showLabels />
+        </div>
+      </div>
+
+      <form
+        class="contact__form"
+        data-contact-form
+        data-endpoint={FEATURES.contactEndpoint}
+        action={hasEndpoint ? FEATURES.contactEndpoint : mailtoAction}
+        method="post"
+        enctype={hasEndpoint ? undefined : 'text/plain'}
+        novalidate
+        data-reveal
+      >
+        <div class="field">
+          <label for="contact-name">Nome</label>
+          <input
+            type="text"
+            id="contact-name"
+            name="nome"
+            required
+            autocomplete="name"
+            placeholder="Como devo te chamar?"
+            aria-describedby="contact-name-error"
+          />
+          <p class="field__error" id="contact-name-error" data-error-for="nome" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="contact-email">E-mail</label>
+          <input
+            type="email"
+            id="contact-email"
+            name="email"
+            required
+            autocomplete="email"
+            placeholder="voce@empresa.com"
+            aria-describedby="contact-email-error"
+          />
+          <p class="field__error" id="contact-email-error" data-error-for="email" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="contact-subject">Assunto</label>
+          <select id="contact-subject" name="assunto">
+            <option value="Oportunidade de trabalho">Oportunidade de trabalho</option>
+            <option value="Projeto freelance">Projeto freelance</option>
+            <option value="Parceria">Parceria</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="contact-message">Mensagem</label>
+          <textarea
+            id="contact-message"
+            name="mensagem"
+            rows="5"
+            required
+            minlength="20"
+            placeholder="Conte um pouco sobre o contexto, o desafio e o prazo."
+            aria-describedby="contact-message-error"></textarea>
+          <p class="field__error" id="contact-message-error" data-error-for="mensagem" hidden></p>
+        </div>
+
+        {/* Honeypot: invisible to humans, irresistible to naive bots. Hidden
+            from assistive tech too, so nobody is ever asked to fill it in. */}
+        <div class="field field--honeypot" aria-hidden="true">
+          <label for="contact-website">Não preencha este campo</label>
+          <input type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <Button type="submit" variant="primary" size="lg" icon="send" fullWidth class="contact__submit">
+          Enviar mensagem
+        </Button>
+
+        <p class="contact__status" role="status" aria-live="polite" data-form-status></p>
+
+        {
+          !hasEndpoint && (
+            <p class="contact__note">
+              <Icon name="mail" size={13} />
+              O envio abre o seu cliente de e-mail. Prefere escrever direto?
+              <a href={profile.mailto}>{profile.email}</a>
+            </p>
+          )
+        }
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initContactForm } from '@presentation/scripts/contact-form';
+  import { initCopyEmail } from '@presentation/scripts/copy-email';
+
+  initContactForm();
+  initCopyEmail();
+</script>
+
+<style>
+  .contact__shell {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-12);
+  }
+
+  /* ----------------------------------------------------------------- aside */
+
+  .contact__aside {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .contact__direct {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .contact__email-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-5);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-full);
+    background-color: var(--color-surface);
+    box-shadow: var(--highlight-top);
+    font-size: var(--fs-base);
+    font-weight: 500;
+    word-break: break-all;
+    transition:
+      border-color var(--duration-fast) var(--ease-out-quart),
+      color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .contact__email-link:hover {
+    border-color: var(--color-accent-ring);
+    color: var(--color-accent);
+  }
+
+  .contact__copy {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    padding-inline: var(--space-4);
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      background-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .contact__copy:hover {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .contact__location {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    color: var(--color-text-faint);
+    font-size: var(--fs-sm);
+  }
+
+  .contact__socials-title {
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-2xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  /* ------------------------------------------------------------------ form */
+
+  .contact__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding: var(--space-6);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    background-color: var(--color-surface);
+    box-shadow: var(--highlight-top), var(--shadow-md);
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .field label {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text);
+    font-size: var(--fs-base);
+    transition:
+      border-color var(--duration-fast) var(--ease-out-quart),
+      box-shadow var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .field textarea {
+    resize: vertical;
+    min-height: 8rem;
+    line-height: var(--lh-relaxed);
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: var(--color-text-faint);
+  }
+
+  .field input:focus-visible,
+  .field select:focus-visible,
+  .field textarea:focus-visible {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-soft);
+  }
+
+  /* Only flag a field once the script has marked it — never style `:invalid`
+     directly, or every empty required field is red before the visitor types. */
+  .field input[aria-invalid='true'],
+  .field textarea[aria-invalid='true'] {
+    border-color: var(--aurora-rose);
+  }
+
+  .field__error {
+    margin: 0;
+    color: var(--aurora-rose);
+    font-size: var(--fs-xs);
+  }
+
+  .field--honeypot {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .contact__status {
+    margin: 0;
+    font-size: var(--fs-sm);
+    text-align: center;
+    min-height: 1.25rem;
+  }
+
+  .contact__status[data-state='success'] {
+    color: var(--color-positive);
+  }
+
+  .contact__status[data-state='error'] {
+    color: var(--aurora-rose);
+  }
+
+  .contact__note {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    color: var(--color-text-faint);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
+  }
+
+  .contact__note a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (min-width: 62rem) {
+    .contact__shell {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-16);
+      align-items: start;
+    }
+
+    .contact__form {
+      padding: var(--space-8);
+    }
+  }
+</style>

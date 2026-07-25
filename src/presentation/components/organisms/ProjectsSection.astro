@@ -1,0 +1,215 @@
+---
+/**
+ * ProjectsSection — organism. The centrepiece of the portfolio.
+ *
+ * Filtering is done by toggling a `hidden` attribute on already-rendered cards
+ * rather than by re-rendering a list. Consequences that matter:
+ *  - Every project is in the initial HTML, so crawlers and no-JS visitors see
+ *    the full catalogue.
+ *  - Switching a filter costs one class change, not a re-render.
+ *  - The filter state is mirrored into `?categoria=` so a filtered view is a
+ *    shareable, back-button-friendly URL.
+ */
+import type { CategoryFilter } from '@application/use-cases/get-project-catalog.use-case';
+import type { Project } from '@domain/projects/project.entity';
+import Button from '@atoms/Button.astro';
+import SectionHeader from '@molecules/SectionHeader.astro';
+import ProjectCard from '@molecules/ProjectCard.astro';
+
+interface Props {
+  projects: readonly Project[];
+  filters: readonly CategoryFilter[];
+  /** The home page shows a curated subset and links out to the full index. */
+  limit?: number;
+  showFilters?: boolean;
+  showAllLink?: boolean;
+  index?: string;
+  title?: string;
+  description?: string;
+}
+
+const {
+  projects,
+  filters,
+  limit,
+  showFilters = true,
+  showAllLink = false,
+  index = '03',
+  title = 'Projetos que resolveram problemas reais',
+  description = 'Cada estudo de caso descreve o problema, a solução implementada, os desafios enfrentados e os resultados alcançados.',
+} = Astro.props as Props;
+
+const visible = typeof limit === 'number' ? projects.slice(0, limit) : projects;
+---
+
+<section id="projetos" class="u-section projects" aria-labelledby="projects-title">
+  <div class="u-container u-container--wide">
+    <SectionHeader
+      index={index}
+      eyebrow="Projetos"
+      title={title}
+      description={description}
+      id="projects-title"
+    >
+      {
+        showAllLink && (
+          <Button href="/projetos" variant="secondary" icon="arrow-right" slot="action">
+            Ver todos
+          </Button>
+        )
+      }
+    </SectionHeader>
+
+    {
+      showFilters && filters.length > 1 && (
+        <div class="projects__filters" data-reveal>
+          <div
+            class="projects__filter-list"
+            role="group"
+            aria-label="Filtrar projetos por categoria"
+            data-project-filters
+          >
+            {filters.map((filter, position) => (
+              <button
+                type="button"
+                class="filter-chip"
+                data-filter={filter.id}
+                aria-pressed={position === 0 ? 'true' : 'false'}
+              >
+                <span>{filter.label}</span>
+                <span class="filter-chip__count" aria-hidden="true">
+                  {filter.count}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <p class="projects__count" role="status" aria-live="polite" data-project-count>
+            {visible.length} {visible.length === 1 ? 'projeto' : 'projetos'}
+          </p>
+        </div>
+      )
+    }
+
+    <div class="projects__grid" data-project-grid>
+      {
+        visible.map((project, position) => (
+          <ProjectCard
+            project={project}
+            featured={position === 0 && visible.length > 2}
+            priority={position === 0}
+          />
+        ))
+      }
+    </div>
+
+    <p class="projects__empty" data-project-empty hidden>
+      Nenhum projeto nesta categoria ainda.
+    </p>
+  </div>
+</section>
+
+<script>
+  import { initProjectFilters } from '@presentation/scripts/project-filter';
+
+  initProjectFilters();
+</script>
+
+<style>
+  /* --------------------------------------------------------------- filters */
+
+  .projects__filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-block-end: var(--space-8);
+  }
+
+  .projects__filter-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.5rem;
+    padding-inline: var(--space-4);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      background-color var(--duration-fast) var(--ease-out-quart),
+      border-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .filter-chip:hover {
+    color: var(--color-text);
+    border-color: var(--border-strong);
+  }
+
+  /* `aria-pressed` is the source of truth for both state and styling — the
+     visual and the accessible state can never drift apart. */
+  .filter-chip[aria-pressed='true'] {
+    background-color: var(--color-accent);
+    border-color: transparent;
+    color: var(--color-accent-contrast);
+  }
+
+  .filter-chip__count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding-inline: 0.25rem;
+    border-radius: var(--radius-full);
+    background-color: color-mix(in oklab, currentColor 14%, transparent);
+    font-size: var(--fs-2xs);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .projects__count {
+    margin: 0;
+    color: var(--color-text-faint);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  /* ------------------------------------------------------------------ grid */
+
+  .projects__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  .projects__empty {
+    padding: var(--space-16) var(--space-4);
+    margin: 0;
+    text-align: center;
+    color: var(--color-text-faint);
+  }
+
+  @media (min-width: 48rem) {
+    .projects__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .projects__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+  }
+</style>

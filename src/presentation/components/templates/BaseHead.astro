@@ -1,0 +1,128 @@
+---
+/**
+ * BaseHead — everything inside `<head>`.
+ *
+ * Centralising this guarantees that every route ships a canonical URL, a unique
+ * title/description, complete Open Graph + Twitter cards and correct font
+ * preloads. Pages only pass what differs.
+ *
+ * Ordering inside the head is deliberate: charset and viewport first (so the
+ * parser never has to restart), then preconnect/preload for the render-critical
+ * fonts, then metadata.
+ */
+import { SITE, FEATURES } from '@config/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path-only, e.g. `/projetos/agronota`. Canonical is derived from it. */
+  path: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article' | 'profile';
+  /** JSON-LD `@graph`, already stringified by the SEO builders. */
+  jsonLd?: string;
+  noindex?: boolean;
+  publishedTime?: string;
+}
+
+const {
+  title,
+  description,
+  path,
+  image = SITE.ogImage,
+  imageAlt = SITE.ogImageAlt,
+  type = 'website',
+  jsonLd,
+  noindex = false,
+  publishedTime,
+} = Astro.props as Props;
+
+const canonical = new URL(path, SITE.url).href.replace(/\/$/, '') || `${SITE.url}/`;
+const imageUrl = new URL(image, SITE.url).href;
+
+/** Home keeps the brand title alone; inner pages get the suffix. */
+const fullTitle = path === '/' ? title : `${title} · ${SITE.name}`;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+{/* Self-hosted, so a preconnect is unnecessary — preload the two faces that
+    paint above the fold. Instrument Serif is intentionally not preloaded: it
+    styles a single decorative word and must not compete for bandwidth. */}
+<link
+  rel="preload"
+  href="/fonts/geist-latin-variable.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin
+/>
+<link
+  rel="preload"
+  href="/fonts/geist-mono-latin-variable.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin
+/>
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+<meta name="author" content={SITE.name} />
+<meta name="generator" content={Astro.generator} />
+<meta name="theme-color" content={SITE.themeColor} />
+<meta name="color-scheme" content="dark light" />
+
+{
+  noindex ? (
+    <meta name="robots" content="noindex, nofollow" />
+  ) : (
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+  )
+}
+
+{/* ------------------------------------------------------------ Open Graph */}
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:locale" content={SITE.localeOg} />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:image:alt" content={imageAlt} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+{publishedTime && <meta property="article:published_time" content={publishedTime} />}
+
+{/* --------------------------------------------------------- Twitter card */}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
+<meta name="twitter:image:alt" content={imageAlt} />
+
+{/* ---------------------------------------------------------------- icons */}
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+<link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
+
+{/* ------------------------------------------------------------- JSON-LD */}
+{jsonLd && <script type="application/ld+json" is:inline set:html={jsonLd} />}
+
+{
+  FEATURES.analyticsScript && (
+    <script
+      is:inline
+      defer
+      src={FEATURES.analyticsScript}
+      data-domain={FEATURES.analyticsDomain}
+    />
+  )
+}

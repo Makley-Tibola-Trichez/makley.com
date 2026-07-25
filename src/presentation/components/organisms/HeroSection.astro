@@ -1,0 +1,370 @@
+---
+/**
+ * HeroSection — organism. The first ten seconds of the visit.
+ *
+ * Content hierarchy is tuned for the actual audience: a recruiter scanning
+ * needs (1) who, (2) what level, (3) proof, (4) how to act — in that order and
+ * without scrolling. Hence name → statement → intro → CTAs → metrics.
+ *
+ * Performance notes
+ * -----------------
+ * - The `<h1>` is the LCP element. It is plain text with a preloaded font, so
+ *   it paints on the first frame; nothing above it blocks rendering.
+ * - All ambience (glow, grid, aurora) is CSS on `aria-hidden` layers with no
+ *   images and no JavaScript, so it costs nothing on the critical path.
+ * - The hero is explicitly excluded from scroll-reveal — animating the LCP
+ *   element in would delay the metric it is measured by.
+ */
+import type { Profile } from '@domain/profile/profile.entity';
+import Badge from '@atoms/Badge.astro';
+import Button from '@atoms/Button.astro';
+import Icon from '@atoms/Icon.astro';
+import SocialLinks from '@molecules/SocialLinks.astro';
+
+interface Props {
+  profile: Profile;
+  /** Derived at build time so the copy never goes stale. */
+  yearsOfExperience: number;
+}
+
+const { profile, yearsOfExperience } = Astro.props as Props;
+const { heroStatement } = profile;
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero__ambience" aria-hidden="true">
+    <div class="hero__grid"></div>
+    <div class="hero__glow"></div>
+    <div class="hero__aurora"></div>
+  </div>
+
+  <div class="u-container hero__inner">
+    <Badge
+      tone={profile.isAvailable ? 'positive' : 'neutral'}
+      pulse={profile.isAvailable}
+      class="hero__status"
+    >
+      {profile.availabilityLabel}
+    </Badge>
+
+    <h1 class="hero__title" id="hero-title">
+      <span class="hero__name">{profile.name}</span>
+      <span class="hero__statement">
+        {heroStatement.lead}{' '}
+        <em class="hero__emphasis">{heroStatement.emphasis}</em>{' '}
+        {heroStatement.trail}
+      </span>
+    </h1>
+
+    <p class="hero__intro">{profile.heroIntro}</p>
+
+    <div class="hero__actions">
+      <Button href="/#projetos" variant="primary" size="lg" icon="arrow-right">
+        Ver projetos
+      </Button>
+      <Button href={profile.resumePath} variant="secondary" size="lg" icon="download" download>
+        Baixar currículo
+      </Button>
+      <SocialLinks profile={profile} scope="primary" class="hero__socials" />
+    </div>
+
+    <dl class="hero__stats">
+      {
+        profile.stats.map((stat) => (
+          <div class="hero__stat">
+            <dt class="hero__stat-value">{stat.value}</dt>
+            <dd class="hero__stat-label">
+              {stat.label}
+              {stat.detail && <span class="hero__stat-detail">{stat.detail}</span>}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <p class="hero__meta">
+      <Icon name="map-pin" size={14} />
+      <span>{profile.location}</span>
+      <span class="hero__meta-sep" aria-hidden="true">·</span>
+      <span>{yearsOfExperience} anos de experiência profissional</span>
+    </p>
+  </div>
+
+  <a class="hero__scroll" href="#sobre" aria-label="Ir para a seção Sobre">
+    <span class="hero__scroll-line" aria-hidden="true"></span>
+    <Icon name="chevron-down" size={16} />
+  </a>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: calc(100svh - var(--header-height));
+    padding-block: var(--space-16) var(--space-24);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* ------------------------------------------------------------- ambience */
+
+  .hero__ambience {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .hero__grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    /* Fades the grid out before it reaches the content, so it reads as texture
+       rather than as a table. */
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 10%, transparent 75%);
+  }
+
+  .hero__glow {
+    position: absolute;
+    inset-block-start: -30%;
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    width: min(70rem, 140vw);
+    aspect-ratio: 1.4;
+    background: radial-gradient(
+      ellipse at center,
+      color-mix(in oklab, var(--color-accent) 22%, transparent) 0%,
+      color-mix(in oklab, var(--color-accent) 6%, transparent) 34%,
+      transparent 68%
+    );
+  }
+
+  .hero__aurora {
+    position: absolute;
+    inset-block-start: 8%;
+    inset-inline-end: -10%;
+    width: min(34rem, 80vw);
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--aurora-violet) 20%, transparent) 0%,
+      transparent 62%
+    );
+    filter: blur(30px);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__aurora {
+      animation: aurora-drift 22s var(--ease-in-out) infinite alternate;
+    }
+  }
+
+  @keyframes aurora-drift {
+    to {
+      transform: translate3d(-6%, 8%, 0) scale(1.12);
+      opacity: 0.7;
+    }
+  }
+
+  /* ---------------------------------------------------------------- layout */
+
+  .hero__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-6);
+  }
+
+  /* ----------------------------------------------------------------- title */
+
+  .hero__title {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin: 0;
+  }
+
+  .hero__name {
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .hero__statement {
+    max-width: 16ch;
+    font-size: var(--fs-5xl);
+    font-weight: 560;
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+  }
+
+  .hero__emphasis {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    /* Optical correction: the serif's x-height runs smaller than Geist's. */
+    font-size: 1.06em;
+    background: linear-gradient(
+      98deg,
+      var(--color-accent) 8%,
+      var(--aurora-rose) 55%,
+      var(--aurora-violet) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  @media (forced-colors: active) {
+    .hero__emphasis {
+      color: LinkText;
+    }
+  }
+
+  .hero__intro {
+    max-width: 46ch;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--fs-lg);
+    line-height: var(--lh-relaxed);
+    text-wrap: pretty;
+  }
+
+  /* --------------------------------------------------------------- actions */
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-block-start: var(--space-2);
+  }
+
+  .hero__socials {
+    margin-inline-start: var(--space-2);
+  }
+
+  /* ----------------------------------------------------------------- stats */
+
+  .hero__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6) var(--space-8);
+    width: 100%;
+    max-width: 46rem;
+    margin: var(--space-8) 0 0;
+    padding-block-start: var(--space-8);
+    border-block-start: 1px solid var(--border-subtle);
+  }
+
+  .hero__stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .hero__stat-value {
+    font-size: var(--fs-2xl);
+    font-weight: 560;
+    line-height: 1;
+    letter-spacing: var(--tracking-tighter);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text);
+  }
+
+  .hero__stat-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--fs-sm);
+  }
+
+  .hero__stat-detail {
+    color: var(--color-text-faint);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
+    text-wrap: pretty;
+  }
+
+  /* ------------------------------------------------------------------ meta */
+
+  .hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    color: var(--color-text-faint);
+    font-size: var(--fs-sm);
+  }
+
+  /* ---------------------------------------------------------- scroll hint */
+
+  .hero__scroll {
+    position: absolute;
+    inset-block-end: var(--space-6);
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    color: var(--color-text-faint);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .hero__scroll:hover {
+    color: var(--color-accent);
+  }
+
+  .hero__scroll-line {
+    width: 1px;
+    height: 2.5rem;
+    background: linear-gradient(to bottom, transparent, var(--border-strong));
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__scroll {
+      animation: scroll-hint 2.8s var(--ease-in-out) infinite;
+    }
+  }
+
+  @keyframes scroll-hint {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(5px);
+    }
+  }
+
+  /* ------------------------------------------------------------ responsive */
+
+  @media (min-width: 48rem) {
+    .hero__stats {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .hero__statement {
+      max-width: 14ch;
+    }
+  }
+
+  @media (min-width: 62rem) and (min-height: 44rem) {
+    .hero__scroll {
+      display: flex;
+    }
+  }
+</style>

@@ -1,0 +1,15 @@
+/**
+ * Global stylesheet entrypoint.
+ *
+ * Import order encodes the cascade intentionally:
+ * tokens → fonts → reset → base → utilities.
+ * Component styles are Astro-scoped and always win over everything here, which
+ * removes the need for `!important` anywhere in the codebase.
+ */
+
+@import './tokens.css';
+@import './fonts.css';
+@import './reset.css';
+@import './base.css';
+@import './prose.css';
+@import './utilities.css';

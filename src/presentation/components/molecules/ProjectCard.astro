@@ -1,0 +1,372 @@
+---
+/**
+ * ProjectCard — molecule. The primary entry point into a case study.
+ *
+ * Interaction notes
+ * -----------------
+ * - The whole card is clickable via a stretched pseudo-element on the title
+ *   link, *not* by wrapping everything in an `<a>`. That keeps a single, clean
+ *   link in the accessibility tree (announced as the project name) while still
+ *   giving mouse users a large target — and text inside stays selectable.
+ * - The cursor spotlight is driven by two CSS custom properties set by a shared
+ *   pointer listener. No per-card JavaScript, no layout thrash.
+ */
+import { Image } from 'astro:assets';
+
+import type { Project } from '@domain/projects/project.entity';
+import Badge from '@atoms/Badge.astro';
+import Heading from '@atoms/Heading.astro';
+import Icon from '@atoms/Icon.astro';
+import TechTag from '@atoms/TechTag.astro';
+
+interface Props {
+  project: Project;
+  /** The first card in the grid gets a wider, editorial treatment. */
+  featured?: boolean;
+  /** Eager-load the cover of the first card only; the rest stay lazy. */
+  priority?: boolean;
+  /** Keeps the outline valid wherever the card is nested. */
+  headingLevel?: 2 | 3 | 4;
+}
+
+const {
+  project,
+  featured = false,
+  priority = false,
+  headingLevel = 3,
+} = Astro.props as Props;
+
+const result = project.headlineResult;
+---
+
+<article
+  class:list={['card', featured && 'card--featured']}
+  data-project-card
+  data-category={project.category}
+  data-reveal
+>
+  <div class="card__media">
+    {
+      project.cover ? (
+        <Image
+          src={project.cover.image as never}
+          alt={project.cover.alt}
+          widths={[400, 700, 1000]}
+          sizes={
+            featured
+              ? '(min-width: 64rem) 640px, (min-width: 48rem) 90vw, 100vw'
+              : '(min-width: 64rem) 420px, (min-width: 48rem) 45vw, 100vw'
+          }
+          loading={priority ? 'eager' : 'lazy'}
+          fetchpriority={priority ? 'high' : 'auto'}
+          decoding={priority ? 'sync' : 'async'}
+          class="card__image"
+        />
+      ) : (
+        <div class="card__image card__image--placeholder" aria-hidden="true" />
+      )
+    }
+    <div class="card__media-overlay" aria-hidden="true"></div>
+  </div>
+
+  <div class="card__body">
+    <div class="card__meta">
+      <Badge tone="accent" size="sm">{project.categoryLabel}</Badge>
+      <span class="card__year">{project.year}</span>
+      {
+        project.isConfidential && (
+          <span class="card__private" title="Código-fonte privado">
+            <Icon name="lock" size={12} />
+            <span class="u-visually-hidden">Código-fonte privado</span>
+          </span>
+        )
+      }
+    </div>
+
+    <Heading level={headingLevel} class="card__title">
+      <a href={project.href} class="card__link">{project.title}</a>
+    </Heading>
+
+    <p class="card__tagline">{project.tagline}</p>
+
+    {
+      result && (
+        <p class="card__result">
+          <strong class="card__result-value">{result.value}</strong>
+          <span class="card__result-label">{result.label}</span>
+        </p>
+      )
+    }
+
+    <ul class="card__tech u-list-reset" aria-label={`Tecnologias de ${project.title}`}>
+      {project.primaryTechnologies().map((tech) => <TechTag size="sm">{tech}</TechTag>)}
+      {
+        project.remainingTechnologyCount > 0 && (
+          <li class="card__tech-more">+{project.remainingTechnologyCount}</li>
+        )
+      }
+    </ul>
+
+    <span class="card__cta" aria-hidden="true">
+      Ver estudo de caso
+      <Icon name="arrow-right" size={15} />
+    </span>
+  </div>
+</article>
+
+<style>
+  .card {
+    --spotlight-x: 50%;
+    --spotlight-y: 0%;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    background-color: var(--color-surface);
+    box-shadow: var(--highlight-top);
+    isolation: isolate;
+    transition:
+      border-color var(--duration-base) var(--ease-out-quart),
+      transform var(--duration-base) var(--ease-out-expo),
+      box-shadow var(--duration-base) var(--ease-out-quart);
+  }
+
+  /* Cursor spotlight. Sits above the background but below the content. */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      420px circle at var(--spotlight-x) var(--spotlight-y),
+      color-mix(in oklab, var(--color-accent) 12%, transparent),
+      transparent 62%
+    );
+    transition: opacity var(--duration-base) var(--ease-out-quart);
+  }
+
+  .card:hover,
+  .card:focus-within {
+    border-color: var(--border-strong);
+    transform: translateY(-3px);
+    box-shadow: var(--highlight-top), var(--shadow-lg);
+  }
+
+  .card:hover::before,
+  .card:focus-within::before {
+    opacity: 1;
+  }
+
+  /* ----------------------------------------------------------------- media */
+
+  .card__media {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-bg-subtle);
+    border-block-end: 1px solid var(--border-subtle);
+    aspect-ratio: 16 / 10;
+  }
+
+  .card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-slower) var(--ease-out-expo);
+  }
+
+  .card__image--placeholder {
+    background: linear-gradient(135deg, var(--color-surface-raised), var(--color-bg-subtle));
+  }
+
+  .card:hover .card__image {
+    transform: scale(1.035);
+  }
+
+  /* Fades the artwork into the card body so the seam reads as one surface. */
+  .card__media-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 55%,
+      color-mix(in oklab, var(--color-surface) 85%, transparent) 100%
+    );
+  }
+
+  /* ------------------------------------------------------------------ body */
+
+  .card__body {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    flex: 1;
+    padding: var(--space-6);
+  }
+
+  .card__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .card__year,
+  .card__private {
+    font-family: var(--font-mono);
+    font-size: var(--fs-2xs);
+    color: var(--color-text-faint);
+  }
+
+  .card__private {
+    display: inline-flex;
+    align-items: center;
+    margin-inline-start: auto;
+  }
+
+  .card__title {
+    margin: 0;
+    font-size: var(--fs-xl);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .card__link {
+    color: inherit;
+  }
+
+  /* Stretches the link over the whole card without nesting content inside it. */
+  .card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+  }
+
+  .card__link:focus-visible {
+    outline: none;
+  }
+
+  .card__link:focus-visible::after {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -3px;
+  }
+
+  .card__tagline {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--fs-base);
+    line-height: var(--lh-relaxed);
+  }
+
+  .card__result {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin: var(--space-1) 0 0;
+    padding-block-start: var(--space-4);
+    border-block-start: 1px solid var(--border-subtle);
+  }
+
+  .card__result-value {
+    font-size: var(--fs-lg);
+    font-weight: 560;
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card__result-label {
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
+  }
+
+  .card__tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-block-start: auto;
+    padding-block-start: var(--space-4);
+  }
+
+  .card__tech-more {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-2xs);
+    color: var(--color-text-faint);
+  }
+
+  .card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-block-start: var(--space-2);
+    color: var(--color-accent);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity var(--duration-base) var(--ease-out-quart),
+      transform var(--duration-base) var(--ease-out-quart);
+  }
+
+  .card:hover .card__cta,
+  .card:focus-within .card__cta {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Touch devices never fire hover, so the CTA would be permanently invisible. */
+  @media (hover: none) {
+    .card__cta {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* --------------------------------------------------------- featured card */
+
+  @media (min-width: 64rem) {
+    .card--featured {
+      grid-column: span 2;
+      flex-direction: row;
+    }
+
+    .card--featured .card__media {
+      flex: 1 1 55%;
+      aspect-ratio: auto;
+      border-block-end: none;
+      border-inline-end: 1px solid var(--border-subtle);
+    }
+
+    .card--featured .card__media-overlay {
+      background: linear-gradient(
+        to right,
+        transparent 60%,
+        color-mix(in oklab, var(--color-surface) 85%, transparent) 100%
+      );
+    }
+
+    .card--featured .card__body {
+      flex: 1 1 45%;
+      justify-content: center;
+      padding: var(--space-10);
+    }
+
+    .card--featured .card__title {
+      font-size: var(--fs-2xl);
+    }
+
+    .card--featured .card__tagline {
+      font-size: var(--fs-md);
+    }
+  }
+</style>

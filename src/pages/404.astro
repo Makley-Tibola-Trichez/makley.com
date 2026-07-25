@@ -1,0 +1,143 @@
+---
+/**
+ * 404. A dead end is a chance to redirect intent, not just apologise —
+ * so it offers the three destinations a lost visitor most likely wanted.
+ */
+import { useCases } from '@infrastructure/container';
+import BaseLayout from '@presentation/layouts/BaseLayout.astro';
+import Button from '@atoms/Button.astro';
+import ProjectCard from '@molecules/ProjectCard.astro';
+
+const { profile, featuredProjects } = await useCases.getPortfolioOverview.execute();
+const suggestions = featuredProjects.slice(0, 3);
+---
+
+<BaseLayout
+  title="Página não encontrada"
+  description="A página que você procurava não existe. Veja os projetos, o currículo ou entre em contato."
+  path="/404"
+  noindex
+>
+  <section class="notfound">
+    <div class="u-container">
+      <p class="notfound__code" aria-hidden="true">404</p>
+
+      <h1 class="notfound__title">Esta página não existe</h1>
+      <p class="notfound__text">
+        O endereço pode ter mudado ou o link estar incorreto. Abaixo estão os
+        caminhos mais úteis — ou use <kbd>⌘</kbd> <kbd>K</kbd> para buscar.
+      </p>
+
+      <div class="notfound__actions">
+        <Button href="/" variant="primary" icon="arrow-right">Voltar ao início</Button>
+        <Button href="/projetos" variant="secondary" icon="code" iconPosition="start">
+          Ver projetos
+        </Button>
+        <Button href={profile.mailto} variant="ghost" icon="mail" iconPosition="start">
+          Falar comigo
+        </Button>
+      </div>
+    </div>
+  </section>
+
+  {
+    suggestions.length > 0 && (
+      <section class="notfound__suggestions u-section" aria-labelledby="notfound-suggestions">
+        <div class="u-container u-container--wide">
+          <h2 class="notfound__suggestions-title" id="notfound-suggestions">
+            Talvez você procurasse por
+          </h2>
+          <div class="notfound__grid">
+            {suggestions.map((project) => (
+              <ProjectCard project={project} headingLevel={3} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .notfound {
+    display: flex;
+    align-items: center;
+    min-height: 60svh;
+    padding-block: var(--space-24) var(--space-16);
+    text-align: center;
+  }
+
+  .notfound__code {
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-mono);
+    font-size: clamp(4rem, 18vw, 9rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-text) 24%, transparent),
+      transparent 88%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .notfound__title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--fs-3xl);
+  }
+
+  .notfound__text {
+    max-width: 44ch;
+    margin: 0 auto var(--space-8);
+    color: var(--color-text-muted);
+    font-size: var(--fs-lg);
+    line-height: var(--lh-relaxed);
+  }
+
+  .notfound__text kbd {
+    padding: 0.1rem 0.35rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xs);
+    background-color: var(--color-surface);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+  }
+
+  .notfound__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+  }
+
+  .notfound__suggestions-title {
+    margin: 0 0 var(--space-8);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  .notfound__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 48rem) {
+    .notfound__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (forced-colors: active) {
+    .notfound__code {
+      color: CanvasText;
+    }
+  }
+</style>

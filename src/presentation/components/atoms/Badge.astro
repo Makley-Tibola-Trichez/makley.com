@@ -1,0 +1,106 @@
+---
+/**
+ * Badge — atom. Compact status/category label.
+ *
+ * `tone` is semantic ("this is an accent", "this is neutral"), not literal
+ * ("this is orange"), so a theme change never requires editing call sites.
+ */
+import Icon, { type IconName } from './Icon.astro';
+
+interface Props {
+  tone?: 'neutral' | 'accent' | 'positive' | 'outline';
+  size?: 'sm' | 'md';
+  icon?: IconName;
+  /** Renders a soft pulsing dot — used for the "available" status. */
+  pulse?: boolean;
+  class?: string;
+}
+
+const { tone = 'neutral', size = 'md', icon, pulse = false, class: className } =
+  Astro.props as Props;
+---
+
+<span class:list={['badge', `badge--${tone}`, `badge--${size}`, className]}>
+  {pulse && <span class="badge__pulse" aria-hidden="true"></span>}
+  {icon && <Icon name={icon} size={size === 'sm' ? 12 : 14} />}
+  <slot />
+</span>
+
+<style>
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0.3rem var(--space-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wide);
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .badge--sm {
+    padding: 0.15rem var(--space-2);
+    font-size: var(--fs-2xs);
+  }
+
+  .badge--accent {
+    border-color: color-mix(in oklab, var(--color-accent) 30%, transparent);
+    background-color: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  .badge--positive {
+    border-color: color-mix(in oklab, var(--color-positive) 30%, transparent);
+    background-color: color-mix(in oklab, var(--color-positive) 12%, transparent);
+    color: var(--color-positive);
+  }
+
+  .badge--outline {
+    background-color: transparent;
+  }
+
+  /* ------------------------------------------------------------ pulse dot */
+
+  .badge__pulse {
+    position: relative;
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-full);
+    background-color: currentColor;
+    flex-shrink: 0;
+  }
+
+  .badge__pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: currentColor;
+    animation: badge-pulse 2.4s var(--ease-out-quart) infinite;
+  }
+
+  @keyframes badge-pulse {
+    0% {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    70%,
+    100% {
+      opacity: 0;
+      transform: scale(2.6);
+    }
+  }
+
+  /* A perpetual animation is exactly what motion sensitivity flags — the dot
+     stays, the pulse stops. */
+  @media (prefers-reduced-motion: reduce) {
+    .badge__pulse::after {
+      animation: none;
+    }
+  }
+</style>

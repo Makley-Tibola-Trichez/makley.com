@@ -1,0 +1,319 @@
+---
+/**
+ * AboutSection — organism.
+ *
+ * Two columns: the narrative on the left (a real measure, ~62ch), a sticky
+ * "facts" rail on the right. The rail exists because the two questions a
+ * recruiter answers in this section — "is this person senior enough" and "where
+ * are they" — should be scannable without reading the prose at all.
+ */
+import type { Profile } from '@domain/profile/profile.entity';
+import Icon from '@atoms/Icon.astro';
+import SectionHeader from '@molecules/SectionHeader.astro';
+
+interface Props {
+  profile: Profile;
+}
+
+const { profile } = Astro.props as Props;
+---
+
+<section id="sobre" class="u-section about" aria-labelledby="about-title">
+  <div class="u-container">
+    <SectionHeader
+      index="01"
+      eyebrow="Sobre"
+      title="Cinco anos resolvendo problemas reais de produto"
+      description="Front-end com profundidade de produto: entendo a regra de negócio antes de escrever a interface."
+      id="about-title"
+    />
+
+    <div class="about__layout">
+      <div class="about__narrative" data-reveal>
+        {profile.bio.map((paragraph) => <p>{paragraph}</p>)}
+
+        <div class="about__goals">
+          <h3 class="about__goals-title">
+            <Icon name="sparkles" size={16} />
+            Para onde estou indo
+          </h3>
+          <ul class="about__goals-list">
+            {profile.goals.map((goal) => <li>{goal}</li>)}
+          </ul>
+        </div>
+      </div>
+
+      <aside class="about__facts" aria-label="Informações rápidas" data-reveal>
+        <dl class="about__fact-list">
+          <div class="about__fact">
+            <dt>Localização</dt>
+            <dd>{profile.location}</dd>
+          </div>
+          <div class="about__fact">
+            <dt>Disponibilidade</dt>
+            <dd>{profile.availabilityNote}</dd>
+          </div>
+          <div class="about__fact">
+            <dt>Idiomas</dt>
+            <dd>
+              <ul class="u-list-reset about__languages">
+                {
+                  profile.languages.map((language) => (
+                    <li>
+                      <strong>{language.name}</strong> <span>{language.level}</span>
+                    </li>
+                  ))
+                }
+              </ul>
+            </dd>
+          </div>
+          <div class="about__fact">
+            <dt>Especialidades</dt>
+            <dd>
+              <ul class="u-list-reset about__specialties">
+                {profile.specialties.map((specialty) => <li>{specialty}</li>)}
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+
+    <div class="about__focus">
+      <h3 class="about__focus-title">Onde eu gero mais valor</h3>
+      <ul class="about__focus-grid u-list-reset">
+        {
+          profile.focusAreas.map((area, index) => (
+            <li class="focus-card" data-spotlight data-reveal>
+              <span class="focus-card__index" aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <h4 class="focus-card__title">{area.title}</h4>
+              <p class="focus-card__description">{area.description}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about__layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-10);
+  }
+
+  /* ------------------------------------------------------------- narrative */
+
+  .about__narrative {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    max-width: 62ch;
+  }
+
+  .about__narrative p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--fs-lg);
+    line-height: var(--lh-relaxed);
+  }
+
+  /* First paragraph is the lede — slightly larger and lighter in colour. */
+  .about__narrative p:first-child {
+    color: var(--color-text-secondary);
+  }
+
+  .about__goals {
+    margin-block-start: var(--space-4);
+    padding: var(--space-5) var(--space-6);
+    border: 1px solid var(--border-subtle);
+    border-inline-start: 2px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+  }
+
+  .about__goals-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-3);
+    color: var(--color-accent);
+    font-size: var(--fs-sm);
+    font-weight: 560;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .about__goals-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding-inline-start: var(--space-5);
+    color: var(--color-text-muted);
+    font-size: var(--fs-base);
+    line-height: var(--lh-relaxed);
+  }
+
+  .about__goals-list li::marker {
+    color: var(--color-accent);
+  }
+
+  /* ----------------------------------------------------------------- facts */
+
+  .about__fact-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    margin: 0;
+    padding: var(--space-6);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--highlight-top);
+  }
+
+  .about__fact dt {
+    margin-block-end: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  .about__fact dd {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--fs-base);
+    line-height: var(--lh-relaxed);
+  }
+
+  .about__languages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .about__languages span {
+    color: var(--color-text-faint);
+    font-size: var(--fs-sm);
+  }
+
+  .about__specialties {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .about__specialties li {
+    padding: 0.2rem var(--space-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    background-color: var(--color-bg-subtle);
+    font-size: var(--fs-xs);
+    color: var(--color-text-muted);
+  }
+
+  /* ----------------------------------------------------------------- focus */
+
+  .about__focus {
+    margin-block-start: var(--space-16);
+  }
+
+  .about__focus-title {
+    margin: 0 0 var(--space-6);
+    font-size: var(--fs-xl);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .about__focus-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: var(--space-4);
+  }
+
+  .focus-card {
+    --spotlight-x: 50%;
+    --spotlight-y: 0%;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-6);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--highlight-top);
+    overflow: hidden;
+    transition:
+      border-color var(--duration-base) var(--ease-out-quart),
+      transform var(--duration-base) var(--ease-out-expo);
+  }
+
+  .focus-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      340px circle at var(--spotlight-x) var(--spotlight-y),
+      color-mix(in oklab, var(--color-accent) 10%, transparent),
+      transparent 60%
+    );
+    transition: opacity var(--duration-base) var(--ease-out-quart);
+  }
+
+  .focus-card:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+  }
+
+  .focus-card:hover::before {
+    opacity: 1;
+  }
+
+  .focus-card__index {
+    position: relative;
+    font-family: var(--font-mono);
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--tracking-widest);
+    color: var(--color-accent);
+  }
+
+  .focus-card__title {
+    position: relative;
+    margin: 0;
+    font-size: var(--fs-lg);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .focus-card__description {
+    position: relative;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--fs-base);
+    line-height: var(--lh-relaxed);
+  }
+
+  /* ------------------------------------------------------------ responsive */
+
+  @media (min-width: 62rem) {
+    .about__layout {
+      grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+      gap: var(--space-16);
+      align-items: start;
+    }
+
+    .about__facts {
+      position: sticky;
+      /* Clears the sticky header plus a breathing gap. */
+      top: calc(var(--header-height) + var(--space-6));
+    }
+  }
+</style>

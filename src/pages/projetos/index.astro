@@ -1,0 +1,50 @@
+---
+/**
+ * Project index — the full, filterable catalogue.
+ *
+ * Exists as a real route (rather than only the home-page section) so that every
+ * project is reachable from a stable, indexable URL and so filtered views can be
+ * shared as `/projetos?categoria=produto`.
+ */
+import { useCases } from '@infrastructure/container';
+import BaseLayout from '@presentation/layouts/BaseLayout.astro';
+import ProjectsSection from '@organisms/ProjectsSection.astro';
+import Breadcrumbs from '@molecules/Breadcrumbs.astro';
+import { buildBreadcrumbNode, buildGraph } from '@presentation/seo/structured-data';
+
+const { projects, filters } = await useCases.getProjectCatalog.execute();
+
+const breadcrumbs = [
+  { name: 'Início', url: '/' },
+  { name: 'Projetos', url: '/projetos' },
+];
+
+const jsonLd = buildGraph([buildBreadcrumbNode(breadcrumbs)]);
+---
+
+<BaseLayout
+  title="Projetos"
+  description="Estudos de caso completos: problema, solução, desafios, resultados e stack de cada projeto que desenvolvi — de SaaS fiscal a design systems."
+  path="/projetos"
+  jsonLd={jsonLd}
+>
+  <div class="page-top">
+    <div class="u-container u-container--wide">
+      <Breadcrumbs items={breadcrumbs} />
+    </div>
+  </div>
+
+  <ProjectsSection
+    projects={projects}
+    filters={filters}
+    index="—"
+    title="Todos os projetos"
+    description="Filtre por categoria para ver o tipo de trabalho que mais te interessa. Cada projeto tem um estudo de caso com problema, solução, desafios e resultados."
+  />
+</BaseLayout>
+
+<style>
+  .page-top {
+    padding-block-start: var(--space-8);
+  }
+</style>

@@ -1,0 +1,16 @@
+# ATENÇÃO: datas aproximadas. Confirme o período real da pesquisa.
+# Ver CONTEUDO-PENDENTE.md → "Timeline acadêmica".
+institution: Atitus Educação
+credential: Artigo científico — LLMs em dispositivos móveis
+kind: publicacao
+start: 2023-08
+end: 2023-12
+
+description: >-
+  Pesquisa sobre a viabilidade de executar grandes modelos de linguagem localmente em
+  smartphones, avaliando memória, capacidade de processamento, consumo de bateria e o
+  impacto da quantização sobre a qualidade das respostas.
+
+highlights:
+  - Investigação de inferência local como alternativa a custo, latência e exposição de dados na nuvem.
+  - Comparação entre modelos e níveis de quantização sob critérios consistentes.

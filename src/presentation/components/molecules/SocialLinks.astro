@@ -1,0 +1,125 @@
+---
+/**
+ * SocialLinks — molecule.
+ *
+ * Icon-only links need an accessible name, so each one carries a `title` on the
+ * icon *and* a visually hidden label. The platform → icon map lives here rather
+ * than in the profile content, keeping presentation out of the data.
+ */
+import type { Profile, SocialPlatform } from '@domain/profile/profile.entity';
+import Icon, { type IconName } from '@atoms/Icon.astro';
+
+interface Props {
+  profile: Profile;
+  /** `primary` shows only the pinned platforms; `all` shows everything. */
+  scope?: 'primary' | 'all';
+  size?: 'sm' | 'md';
+  showLabels?: boolean;
+  class?: string;
+}
+
+const {
+  profile,
+  scope = 'all',
+  size = 'md',
+  showLabels = false,
+  class: className,
+} = Astro.props as Props;
+
+const PLATFORM_ICONS: Record<SocialPlatform, IconName> = {
+  github: 'github',
+  linkedin: 'linkedin',
+  instagram: 'instagram',
+  email: 'mail',
+  phone: 'send',
+  hackerrank: 'terminal',
+  resume: 'file-text',
+};
+
+const PLATFORM_LABELS: Record<SocialPlatform, string> = {
+  github: 'GitHub',
+  linkedin: 'LinkedIn',
+  instagram: 'Instagram',
+  email: 'E-mail',
+  phone: 'Telefone',
+  hackerrank: 'HackerRank',
+  resume: 'Currículo',
+};
+
+const socials = scope === 'primary' ? profile.primarySocials : profile.socials;
+---
+
+<ul class:list={['socials', `socials--${size}`, showLabels && 'socials--labelled', className]}>
+  {
+    socials.map((social) => (
+      <li>
+        <a
+          href={social.url}
+          class="socials__link"
+          target={social.link.targetAttribute}
+          rel={social.link.relAttribute}
+        >
+          <Icon name={PLATFORM_ICONS[social.platform]} size={size === 'sm' ? 16 : 18} />
+          {showLabels ? (
+            <span class="socials__label">{PLATFORM_LABELS[social.platform]}</span>
+          ) : (
+            <span class="u-visually-hidden">
+              {PLATFORM_LABELS[social.platform]} — {social.handle}
+            </span>
+          )}
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .socials__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    /* 44px touch target even though the icon is 18px — WCAG 2.5.5. */
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      background-color var(--duration-fast) var(--ease-out-quart),
+      border-color var(--duration-fast) var(--ease-out-quart),
+      transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .socials__link:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface);
+    border-color: var(--border-subtle);
+    transform: translateY(-1px);
+  }
+
+  .socials--sm .socials__link {
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+  }
+
+  .socials--labelled .socials__link {
+    justify-content: flex-start;
+    padding-inline: var(--space-3);
+  }
+
+  .socials__label {
+    font-size: var(--fs-sm);
+  }
+</style>

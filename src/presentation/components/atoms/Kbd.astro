@@ -1,0 +1,34 @@
+---
+/**
+ * Kbd — atom. Renders a keyboard key cap.
+ *
+ * Used to advertise the command palette shortcut. Semantically a `<kbd>`, so
+ * assistive tech announces it as keyboard input rather than as decoration.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props as Props;
+---
+
+<kbd class:list={['kbd', className]}><slot /></kbd>
+
+<style>
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding-inline: 0.4rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xs);
+    background-color: var(--color-surface-raised);
+    box-shadow: var(--highlight-top), 0 1px 0 0 var(--border-subtle);
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-2xs);
+    line-height: 1;
+  }
+</style>

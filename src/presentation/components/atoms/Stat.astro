@@ -1,0 +1,80 @@
+---
+/**
+ * Stat — atom. A single quantified outcome.
+ *
+ * Numbers are the most persuasive thing on a portfolio, so they get their own
+ * component with tabular figures (so digits align across a row) and a tight
+ * optical size that reads as data rather than as a headline.
+ */
+interface Props {
+  value: string;
+  label: string;
+  detail?: string;
+  size?: 'sm' | 'md' | 'lg';
+  class?: string;
+}
+
+const { value, label, detail, size = 'md', class: className } = Astro.props as Props;
+---
+
+<div class:list={['stat', `stat--${size}`, className]}>
+  <dt class="stat__value">{value}</dt>
+  <dd class="stat__body">
+    <span class="stat__label">{label}</span>
+    {detail && <span class="stat__detail">{detail}</span>}
+  </dd>
+</div>
+
+<style>
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .stat__value {
+    font-size: var(--fs-2xl);
+    font-weight: 560;
+    line-height: 1;
+    letter-spacing: var(--tracking-tighter);
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat--sm .stat__value {
+    font-size: var(--fs-xl);
+  }
+
+  .stat--lg .stat__value {
+    font-size: var(--fs-3xl);
+    background: linear-gradient(160deg, var(--color-text) 30%, var(--color-accent) 130%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .stat__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 0;
+  }
+
+  .stat__label {
+    font-size: var(--fs-sm);
+    color: var(--color-text-secondary);
+  }
+
+  .stat__detail {
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
+    color: var(--color-text-muted);
+    text-wrap: pretty;
+  }
+
+  @media (forced-colors: active) {
+    .stat--lg .stat__value {
+      color: CanvasText;
+    }
+  }
+</style>

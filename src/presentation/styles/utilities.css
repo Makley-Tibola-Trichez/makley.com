@@ -1,0 +1,164 @@
+/**
+ * Utilities — small, composable, single-purpose classes.
+ *
+ * Kept intentionally tiny: layout primitives, accessibility helpers and the
+ * shared scroll-reveal contract. Everything visual belongs in a component's own
+ * scoped `<style>` block so it can be deleted alongside the component.
+ *
+ * Prefix `u-` marks these as global utilities and prevents collisions with the
+ * component-scoped class names Astro generates.
+ */
+
+/* ----------------------------------------------------------------- layout */
+
+.u-container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+.u-container--wide {
+  max-width: var(--container-wide);
+}
+
+.u-section {
+  padding-block: var(--space-section);
+  position: relative;
+}
+
+.u-measure {
+  max-width: var(--measure);
+}
+
+.u-stack > * + * {
+  margin-block-start: var(--stack-gap, var(--space-4));
+}
+
+/* ---------------------------------------------------------- accessibility */
+
+/** Visually hidden but announced by screen readers (WCAG-safe clip pattern). */
+.u-visually-hidden:not(:focus):not(:active) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/** Decorative element, hidden from the a11y tree; pair with aria-hidden. */
+.u-decorative {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ------------------------------------------------------------ typography */
+
+.u-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.u-serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  /* Instrument Serif runs small next to Geist; nudge the optical size. */
+  font-size: 1.08em;
+  letter-spacing: 0;
+}
+
+/** Gradient text used for at most one phrase per page. */
+.u-gradient-text {
+  background: linear-gradient(
+    100deg,
+    var(--color-text) 12%,
+    var(--color-accent) 52%,
+    var(--aurora-violet) 96%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* Forced-colors mode strips backgrounds — restore a real colour. */
+  @media (forced-colors: active) {
+    color: CanvasText;
+  }
+}
+
+/* -------------------------------------------------------------- surfaces */
+
+.u-panel {
+  background-color: var(--color-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--highlight-top);
+}
+
+/** Faint blueprint grid used behind hero/CTA sections. */
+.u-grid-backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 78%);
+}
+
+/* --------------------------------------------------------- scroll reveal */
+
+/**
+ * The reveal contract, shared by every section.
+ *
+ * The element starts visible (`opacity: 1`) and is only hidden once the reveal
+ * observer confirms JS + motion are available. That ordering matters: with JS
+ * disabled or the script failing, content is fully readable instead of being
+ * stuck at `opacity: 0` — a common and severe a11y regression in animated sites.
+ */
+[data-reveal] {
+  --reveal-distance: 14px;
+}
+
+html.js-reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-distance), 0);
+  transition: opacity var(--duration-slow) var(--ease-out-quart),
+    transform var(--duration-slower) var(--ease-out-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+html.js-reveal-ready [data-reveal].is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js-reveal-ready [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------- utilities */
+
+.u-list-reset {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.u-no-scroll {
+  overflow: hidden;
+}

@@ -1,0 +1,202 @@
+---
+/**
+ * StackSection — organism.
+ *
+ * The brief asked for "todas as tecnologias, agrupadas por categoria". The risk
+ * with that request is a wall of forty identical chips, which reads as a list of
+ * keywords rather than as evidence of depth. Two things fix it:
+ *  1. Core technologies are pulled into a highlighted row at the top with a note
+ *     on the actual depth of use.
+ *  2. Everything else is grouped, with the group's count visible so the eye can
+ *     skip what it does not care about.
+ */
+import type { Technology, TechnologyGroup } from '@domain/tech-stack/technology.entity';
+import SectionHeader from '@molecules/SectionHeader.astro';
+import TechTag from '@atoms/TechTag.astro';
+
+interface Props {
+  groups: readonly TechnologyGroup[];
+}
+
+const { groups } = Astro.props as Props;
+
+const core: Technology[] = groups.flatMap((group) =>
+  group.technologies.filter((technology) => technology.isCore),
+);
+---
+
+<section id="stack" class="u-section stack" aria-labelledby="stack-title">
+  <div class="u-container">
+    <SectionHeader
+      index="02"
+      eyebrow="Stack"
+      title="Ferramentas que uso para construir"
+      description="Destaque para o que uso no dia a dia em produção. O restante é apoio — tecnologias com que já entreguei ou mantive projetos."
+      id="stack-title"
+    />
+
+    {
+      core.length > 0 && (
+        <div class="stack__core" data-reveal>
+          <h3 class="stack__core-title">Núcleo do dia a dia</h3>
+          <ul class="stack__core-grid u-list-reset">
+            {core.map((technology) => (
+              <li class="core-chip" data-spotlight>
+                <span class="core-chip__name">{technology.name}</span>
+                {technology.note && <span class="core-chip__note">{technology.note}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+
+    <div class="stack__groups">
+      {
+        groups.map((group) => (
+          <section class="stack__group" aria-labelledby={`stack-${group.category}`} data-reveal>
+            <h3 class="stack__group-title" id={`stack-${group.category}`}>
+              {group.label}
+              <span class="stack__group-count" aria-hidden="true">
+                {group.technologies.length}
+              </span>
+            </h3>
+
+            <ul class="stack__group-list u-list-reset">
+              {group.technologies.map((technology) => (
+                <TechTag core={technology.isCore}>{technology.name}</TechTag>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ------------------------------------------------------------------ core */
+
+  .stack__core {
+    margin-block-end: var(--space-16);
+  }
+
+  .stack__core-title,
+  .stack__group-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  .stack__core-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    gap: var(--space-3);
+  }
+
+  .core-chip {
+    --spotlight-x: 50%;
+    --spotlight-y: 0%;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    box-shadow: var(--highlight-top);
+    overflow: hidden;
+    transition:
+      border-color var(--duration-base) var(--ease-out-quart),
+      transform var(--duration-base) var(--ease-out-expo);
+  }
+
+  .core-chip::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      220px circle at var(--spotlight-x) var(--spotlight-y),
+      color-mix(in oklab, var(--color-accent) 14%, transparent),
+      transparent 62%
+    );
+    transition: opacity var(--duration-base) var(--ease-out-quart);
+  }
+
+  .core-chip:hover {
+    border-color: color-mix(in oklab, var(--color-accent) 38%, transparent);
+    transform: translateY(-2px);
+  }
+
+  .core-chip:hover::before {
+    opacity: 1;
+  }
+
+  .core-chip__name {
+    position: relative;
+    font-size: var(--fs-md);
+    font-weight: 560;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .core-chip__note {
+    position: relative;
+    color: var(--color-text-faint);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
+  }
+
+  /* ---------------------------------------------------------------- groups */
+
+  .stack__groups {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-10);
+  }
+
+  .stack__group-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    padding-inline: 0.3rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    background-color: var(--color-surface);
+    color: var(--color-text-faint);
+    font-size: var(--fs-2xs);
+    line-height: 1;
+  }
+
+  /* Hairline that runs from the title to the edge of the column. */
+  .stack__group-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-subtle), transparent);
+  }
+
+  .stack__group-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  @media (min-width: 48rem) {
+    .stack__groups {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-10) var(--space-12);
+    }
+  }
+</style>

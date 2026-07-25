@@ -1,0 +1,36 @@
+{
+  "name": "makley-com",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfólio profissional de Makley Tibola Trichez — Software Engineer.",
+  "engines": {
+    "node": ">=20.3.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "build:fast": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "astro": "astro",
+    "covers": "node scripts/generate-covers.mjs",
+    "brand": "node scripts/generate-brand.mjs",
+    "assets": "npm run covers && npm run brand",
+    "fonts:sync": "node scripts/sync-fonts.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.6.0",
+    "astro": "^5.14.1",
+    "sharp": "^0.34.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.5",
+    "@fontsource-variable/geist": "^5.2.8",
+    "@fontsource-variable/geist-mono": "^5.2.8",
+    "@fontsource/instrument-serif": "^5.2.8",
+    "lightningcss": "^1.33.0",
+    "typescript": "^5.9.3"
+  }
+}

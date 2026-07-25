@@ -1,0 +1,201 @@
+---
+/**
+ * Button — atom.
+ *
+ * Polymorphic by intent, not by prop: passing `href` renders an anchor, omitting
+ * it renders a `<button>`. That keeps the semantics correct automatically — a
+ * link that navigates must be an `<a>` for keyboard, middle-click and screen
+ * reader behaviour, no matter how it is styled.
+ *
+ * External links get `target="_blank"` plus `rel="noopener noreferrer"` and an
+ * appended screen-reader hint, since an unannounced new tab is disorienting.
+ */
+import Icon, { type IconName } from './Icon.astro';
+
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'ghost' | 'link';
+  size?: 'sm' | 'md' | 'lg';
+  icon?: IconName;
+  iconPosition?: 'start' | 'end';
+  external?: boolean;
+  download?: boolean | string;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  fullWidth?: boolean;
+  class?: string;
+  id?: string;
+  'aria-label'?: string;
+  [key: string]: unknown;
+}
+
+const {
+  href,
+  variant = 'secondary',
+  size = 'md',
+  icon,
+  iconPosition = 'end',
+  external = false,
+  download,
+  type = 'button',
+  disabled = false,
+  fullWidth = false,
+  class: className,
+  ...rest
+} = Astro.props as Props;
+
+const Tag = href ? 'a' : 'button';
+const isExternal = external || (href?.startsWith('http') ?? false);
+
+const tagProps = href
+  ? {
+      href,
+      ...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {}),
+      ...(download !== undefined ? { download } : {}),
+    }
+  : { type, disabled };
+
+const iconSize = size === 'lg' ? 18 : size === 'sm' ? 15 : 16;
+---
+
+<Tag
+  class:list={[
+    'btn',
+    `btn--${variant}`,
+    `btn--${size}`,
+    fullWidth && 'btn--full',
+    className,
+  ]}
+  {...tagProps}
+  {...rest}
+>
+  {icon && iconPosition === 'start' && <Icon name={icon} size={iconSize} class="btn__icon" />}
+  <span class="btn__label"><slot /></span>
+  {icon && iconPosition === 'end' && <Icon name={icon} size={iconSize} class="btn__icon" />}
+  {isExternal && <span class="u-visually-hidden">(abre em nova aba)</span>}
+</Tag>
+
+<style>
+  .btn {
+    --btn-bg: transparent;
+    --btn-fg: var(--color-text);
+    --btn-border: var(--border-default);
+    --btn-shadow: none;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    /* 44px min target on touch devices — WCAG 2.5.5. */
+    min-height: 2.75rem;
+    padding-inline: var(--space-5);
+    border: 1px solid var(--btn-border);
+    border-radius: var(--radius-full);
+    background-color: var(--btn-bg);
+    color: var(--btn-fg);
+    box-shadow: var(--btn-shadow);
+    font-size: var(--fs-base);
+    font-weight: 500;
+    letter-spacing: var(--tracking-normal);
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out-quart),
+      border-color var(--duration-fast) var(--ease-out-quart),
+      color var(--duration-fast) var(--ease-out-quart),
+      box-shadow var(--duration-base) var(--ease-out-quart),
+      transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* -------------------------------------------------------------- variants */
+
+  .btn--primary {
+    --btn-bg: var(--color-accent);
+    --btn-fg: var(--color-accent-contrast);
+    --btn-border: transparent;
+    --btn-shadow: var(--highlight-top);
+    font-weight: 560;
+  }
+
+  .btn--primary:hover:not(:disabled) {
+    --btn-bg: var(--color-accent-hover);
+    --btn-shadow: var(--shadow-glow);
+  }
+
+  .btn--secondary {
+    --btn-bg: var(--color-surface);
+    --btn-shadow: var(--highlight-top);
+  }
+
+  .btn--secondary:hover:not(:disabled) {
+    --btn-bg: var(--color-surface-hover);
+    --btn-border: var(--border-strong);
+  }
+
+  .btn--ghost {
+    --btn-border: transparent;
+    --btn-fg: var(--color-text-muted);
+  }
+
+  .btn--ghost:hover:not(:disabled) {
+    --btn-bg: var(--color-surface);
+    --btn-fg: var(--color-text);
+  }
+
+  .btn--link {
+    --btn-border: transparent;
+    --btn-fg: var(--color-accent);
+    min-height: 0;
+    padding: 0;
+    border-radius: var(--radius-xs);
+  }
+
+  .btn--link:hover:not(:disabled) {
+    --btn-fg: var(--color-accent-hover);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  /* ----------------------------------------------------------------- sizes */
+
+  .btn--sm {
+    min-height: 2.25rem;
+    padding-inline: var(--space-4);
+    font-size: var(--fs-sm);
+  }
+
+  .btn--lg {
+    min-height: 3.25rem;
+    padding-inline: var(--space-6);
+    font-size: var(--fs-md);
+  }
+
+  .btn--full {
+    width: 100%;
+  }
+
+  /* The trailing arrow nudges forward on hover — a small, cheap affordance. */
+  .btn:hover:not(:disabled) :global(.btn__icon:last-child) {
+    transform: translateX(2px);
+  }
+
+  .btn :global(.btn__icon) {
+    transition: transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  @media (forced-colors: active) {
+    .btn {
+      border: 1px solid ButtonBorder;
+    }
+  }
+</style>

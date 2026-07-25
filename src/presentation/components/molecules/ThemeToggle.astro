@@ -1,0 +1,98 @@
+---
+/**
+ * ThemeToggle — molecule.
+ *
+ * Behaviour: with no stored preference the site follows the operating system.
+ * The first click writes an explicit preference; from then on the site ignores
+ * the OS. "Voltar ao tema do sistema" is offered in the command palette so the
+ * choice is reversible without cluttering the header with a third state.
+ *
+ * The flash-of-wrong-theme is prevented by an inline blocking script in
+ * `BaseLayout` that stamps `data-theme` on `<html>` before first paint.
+ */
+import Icon from '@atoms/Icon.astro';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props as Props;
+---
+
+<button
+  type="button"
+  class:list={['theme-toggle', className]}
+  data-theme-toggle
+  aria-label="Alternar entre tema claro e escuro"
+  title="Alternar tema"
+>
+  <span class="theme-toggle__track" aria-hidden="true">
+    <Icon name="sun" size={15} class="theme-toggle__icon theme-toggle__icon--sun" />
+    <Icon name="moon" size={15} class="theme-toggle__icon theme-toggle__icon--moon" />
+  </span>
+</button>
+
+<script>
+  import { initThemeToggle } from '@presentation/scripts/theme';
+
+  initThemeToggle();
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      background-color var(--duration-fast) var(--ease-out-quart),
+      border-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .theme-toggle:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface);
+    border-color: var(--border-subtle);
+  }
+
+  .theme-toggle__track {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 15px;
+    height: 15px;
+  }
+
+  .theme-toggle :global(.theme-toggle__icon) {
+    position: absolute;
+    transition:
+      opacity var(--duration-base) var(--ease-out-quart),
+      transform var(--duration-base) var(--ease-spring);
+  }
+
+  /* Dark theme active → offer the sun (what a click produces). */
+  .theme-toggle :global(.theme-toggle__icon--sun) {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+
+  .theme-toggle :global(.theme-toggle__icon--moon) {
+    opacity: 0;
+    transform: rotate(-70deg) scale(0.6);
+  }
+
+  :global(:root[data-theme='light']) .theme-toggle :global(.theme-toggle__icon--sun) {
+    opacity: 0;
+    transform: rotate(70deg) scale(0.6);
+  }
+
+  :global(:root[data-theme='light']) .theme-toggle :global(.theme-toggle__icon--moon) {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+</style>

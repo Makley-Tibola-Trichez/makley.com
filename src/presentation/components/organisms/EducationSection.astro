@@ -1,0 +1,86 @@
+---
+/**
+ * EducationSection — organism. Degrees, publications, certifications, events.
+ *
+ * The degree is separated from the rest: it is the single credential a
+ * recruiter actually filters on, and burying it in a list of five HackerRank
+ * badges buries the lede.
+ */
+import type { Education } from '@domain/education/education.entity';
+import SectionHeader from '@molecules/SectionHeader.astro';
+import EducationItem from '@molecules/EducationItem.astro';
+
+interface Props {
+  education: readonly Education[];
+}
+
+const { education } = Astro.props as Props;
+
+const primary = education.filter(
+  (item) => item.kind === 'graduacao' || item.kind === 'publicacao',
+);
+const secondary = education.filter(
+  (item) => item.kind !== 'graduacao' && item.kind !== 'publicacao',
+);
+---
+
+<section id="formacao" class="u-section education" aria-labelledby="education-title">
+  <div class="u-container">
+    <SectionHeader
+      index="05"
+      eyebrow="Formação"
+      title="Base acadêmica e aprendizado contínuo"
+      description="Bacharelado em Ciência da Computação, pesquisa aplicada e certificações técnicas."
+      id="education-title"
+    />
+
+    <div class="education__layout">
+      <ul class="education__list u-list-reset">
+        {primary.map((item) => <EducationItem item={item} />)}
+      </ul>
+
+      {
+        secondary.length > 0 && (
+          <div class="education__secondary">
+            <h3 class="education__subtitle">Certificações, cursos e eventos</h3>
+            <ul class="education__list education__list--compact u-list-reset">
+              {secondary.map((item) => (
+                <EducationItem item={item} />
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .education__layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+  }
+
+  .education__list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .education__subtitle {
+    margin: 0 0 var(--space-5);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  @media (min-width: 62rem) {
+    .education__list--compact {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
