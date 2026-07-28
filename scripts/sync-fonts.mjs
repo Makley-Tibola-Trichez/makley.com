@@ -8,7 +8,7 @@
  * Only the `latin` subset is copied — Portuguese is fully covered by it, and
  * shipping cyrillic/greek/vietnamese would roughly triple the payload.
  *
- * Usage: npm run fonts:sync
+ * Usage: pnpm fonts:sync
  */
 
 import { copyFile, mkdir } from 'node:fs/promises';

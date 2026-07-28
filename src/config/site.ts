@@ -39,9 +39,6 @@ export const FEATURES = {
    * never ships a broken call-to-action.
    */
   contactEndpoint: (import.meta.env?.PUBLIC_CONTACT_ENDPOINT as string | undefined) ?? '',
-  /** Plausible/Umami-style analytics host. Empty = no analytics script at all. */
-  analyticsScript: (import.meta.env?.PUBLIC_ANALYTICS_SRC as string | undefined) ?? '',
-  analyticsDomain: (import.meta.env?.PUBLIC_ANALYTICS_DOMAIN as string | undefined) ?? '',
 } as const;
 
 export type SiteConfig = typeof SITE;

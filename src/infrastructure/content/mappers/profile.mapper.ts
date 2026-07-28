@@ -29,7 +29,7 @@ export function toProfile(entry: CollectionEntry<'profile'>): Profile {
     socials: data.socials,
     resumePath: data.resumePath,
     avatar: data.avatar
-      ? { src: data.avatar.image.src, alt: data.avatar.alt }
+      ? { image: data.avatar.image, alt: data.avatar.alt }
       : undefined,
   });
 }

@@ -15,6 +15,9 @@ import { SITE } from './src/config/site.ts';
  * - No UI framework integration (React/Vue/Svelte) is installed **on purpose**.
  *   Every interactive behaviour is a small vanilla-TS island, so the shipped JS
  *   stays in the low single-digit kilobytes instead of ~45 kB of runtime.
+ *   `react` does appear in package.json, but only as a peer of
+ *   `@react-pdf/renderer`, which renders the résumé PDF once per build in a
+ *   prerendered API route — it never reaches the browser.
  * - `inlineStylesheets: 'auto'` lets Astro inline small critical CSS into the
  *   document head, removing a render-blocking round-trip for above-the-fold CSS.
  */
@@ -69,6 +72,13 @@ export default defineConfig({
   vite: {
     build: {
       cssMinify: 'lightningcss',
+    },
+    ssr: {
+      // @react-pdf/renderer pulls in native/WASM layout and font-parsing
+      // dependencies (yoga, fontkit) that break when Vite tries to bundle
+      // them for SSR. Resolving it through plain Node `require` instead
+      // avoids that — it only ever runs inside the build-time PDF route.
+      external: ['@react-pdf/renderer'],
     },
   },
 });

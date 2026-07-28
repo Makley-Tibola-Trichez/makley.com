@@ -7,6 +7,8 @@
  * recruiter answers in this section — "is this person senior enough" and "where
  * are they" — should be scannable without reading the prose at all.
  */
+import { Image } from 'astro:assets';
+
 import type { Profile } from '@domain/profile/profile.entity';
 import Icon from '@atoms/Icon.astro';
 import SectionHeader from '@molecules/SectionHeader.astro';
@@ -44,6 +46,18 @@ const { profile } = Astro.props as Props;
       </div>
 
       <aside class="about__facts" aria-label="Informações rápidas" data-reveal>
+        {
+          profile.avatar && (
+            <Image
+              src={profile.avatar.image as never}
+              alt={profile.avatar.alt}
+              width={112}
+              height={112}
+              loading="lazy"
+              class="about__avatar"
+            />
+          )
+        }
         <dl class="about__fact-list">
           <div class="about__fact">
             <dt>Localização</dt>
@@ -174,6 +188,16 @@ const { profile } = Astro.props as Props;
     border-radius: var(--radius-lg);
     background-color: var(--color-surface);
     box-shadow: var(--highlight-top);
+  }
+
+  .about__avatar {
+    width: 4.5rem;
+    height: 4.5rem;
+    margin-block-end: var(--space-5);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-default);
+    box-shadow: var(--highlight-top);
+    object-fit: cover;
   }
 
   .about__fact dt {

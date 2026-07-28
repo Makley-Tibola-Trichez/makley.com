@@ -7,7 +7,7 @@
  * `public/favicon.svg` is hand-authored (vector, theme-aware) and is not
  * produced here.
  *
- * Usage: npm run brand
+ * Usage: pnpm brand
  */
 
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -21,7 +21,7 @@ const PUBLIC_DIR = join(ROOT, 'public');
 const NAME = 'Makley Trichez';
 const ROLE = 'Software Engineer';
 const TAGLINE = 'React · TypeScript · Design Systems · Performance';
-const DOMAIN = 'makley.com';
+const DOMAIN = 'makley.com.br';
 
 const EMBER = '#ff6a3d';
 const VIOLET = '#8b5cf6';
@@ -92,7 +92,7 @@ const ogCard = () => `<svg xmlns="http://www.w3.org/2000/svg" width="1200" heigh
   <g transform="translate(80,556)">
     <rect width="1040" height="1" fill="rgba(255,255,255,0.09)"/>
     <text x="0" y="42" font-family="${FONT}" font-size="24" font-weight="600" fill="${EMBER}">5+ anos</text>
-    <text x="150" y="42" font-family="${FONT}" font-size="24" font-weight="600" fill="${EMBER}">22 mil+ clientes</text>
+    <text x="150" y="42" font-family="${FONT}" font-size="24" font-weight="600" fill="${EMBER}">22 mil+ usuários</text>
     <text x="410" y="42" font-family="${FONT}" font-size="24" font-weight="600" fill="${EMBER}">2 design systems</text>
     <text x="700" y="42" font-family="${FONT}" font-size="24" font-weight="600" fill="${EMBER}">−84% deploy</text>
   </g>

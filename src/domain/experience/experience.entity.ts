@@ -89,7 +89,7 @@ export class Experience {
     return EMPLOYMENT_TYPE_LABELS[this.employmentType];
   }
 
-  /** `Desenvolvedor Front-end · Pleno` */
+  /** `Desenvolvedor Front-end · Sênior` */
   get fullRole(): string {
     return this.seniority ? `${this.role} · ${this.seniority}` : this.role;
   }
