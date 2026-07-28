@@ -15,23 +15,27 @@ technologies:
   - { id: astro, name: Astro, category: frontend, core: true }
   - { id: javascript, name: JavaScript, category: frontend, core: true }
   - { id: vite, name: Vite, category: frontend }
-  - { id: zustand, name: Zustand, category: frontend }
+  - { id: zustand, name: Zustand, category: frontend, core: true }
   - { id: redux, name: Redux, category: frontend }
-  - { id: tanstack-query, name: TanStack Query, category: frontend }
-  - { id: react-hook-form, name: React Hook Form, category: frontend }
+  - { id: tanstack-query, name: TanStack Query, category: frontend, core: true }
+  - { id: tanstack-router, name: TanStack Router, category: frontend, core: true }
+  - { id: react-router, name: React Router, category: frontend, core: true }
+  - { id: react-hook-form, name: React Hook Form, category: frontend, core: true }
   - { id: zod, name: Zod, category: frontend }
   - { id: styled-components, name: Styled Components, category: frontend }
-  - { id: emotion, name: Emotion, category: frontend }
+  - { id: emotion, name: Emotion, category: frontend, core: true }
   - { id: tailwind-css, name: Tailwind CSS, category: frontend }
-  - { id: material-ui, name: Material UI, category: frontend }
-  - { id: heroui, name: HeroUI, category: frontend }
+  - { id: material-ui, name: Material UI, category: frontend, core: true }
+  - { id: heroui, name: HeroUI, category: frontend, core: true }
   - { id: html, name: HTML semântico, category: frontend }
   - { id: css, name: CSS moderno, category: frontend }
 
   # ------------------------------------------------------------------- back-end
   - { id: python, name: Python, category: backend, core: true, note: APIs e automações no Sicredi }
   - { id: fastapi, name: FastAPI, category: backend, core: true }
-  - { id: nodejs, name: Node.js, category: backend }
+  - { id: nodejs, name: Node.js, category: backend, core: true }
+  - { id: bun, name: Bun, category: backend }
+  - { id: elysia, name: Elysia, category: backend, core: true }
   - { id: golang, name: Go, category: backend }
   - { id: php, name: PHP, category: backend }
   - { id: rest-apis, name: APIs REST, category: backend, core: true }
@@ -55,7 +59,6 @@ technologies:
   - { id: docker, name: Docker, category: devops }
   - { id: gitlab-ci, name: GitLab CI/CD, category: devops, core: true }
   - { id: git, name: Git, category: devops, core: true }
-  - { id: monorepo, name: Monorepo, category: devops }
   - { id: prefect, name: Prefect, category: devops, note: Orquestração de pipelines de dados }
   - { id: cronjob, name: CronJob, category: devops }
   - { id: uv, name: UV, category: devops, note: Gestão de ambientes Python }
@@ -64,7 +67,7 @@ technologies:
   - { id: vitest, name: Vitest, category: testing }
   - { id: jest, name: Jest, category: testing }
   - { id: cypress, name: Cypress, category: testing, core: true }
-  - { id: testing-library, name: Testing Library, category: testing }
+  - { id: testing-library, name: Testing Library, category: testing, core: true }
   - { id: postman, name: Postman, category: testing }
 
   # ------------------------------------------------------- observabilidade/produto
@@ -76,9 +79,8 @@ technologies:
   # ---------------------------------------------------------------- ferramentas
   - { id: figma, name: Figma, category: tooling }
   - { id: jira, name: Jira, category: tooling }
-  - { id: github, name: GitHub, category: tooling }
+  - { id: github, name: GitHub, category: tooling, core: true }
   - { id: playwright, name: Playwright, category: tooling, core: true, note: RPA e automação de testes }
 
   # -------------------------------------------------------------------------- ia
   - { id: llms, name: LLMs, category: ai, note: Pesquisa acadêmica em inferência on-device }
-  - { id: ai-assisted-dev, name: Desenvolvimento assistido por IA, category: ai }

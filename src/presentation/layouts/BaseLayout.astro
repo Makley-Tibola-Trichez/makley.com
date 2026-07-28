@@ -101,9 +101,11 @@ const linkedin = profile.social('linkedin');
     />
 
     <script>
+      import { initAnalytics } from '@presentation/scripts/analytics';
       import { initReveal } from '@presentation/scripts/reveal';
       import { initSpotlight } from '@presentation/scripts/spotlight';
 
+      initAnalytics();
       initReveal();
       initSpotlight();
     </script>

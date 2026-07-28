@@ -1,4 +1,5 @@
 import { ExternalLink } from '../shared/value-objects/external-link.vo';
+import type { DescribedImage } from '../shared/value-objects/image-ref.vo';
 
 export type SocialPlatform =
   | 'github'
@@ -87,7 +88,7 @@ export interface ProfileProps {
   readonly stats: readonly ProfileStat[];
   readonly socials: readonly SocialProfileProps[];
   readonly resumePath: string;
-  readonly avatar?: { src: string; alt: string };
+  readonly avatar?: DescribedImage;
 }
 
 /**
@@ -121,7 +122,7 @@ export class Profile {
     public readonly stats: readonly ProfileStat[],
     public readonly socials: readonly SocialProfile[],
     public readonly resumePath: string,
-    public readonly avatar: { src: string; alt: string } | null,
+    public readonly avatar: DescribedImage | null,
   ) {}
 
   static create(props: ProfileProps): Profile {

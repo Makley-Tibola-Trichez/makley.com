@@ -44,7 +44,9 @@ export function buildPersonNode(
     description: profile.headline,
     url: `${SITE.url}/`,
     email: profile.email,
-    ...(profile.phone ? { telephone: profile.phone } : {}),
+    // `profile.phone` is intentionally NOT emitted here: it is not shown
+    // anywhere in the UI, and putting it in structured data would make it
+    // publicly scrapeable even though the page never displays it.
     address: {
       '@type': 'PostalAddress',
       addressLocality: profile.locality,

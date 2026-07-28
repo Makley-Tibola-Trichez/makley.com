@@ -13,24 +13,24 @@ Atomic Design. **Nenhum framework de UI é enviado ao navegador.**
 ## Começando
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 | Comando | O que faz |
 |---|---|
-| `npm run dev` | Servidor de desenvolvimento (`localhost:4321`) |
-| `npm run build` | Verificação de tipos + build estático em `dist/` |
-| `npm run preview` | Serve o `dist/` localmente |
-| `npm run check` | Só a verificação de tipos |
-| `npm run assets` | Regenera capas dos projetos e ativos de marca |
-| `npm run fonts:sync` | Recopia as fontes após atualizar as dependências |
+| `pnpm run dev` | Servidor de desenvolvimento (`localhost:4321`) |
+| `pnpm run build` | Verificação de tipos + build estático em `dist/` |
+| `pnpm run preview` | Serve o `dist/` localmente |
+| `pnpm run check` | Só a verificação de tipos |
+| `pnpm run assets` | Regenera capas dos projetos e ativos de marca |
+| `pnpm run fonts:sync` | Recopia as fontes após atualizar as dependências |
 
 ---
 
 ## Números da build
 
-Medidos na saída real de `npm run build`:
+Medidos na saída real de `pnpm run build`:
 
 | Métrica | Valor |
 |---|---|
@@ -108,6 +108,24 @@ mais grave em sites animados. Tudo respeita `prefers-reduced-motion`.
 **Transições de página com zero JavaScript.** `@view-transition { navigation: auto }` é
 CSS nativo. Sem roteador no cliente, sem hidratação.
 
+**O PDF do currículo é gerado no build, a partir dos mesmos dados da página `/curriculo`.**
+Um PDF enviado manualmente é uma segunda fonte de verdade que diverge do site assim que
+qualquer um dos dois é editado. `src/presentation/pdf/resume-document.ts` monta o documento
+com `@react-pdf/renderer` a partir das entidades `Profile`/`Experience`/`Education`/`Stack`;
+[`src/pages/curriculo/makley-trichez-cv-pt-br.pdf.ts`](src/pages/curriculo/makley-trichez-cv-pt-br.pdf.ts)
+expõe isso como uma rota estática. Como o site só muda em um novo deploy, gerar o PDF uma
+vez por build e servir o resultado pela CDN já produz o mesmo efeito de um cache com TTL,
+sem função serverless e sem custo por requisição. `react`/`@react-pdf/renderer` nunca chegam
+ao navegador — rodam apenas durante `astro build`.
+
+Uma observação de implementação que vale registrar: cabeçalhos de entrada (cargo + empresa)
+são renderizados como um único `Text` empilhado, nunca como uma `View` com
+`flexDirection: 'row'` e múltiplos filhos. Testes isolados mostraram que o algoritmo de
+paginação do `@react-pdf/renderer` pode posicionar as colunas de uma linha em páginas
+diferentes quando ela cai perto do fim de uma página — nem `wrap={false}` nem
+`minPresenceAhead` evitaram isso de forma confiável. Um único nó de texto por bloco elimina
+a categoria inteira do problema.
+
 ### Identidade visual
 
 Ponto de partida deliberado: fugir do azul/violeta que domina portfólios de desenvolvedor.
@@ -180,7 +198,7 @@ em um único `@graph` com `@id`s estáveis:
 
 Saída estática — funciona em qualquer host.
 
-- **Build:** `npm run build`
+- **Build:** `pnpm run build`
 - **Diretório:** `dist`
 - **Node:** 20.3+
 

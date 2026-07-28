@@ -10,7 +10,7 @@
  * parser never has to restart), then preconnect/preload for the render-critical
  * fonts, then metadata.
  */
-import { SITE, FEATURES } from '@config/site';
+import { SITE } from '@config/site';
 
 interface Props {
   title: string;
@@ -115,14 +115,3 @@ const fullTitle = path === '/' ? title : `${title} · ${SITE.name}`;
 
 {/* ------------------------------------------------------------- JSON-LD */}
 {jsonLd && <script type="application/ld+json" is:inline set:html={jsonLd} />}
-
-{
-  FEATURES.analyticsScript && (
-    <script
-      is:inline
-      defer
-      src={FEATURES.analyticsScript}
-      data-domain={FEATURES.analyticsDomain}
-    />
-  )
-}

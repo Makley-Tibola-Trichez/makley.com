@@ -1,7 +1,11 @@
 name: Makley Tibola Trichez
 shortName: Makley
 title: Software Engineer
-headline: Software Engineer especializado em front-end, design systems e performance.
+# RASCUNHO — ajustado após seu pedido de reposicionamento (arquitetura/DevOps/back-end).
+# Revise o texto abaixo; é uma sugestão, não uma frase definitiva.
+headline: >-
+  Software Engineer — atuo de soluções específicas a arquiteturas complexas que precisam
+  escalar.
 
 # A palavra em `emphasis` é destacada em serifa itálica no título principal.
 heroStatement:
@@ -45,17 +49,19 @@ phone: "+5554991127790"
 # 'open' | 'selective' | 'closed' — controla o selo de disponibilidade no header.
 availability: selective
 availabilityNote: >-
-  Atualmente atuo como desenvolvedor de sistemas no Sicredi, mas estou aberto a conversar
-  sobre oportunidades desafiadoras em produto e front-end — além de projetos freelance
-  pontuais.
+  Atualmente atuo como desenvolvedor de sistemas na Sicredi Aliança, mas estou aberto a
+  conversar sobre novas oportunidades — especialmente em arquitetura de software, back-end
+  e DevOps — além de projetos freelance pontuais.
 
+# RASCUNHO — ampliado para refletir a atuação atual em back-end/DevOps no Sicredi.
 specialties:
   - React & TypeScript
+  - Arquitetura de software
   - Design Systems
+  - Back-end & Automação
+  - DevOps
   - Performance web
-  - Arquitetura front-end
   - Experiência do usuário
-  - DevOps para front-end
 
 focusAreas:
   - title: Produto SaaS
@@ -74,10 +80,20 @@ focusAreas:
     description: >-
       Testes automatizados, padrões de código acordados com o time, code review e
       pipelines de CI/CD que encurtam o caminho entre o commit e a produção.
+  - title: Arquitetura & Back-end
+    description: >-
+      Também atuo diretamente em back-end e automação — APIs, integração de dados e
+      observabilidade — unindo a visão de produto que trago do front-end a decisões de
+      infraestrutura e escalabilidade.
 
+# RASCUNHO — direção ainda em definição ("preciso de sugestões"); revise à vontade.
 goals:
-  - Evoluir para posições de sênior e liderança técnica em produtos de alto impacto.
-  - Aprofundar arquitetura de front-end em escala e sistemas distribuídos.
+  - >-
+    Evoluir para uma posição de arquitetura de software, unindo a visão de produto e
+    front-end que construí com a atuação atual em back-end, automação e observabilidade.
+  - >-
+    Aprofundar DevOps na prática — CI/CD, observabilidade e infraestrutura como código —
+    a partir do que já uso hoje na Sicredi Aliança (Grafana, Prefect, GitLab CI).
   - Levar meu produto próprio de gestão escolar ao mercado.
 
 languages:
@@ -91,8 +107,8 @@ stats:
     label: anos de experiência
     detail: Desde 2021, sempre em produtos em produção
   - value: 22 mil+
-    label: clientes ativos
-    detail: Somados os produtos AgroNota e SimplesCTe
+    label: usuários impactados
+    detail: Clientes dos produtos AgroNota e SimplesCTe, onde atuei como desenvolvedor
   - value: "2"
     label: design systems
     detail: Mantidos e evoluídos para múltiplos produtos
@@ -123,3 +139,9 @@ socials:
     primary: true
 
 resumePath: /curriculo/makley-trichez-cv-pt-br.pdf
+
+# Herdada do GitHub via `npm run avatar` (scripts/fetch-avatar.mjs) — rode o
+# script de novo caso queira atualizar a foto.
+avatar:
+  image: ../../assets/avatar.png
+  alt: Foto de perfil de Makley Tibola Trichez.

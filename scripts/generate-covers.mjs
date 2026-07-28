@@ -11,7 +11,7 @@
  * Replace any of these with a real screenshot or mockup at the same 1200×750
  * ratio and the layout will not shift (see CONTEUDO-PENDENTE.md).
  *
- * Usage: npm run covers
+ * Usage: pnpm covers
  */
 
 import { mkdir, writeFile } from 'node:fs/promises';

@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "Portfólio profissional de Makley Tibola Trichez — Software Engineer.",
+  "packageManager": "pnpm@10.27.0",
   "engines": {
     "node": ">=20.3.0"
   },
@@ -17,12 +18,16 @@
     "astro": "astro",
     "covers": "node scripts/generate-covers.mjs",
     "brand": "node scripts/generate-brand.mjs",
-    "assets": "npm run covers && npm run brand",
+    "assets": "pnpm run covers && pnpm run brand",
+    "avatar": "node scripts/fetch-avatar.mjs",
     "fonts:sync": "node scripts/sync-fonts.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.6.0",
+    "@react-pdf/renderer": "^4.5.1",
     "astro": "^5.14.1",
+    "posthog-js": "^1.407.3",
+    "react": "^19.2.8",
     "sharp": "^0.34.4"
   },
   "devDependencies": {
@@ -30,6 +35,7 @@
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/geist-mono": "^5.2.8",
     "@fontsource/instrument-serif": "^5.2.8",
+    "@types/react": "^19.2.17",
     "lightningcss": "^1.33.0",
     "typescript": "^5.9.3"
   }
