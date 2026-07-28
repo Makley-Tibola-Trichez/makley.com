@@ -12,65 +12,74 @@ Marque com `[x]` conforme for resolvendo.
 
 ---
 
-## 🔴 1. Domínio e publicação
+## ✅ 1. Domínio e publicação — resolvido
 
-- [ ] **Confirmar o domínio final.** Está configurado como `https://makley.com`.
-      Isso afeta URLs canônicas, `sitemap.xml`, `robots.txt` e as imagens de Open Graph.
-      - Arquivo: [`src/config/site.ts`](src/config/site.ts) → `DEFAULT_URL`
-      - Ou defina a variável de ambiente `PUBLIC_SITE_URL` no serviço de hospedagem.
-- [ ] **Escolher a hospedagem** (Vercel, Netlify, Cloudflare Pages). O projeto gera
-      HTML estático — qualquer uma serve, sem configuração especial.
-      Comando de build: `npm run build` · Diretório de saída: `dist`
+Domínio definido como `https://makley.com.br`, já publicado na Vercel.
+- [x] `DEFAULT_URL` atualizado em [`src/config/site.ts`](src/config/site.ts)
+
+Se a Vercel usar um domínio diferente do de produção em algum ambiente de preview, defina
+`PUBLIC_SITE_URL` nas variáveis de ambiente desse ambiente específico — o valor padrão do
+código só vale quando essa variável não existe.
 
 ---
 
 ## 🔴 2. Formulário de contato
 
-O formulário **funciona hoje** abrindo o cliente de e-mail do visitante (`mailto:`), mas o
-ideal é receber as mensagens direto na caixa de entrada.
+O formulário **funciona hoje** abrindo o cliente de e-mail do visitante (`mailto:`), mas isso
+adiciona fricção: o visitante precisa sair do site, ter um cliente de e-mail configurado, e
+ainda apertar "enviar" manualmente. Em vários navegadores/SOs isso simplesmente não abre nada
+visível. Com um endpoint de verdade, a mensagem sai direto pro seu e-mail sem o visitante sair
+da página — e para um recrutador testando o site, um formulário que "só funciona" é mais um
+sinal de cuidado técnico.
 
 - [ ] Criar uma conta gratuita em [Formspree](https://formspree.io),
-      [Web3Forms](https://web3forms.com) ou [Basin](https://usebasin.com).
-- [ ] Definir a variável de ambiente `PUBLIC_CONTACT_ENDPOINT` com a URL do endpoint.
+      [Web3Forms](https://web3forms.com) ou [Basin](https://usebasin.com) (5 minutos de setup).
+- [ ] Definir a variável de ambiente `PUBLIC_CONTACT_ENDPOINT` com a URL do endpoint (na Vercel:
+      Project Settings → Environment Variables).
 
 Sem essa variável o site continua no modo `mailto:` — nunca fica quebrado.
 Detalhes da implementação: [`src/presentation/components/organisms/ContactSection.astro`](src/presentation/components/organisms/ContactSection.astro)
 
 ---
 
-## 🟡 3. Datas e emissores das certificações
+## 🟡 3. Datas das certificações
 
-O `Profile.pdf` lista as certificações **sem data e sem instituição emissora**. Preenchi com
-datas aproximadas para que a timeline tenha ordenação — **todas precisam ser confirmadas**.
-Cada arquivo tem um comentário `# ATENÇÃO` no topo.
+Os links de cada certificado/curso já foram adicionados (`credentialUrl`), incluindo o
+repositório do artigo de LLM no GitHub. O que ainda falta é só a **data exata** — as
+certificações do HackerRank e da Udemy não expõem a data de emissão na página pública do
+certificado, então os meses abaixo continuam aproximados.
 
 | Item | Arquivo | O que falta |
 |---|---|---|
-| JavaScript (Intermediate) | [`03-hackerrank-javascript-intermediate.yaml`](src/content/education/03-hackerrank-javascript-intermediate.yaml) | Mês/ano reais · confirmar se é HackerRank |
-| React (Basic) | [`04-hackerrank-react-basic.yaml`](src/content/education/04-hackerrank-react-basic.yaml) | Mês/ano reais · confirmar se é HackerRank |
-| JavaScript (Basic) | [`05-hackerrank-javascript-basic.yaml`](src/content/education/05-hackerrank-javascript-basic.yaml) | Mês/ano reais · confirmar se é HackerRank |
-| Desenvolvimento Web Completo | [`06-desenvolvimento-web-completo.yaml`](src/content/education/06-desenvolvimento-web-completo.yaml) | **Instituição emissora** (Udemy? Alura?) e período |
-| Acolhe IMED 2022.2 | [`07-acolhe-imed.yaml`](src/content/education/07-acolhe-imed.yaml) | Mês exato · confirmar o nome da instituição |
-| Artigo científico (LLMs) | [`02-artigo-llm-mobile.yaml`](src/content/education/02-artigo-llm-mobile.yaml) | Período real da pesquisa · link público, se houver |
+| JavaScript (Intermediate) | [`03-hackerrank-javascript-intermediate.yaml`](src/content/education/03-hackerrank-javascript-intermediate.yaml) | Mês/ano reais |
+| React (Basic) | [`04-hackerrank-react-basic.yaml`](src/content/education/04-hackerrank-react-basic.yaml) | Mês/ano reais |
+| JavaScript (Basic) | [`05-hackerrank-javascript-basic.yaml`](src/content/education/05-hackerrank-javascript-basic.yaml) | Mês/ano reais |
+| Desenvolvimento Web Completo (Udemy) | [`06-desenvolvimento-web-completo.yaml`](src/content/education/06-desenvolvimento-web-completo.yaml) | Período real do curso |
+| Artigo científico (LLMs) | [`02-artigo-llm-mobile.yaml`](src/content/education/02-artigo-llm-mobile.yaml) | Período real da pesquisa |
 
-- [ ] Confirmar todas as datas acima.
-- [ ] Se as certificações do HackerRank tiverem link individual, substituir a URL genérica
-      do perfil pelo link do certificado (campo `credentialUrl`).
+O Acolhe IMED 2022.2 ficou sem `credentialUrl` — o link enviado é uma ação de impressão de
+documento que exige sessão autenticada, não é adequado como link público. Se preferir manter
+o item, tudo bem deixá-lo sem link (é o que está hoje).
+
+- [ ] Confirmar as datas acima, se possível.
 
 ---
 
-## 🟡 4. Experiência no Sicredi
+## ✅ 4. Experiência no Sicredi — resolvido
 
-O `Profile.pdf` traz o cargo e o período, mas **nenhuma descrição de atividades**. Escrevi um
-resumo conservador e genérico que precisa ser substituído pelo real.
-
-- [ ] Reescrever `summary`, `responsibilities` e `technologies` em
+Reescrita com as atividades reais: desenvolvimento de sistemas na Sicredi Aliança, com foco
+em APIs (Python/FastAPI) e automação de rotinas via API e RPA (Playwright), usando
+Databricks, Denodo, PostgreSQL, Grafana, Prefect, CronJob e UV, em arquitetura de
+microsserviços.
+- [x] `summary`, `responsibilities` e `technologies` atualizados em
       [`src/content/experience/01-sicredi.yaml`](src/content/experience/01-sicredi.yaml)
-- [ ] Adicionar resultados concretos em `achievements` (números convencem muito mais que
-      descrições de tarefas)
-- [ ] **Confirmar a localização.** O PDF diz "Forchetta, RS"; usei "Rio Grande do Sul, Brasil".
-- [ ] **Confirmar a entidade.** O PDF lista "Sicredi" e "Sicredi Aliança" como dois cargos
-      simultâneos — tratei como uma experiência só. Se forem distintas, duplique o arquivo.
+- [x] Todas as tecnologias novas foram adicionadas à seção Stack
+      ([`src/content/stack/main.yaml`](src/content/stack/main.yaml))
+
+Ainda em aberto, se quiser deixar mais forte:
+- [ ] `achievements` está vazio nesse arquivo — se tiver algum número concreto (ex.: "reduziu
+      X horas/mês de trabalho manual do setor Y"), adicionar ali tem mais impacto do que
+      descrições de tarefa.
 
 ---
 
@@ -115,7 +124,14 @@ Itens que **inferi** e que você deve confirmar ou remover:
 - [ ] `HeroUI`, `Emotion`, `Testing Library` — confirmar
 
 Revise também a marcação `core: true` (as tecnologias em destaque no topo da seção).
-Hoje são: React, TypeScript, Next.js, Astro, JavaScript, APIs REST, GitLab CI/CD, Git, Cypress.
+Hoje são: React, TypeScript, Next.js, Astro, JavaScript, APIs REST, GitLab CI/CD, Git, Cypress,
+Python, FastAPI, PostgreSQL, Grafana, Playwright (as últimas cinco vieram do Sicredi).
+
+Também foram adicionados a partir da experiência do Sicredi: Databricks, Denodo, Prefect,
+CronJob, UV, Microsserviços e RPA. Confira se `core: true` está bem distribuído — hoje o
+destaque ficou meio dividido entre front-end e o trabalho mais recente de back-end/automação
+no Sicredi, o que é fiel à sua trajetória, mas vale revisar se é a mensagem que você quer
+passar.
 
 ---
 
@@ -174,6 +190,13 @@ produtos. **A técnica está correta, mas a voz é minha, não a sua.**
 - [ ] **Cargo exibido.** Usei "Software Engineer" (do LinkedIn). O currículo diz
       "Desenvolvedor Front-end Pleno". Escolha o que quer projetar — o site inteiro usa
       o campo `title`.
+- [ ] **Headline desatualizada frente ao trabalho atual.** O campo `headline`
+      ("...especializado em front-end, design systems e performance") ainda descreve o perfil
+      dos anos na SBSistemas. Seu trabalho mais recente no Sicredi é back-end/automação
+      (Python, FastAPI, RPA) — bem diferente. Vale decidir conscientemente: manter o
+      posicionamento front-end (se é para onde quer voltar) ou ampliar a headline para refletir
+      que você também atua em back-end e automação. Campo em
+      [`src/content/profile/main.yaml`](src/content/profile/main.yaml).
 - [ ] **Frase do hero.** "Construo produtos digitais que *escalam* para milhares de pessoas."
       Campo `heroStatement` (a palavra em `emphasis` vira serifa itálica).
 - [ ] **Telefone.** Está no schema.org mas não aparece visualmente. Se quiser exibi-lo,

@@ -7,17 +7,30 @@ location: Rio Grande do Sul, Brasil
 employmentType: clt
 
 summary: >-
-  Desenvolvimento de sistemas em uma das maiores instituições financeiras cooperativas do
-  país, atuando na Sicredi Aliança.
+  Desenvolvedor de sistemas na Sicredi Aliança, cooperativa de crédito ligada ao Sicredi.
+  Atuo na área de desenvolvimento construindo APIs e automatizando rotinas — via API ou
+  RPA — para reduzir trabalho manual dos setores da sede.
 
 responsibilities:
-  - Desenvolvimento e manutenção de sistemas internos utilizados pelas cooperativas.
-  - Colaboração com times multidisciplinares em ambiente corporativo de larga escala.
-  - Aplicação de padrões de qualidade, revisão de código e testes automatizados.
+  - Desenvolvimento de APIs com Python e FastAPI para integração entre sistemas internos.
+  - Automação de rotinas operacionais via API e RPA (Playwright) para eliminar trabalho manual de setores da sede.
+  - Construção de pipelines de dados e orquestração de jobs com Prefect e CronJob.
+  - Integração e consulta a dados corporativos via Databricks e Denodo, com persistência em PostgreSQL.
+  - Observabilidade de sistemas e automações com Grafana.
+  - Arquitetura de soluções em microsserviços, com gestão de ambientes Python via UV.
 
 achievements: []
 
 technologies:
-  - TypeScript
-  - React
+  - Python
+  - FastAPI
+  - Playwright
+  - PostgreSQL
+  - Databricks
+  - Denodo
+  - Grafana
+  - Prefect
+  - CronJob
+  - Microsserviços
+  - UV
   - Git

@@ -29,17 +29,23 @@ technologies:
   - { id: css, name: CSS moderno, category: frontend }
 
   # ------------------------------------------------------------------- back-end
+  - { id: python, name: Python, category: backend, core: true, note: APIs e automações no Sicredi }
+  - { id: fastapi, name: FastAPI, category: backend, core: true }
   - { id: nodejs, name: Node.js, category: backend }
   - { id: golang, name: Go, category: backend }
   - { id: php, name: PHP, category: backend }
   - { id: rest-apis, name: APIs REST, category: backend, core: true }
+  - { id: microsservicos, name: Microsserviços, category: backend }
+  - { id: rpa, name: RPA, category: backend, note: Automação de rotinas via Playwright }
 
   # --------------------------------------------------------------------- mobile
   - { id: kotlin, name: Kotlin, category: mobile }
 
   # ----------------------------------------------------------- banco de dados
-  - { id: postgresql, name: PostgreSQL, category: database }
+  - { id: postgresql, name: PostgreSQL, category: database, core: true }
   - { id: mysql, name: MySQL, category: database }
+  - { id: databricks, name: Databricks, category: database }
+  - { id: denodo, name: Denodo, category: database }
 
   # ---------------------------------------------------------------------- cloud
   - { id: linux, name: Linux, category: cloud }
@@ -50,6 +56,9 @@ technologies:
   - { id: gitlab-ci, name: GitLab CI/CD, category: devops, core: true }
   - { id: git, name: Git, category: devops, core: true }
   - { id: monorepo, name: Monorepo, category: devops }
+  - { id: prefect, name: Prefect, category: devops, note: Orquestração de pipelines de dados }
+  - { id: cronjob, name: CronJob, category: devops }
+  - { id: uv, name: UV, category: devops, note: Gestão de ambientes Python }
 
   # ------------------------------------------------------------ testes/qualidade
   - { id: vitest, name: Vitest, category: testing }
@@ -62,11 +71,13 @@ technologies:
   - { id: sentry, name: Sentry, category: observability }
   - { id: posthog, name: PostHog, category: observability }
   - { id: clarity, name: Microsoft Clarity, category: observability }
+  - { id: grafana, name: Grafana, category: observability, core: true }
 
   # ---------------------------------------------------------------- ferramentas
   - { id: figma, name: Figma, category: tooling }
   - { id: jira, name: Jira, category: tooling }
   - { id: github, name: GitHub, category: tooling }
+  - { id: playwright, name: Playwright, category: tooling, core: true, note: RPA e automação de testes }
 
   # -------------------------------------------------------------------------- ia
   - { id: llms, name: LLMs, category: ai, note: Pesquisa acadêmica em inferência on-device }

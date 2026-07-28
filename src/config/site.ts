@@ -7,7 +7,7 @@
  * domain layer.
  */
 
-const DEFAULT_URL = 'https://makley.com';
+const DEFAULT_URL = 'https://makley.com.br';
 
 /** Allows previews/staging to build with correct canonical + OG absolute URLs. */
 const resolvedUrl = (import.meta.env?.PUBLIC_SITE_URL as string | undefined) ?? DEFAULT_URL;

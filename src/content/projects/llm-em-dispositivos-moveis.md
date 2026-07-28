@@ -53,6 +53,11 @@ technologies:
 cover:
   image: ../../assets/projects/llm-em-dispositivos-moveis.png
   alt: Representação abstrata de um modelo de linguagem sendo executado em um dispositivo móvel.
+
+links:
+  - url: https://github.com/Makley-Tibola-Trichez/Integration_LLM_Android_Keyboard
+    label: Ver repositório
+    kind: repository
 ---
 
 ## Por que este tema
@@ -61,6 +66,3 @@ Escolhi o assunto em um momento em que quase toda a discussão sobre modelos de 
 girava em torno de escala e de infraestrutura de nuvem. A pergunta oposta — quanto dá para
 fazer com o que o usuário já tem no bolso — parecia mais interessante e, olhando em
 retrospecto, envelheceu bem.
-
-> O acesso público ao artigo ainda não está configurado. Assim que estiver, o link será
-> publicado aqui.

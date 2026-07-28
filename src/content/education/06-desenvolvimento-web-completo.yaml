@@ -1,9 +1,10 @@
-# ATENÇÃO: instituição emissora e datas não constavam no currículo — confirme antes de publicar.
-institution: Curso online
+# ATENÇÃO: datas aproximadas — confirme o período real do curso.
+institution: Udemy
 credential: Desenvolvimento Web Completo
 kind: curso
 start: 2022-01
 end: 2022-12
+credentialUrl: https://www.udemy.com/certificate/UC-ee6e106e-1fc7-43dc-a7f6-24bb7675228a/
 
 description: >-
   Formação prática em desenvolvimento web, cobrindo HTML, CSS, JavaScript e o ecossistema
