@@ -69,7 +69,7 @@ technologies:
   - Sentry
 
 cover:
-  image: ../../assets/projects/simplescte.png
+  image: ../../assets/projects/simplescte.webp
   alt: Página inicial do SimplesCTe mostrando a plataforma de emissão de CT-e e MDF-e.
 
 links:

@@ -34,8 +34,11 @@ export class ProjectContentRepository implements ProjectRepository {
     return typeof limit === 'number' ? featured.slice(0, limit) : featured;
   }
 
-  async findByCategory(category: ProjectCategory): Promise<readonly Project[]> {
-    return (await this.findAll()).filter((project) => project.category === category);
+  async findByCategory(category?: ProjectCategory): Promise<readonly Project[]> {
+    const response = await this.findAll()
+    if (!category) return response;
+    
+    return response.filter((project) => project.category === category);
   }
 
   /**

@@ -12,5 +12,5 @@ export interface ProjectRepository {
   findAll(): Promise<readonly Project[]>;
   findBySlug(slug: string): Promise<Project | null>;
   findFeatured(limit?: number): Promise<readonly Project[]>;
-  findByCategory(category: ProjectCategory): Promise<readonly Project[]>;
+  findByCategory(category?: ProjectCategory): Promise<readonly Project[]>;
 }

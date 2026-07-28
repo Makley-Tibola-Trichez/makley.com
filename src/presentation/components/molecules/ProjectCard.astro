@@ -115,6 +115,14 @@ const result = project.headlineResult;
 </article>
 
 <style>
+  /* Astro's scoped-style attribute raises this rule's specificity above the
+     UA default `[hidden] { display: none }`, so the client-side filter's
+     `hidden` attribute needs an explicit override here to actually hide the
+     card instead of just losing the visual `display: none`. */
+  .card[hidden] {
+    display: none;
+  }
+
   .card {
     --spotlight-x: 50%;
     --spotlight-y: 0%;
