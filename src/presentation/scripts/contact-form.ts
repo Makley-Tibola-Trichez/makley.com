@@ -169,6 +169,9 @@ export function initContactForm(): void {
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
+      window.posthog?.capture('contact_form_submitted', {
+        submission_method: 'configured_endpoint',
+      });
       form.reset();
       setStatus('Mensagem enviada. Respondo em até 48 horas.', 'success');
     } catch {

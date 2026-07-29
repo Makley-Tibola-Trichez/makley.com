@@ -12,6 +12,7 @@ import BaseHead from '@presentation/components/templates/BaseHead.astro';
 import SiteHeader from '@organisms/SiteHeader.astro';
 import SiteFooter from '@organisms/SiteFooter.astro';
 import CommandPalette from '@organisms/CommandPalette.astro';
+import PostHog from '@presentation/components/posthog.astro';
 
 import '@styles/global.css';
 
@@ -48,6 +49,8 @@ const linkedin = profile.social('linkedin');
 <!doctype html>
 <html lang={SITE.locale} data-theme="dark">
   <head>
+    <PostHog />
+
     <BaseHead
       title={title}
       description={description}
@@ -101,11 +104,9 @@ const linkedin = profile.social('linkedin');
     />
 
     <script>
-      import { initAnalytics } from '@presentation/scripts/analytics';
       import { initReveal } from '@presentation/scripts/reveal';
       import { initSpotlight } from '@presentation/scripts/spotlight';
 
-      initAnalytics();
       initReveal();
       initSpotlight();
     </script>

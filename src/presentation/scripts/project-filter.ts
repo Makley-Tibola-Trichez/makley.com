@@ -60,7 +60,11 @@ export function initProjectFilters(): void {
     const chip = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>('[data-filter]');
     if (!chip?.dataset.filter) return;
 
-    apply(chip.dataset.filter);
+    const category = chip.dataset.filter;
+    apply(category);
+    window.posthog?.capture('project_filter_applied', {
+      category,
+    });
   });
 
   // Restore the filter from the URL on load so a shared link opens filtered.

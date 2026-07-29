@@ -25,6 +25,9 @@ export function initCopyEmail(): void {
 
     try {
       await navigator.clipboard.writeText(value);
+      window.posthog?.capture('email_copied', {
+        copy_source: 'contact_section',
+      });
 
       if (label) label.textContent = 'Copiado!';
       button.setAttribute('aria-label', `E-mail ${value} copiado`);
