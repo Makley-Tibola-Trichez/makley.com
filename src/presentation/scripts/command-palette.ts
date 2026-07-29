@@ -128,6 +128,11 @@ export function initCommandPalette(): void {
     const href = item.dataset.href;
     const action = item.dataset.action;
 
+    window.posthog?.capture('command_palette_item_selected', {
+      item_id: item.id,
+      selection_type: href ? 'navigation' : 'action',
+    });
+
     if (href) {
       close();
       window.location.href = href;

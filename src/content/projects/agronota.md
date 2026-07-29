@@ -73,7 +73,7 @@ technologies:
   - GitLab CI/CD
 
 cover:
-  image: ../../assets/projects/agronota.png
+  image: ../../assets/projects/agronota.webp
   alt: Página inicial do AgroNota apresentando a plataforma de emissão fiscal para o produtor rural.
 
 links:

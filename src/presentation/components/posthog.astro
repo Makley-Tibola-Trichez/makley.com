@@ -1,0 +1,79 @@
+---
+// PostHog client initialization is shared by every page through BaseLayout.
+const projectToken = import.meta.env.PUBLIC_POSTHOG_PROJECT_TOKEN;
+const apiHost = import.meta.env.PUBLIC_POSTHOG_HOST;
+---
+
+{projectToken && apiHost && (
+  <script is:inline define:vars={{ projectToken, apiHost }}>
+    !(function (document, posthog) {
+      let script;
+      let firstScript;
+      let methodIndex;
+      let method;
+
+      if (posthog.__SV) return;
+
+      window.posthog = posthog;
+      posthog._i = [];
+      posthog.init = function (projectToken, config, name) {
+        function addMethod(target, methodName) {
+          const parts = methodName.split('.');
+          if (parts.length === 2) {
+            target = target[parts[0]];
+            methodName = parts[1];
+          }
+          target[methodName] = function () {
+            target.push([methodName].concat(Array.prototype.slice.call(arguments, 0)));
+          };
+        }
+
+        script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.crossOrigin = 'anonymous';
+        script.async = true;
+        script.src = `${config.api_host}/static/array.js`;
+        firstScript = document.getElementsByTagName('script')[0];
+        firstScript.parentNode.insertBefore(script, firstScript);
+
+        let instance = posthog;
+        if (name !== undefined) {
+          instance = posthog[name] = [];
+        } else {
+          name = 'posthog';
+        }
+
+        instance.people = instance.people || [];
+        instance.toString = function () {
+          let result = name;
+          if (name !== 'posthog') result += `.${name}`;
+          return result;
+        };
+        instance.people.toString = function () {
+          return `${instance.toString(1)}.people`;
+        };
+
+        const methods =
+          'capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId'.split(
+            ' ',
+          );
+        for (methodIndex = 0; methodIndex < methods.length; methodIndex += 1) {
+          method = methods[methodIndex];
+          addMethod(instance, method);
+        }
+        posthog._i.push([projectToken, config, name]);
+      };
+      posthog.__SV = 1;
+    })(document, window.posthog || []);
+
+    posthog.init(projectToken, {
+      api_host: apiHost,
+      capture_pageview: true,
+      capture_exceptions: {
+        capture_unhandled_errors: true,
+        capture_unhandled_rejections: true,
+        capture_console_errors: false,
+      },
+    });
+  </script>
+)}
