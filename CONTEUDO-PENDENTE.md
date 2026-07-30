@@ -23,22 +23,19 @@ código só vale quando essa variável não existe.
 
 ---
 
-## 🔴 2. Formulário de contato
+## ✅ 2. Formulário de contato — resolvido
 
-O formulário **funciona hoje** abrindo o cliente de e-mail do visitante (`mailto:`), mas isso
-adiciona fricção: o visitante precisa sair do site, ter um cliente de e-mail configurado, e
-ainda apertar "enviar" manualmente. Em vários navegadores/SOs isso simplesmente não abre nada
-visível. Com um endpoint de verdade, a mensagem sai direto pro seu e-mail sem o visitante sair
-da página — e para um recrutador testando o site, um formulário que "só funciona" é mais um
-sinal de cuidado técnico.
+O formulário está **100% funcional** via Web3Forms, com:
+- [x] Conta Web3Forms criada (acesso_key configurado na Vercel e `.env.example`)
+- [x] Envio de e-mail sem página sair (via `fetch`, sem reload)
+- [x] Toast de confirmação: *"Obrigado pelo contato! Responderei assim que possível."*
+- [x] Fallback `mailto:` mantido (quando sem endpoint configurado)
+- [x] PostHog logging de erros e submissões bem-sucedidas
 
-- [ ] Criar uma conta gratuita em [Formspree](https://formspree.io),
-      [Web3Forms](https://web3forms.com) ou [Basin](https://usebasin.com) (5 minutos de setup).
-- [ ] Definir a variável de ambiente `PUBLIC_CONTACT_ENDPOINT` com a URL do endpoint (na Vercel:
-      Project Settings → Environment Variables).
-
-Sem essa variável o site continua no modo `mailto:` — nunca fica quebrado.
-Detalhes da implementação: [`src/presentation/components/organisms/ContactSection.astro`](src/presentation/components/organisms/ContactSection.astro)
+Detalhes:
+- [`ContactSection.astro`](src/presentation/components/organisms/ContactSection.astro) — form com progressive enhancement
+- [`contact-form.ts`](src/presentation/scripts/contact-form.ts) — validação + fetch + PostHog capture
+- [`Toast.astro`](src/presentation/components/atoms/Toast.astro) + [`toast.ts`](src/presentation/scripts/toast.ts) — notificações site-wide
 
 ---
 
