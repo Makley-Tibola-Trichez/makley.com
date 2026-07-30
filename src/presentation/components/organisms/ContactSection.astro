@@ -30,18 +30,8 @@ const { profile } = Astro.props as Props;
 
 const hasEndpoint = FEATURES.contactEndpoint.length > 0;
 
-/**
- * Some providers (Web3Forms) require credentials like `access_key` as a
- * submitted form field rather than a URL query param — a query string on the
- * `action`/`fetch` target is silently ignored server-side. Splitting the
- * configured endpoint here and re-emitting its query params as hidden inputs
- * keeps `PUBLIC_CONTACT_ENDPOINT` a single copy-pasted URL for any provider,
- * without special-casing one provider's convention in the markup.
- */
-const endpointUrl = hasEndpoint ? new URL(FEATURES.contactEndpoint) : null;
-const endpointFields = endpointUrl ? Array.from(endpointUrl.searchParams.entries()) : [];
-
 /** Layer-2 fallback: a plain-text mail composition. */
+const mailtoAction = `mailto:${profile.email}`;
 ---
 
 <section id="contato" class="u-section contact" aria-labelledby="contact-title">
@@ -88,20 +78,14 @@ const endpointFields = endpointUrl ? Array.from(endpointUrl.searchParams.entries
       <form
         class="contact__form"
         data-contact-form
-        data-endpoint={FEATURES.contactEndpoint}
-        action={FEATURES.contactEndpoint}
+        data-endpoint={hasEndpoint ? FEATURES.contactEndpoint : ''}
+        action={hasEndpoint ? FEATURES.contactEndpoint : mailtoAction}
         method="post"
         enctype={hasEndpoint ? undefined : 'text/plain'}
         novalidate
         data-reveal
       >
-        {
-          endpointFields.map(([name, value]) => (
-            <input type="hidden" name={name} value={value} />
-          ))
-        }
-
-        <input type="hidden" name="access_key" value={FEATURES.contactAccessKey} />
+        {hasEndpoint && <input type="hidden" name="access_key" value={FEATURES.contactAccessKey} />}
         <div class="field">
           <label for="contact-name">Nome</label>
           <input

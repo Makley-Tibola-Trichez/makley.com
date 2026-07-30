@@ -9,7 +9,12 @@
  * Errors set `aria-invalid` and fill an `aria-describedby` target, so a screen
  * reader user hears the specific problem when they land on the field — not just
  * "invalid entry".
+ *
+ * Web3Forms (and similar providers) respond `200 OK` with `{ success: false,
+ * message }` for validation failures — an HTTP status check alone misses
+ * those, so the response body's `success` flag is the actual source of truth.
  */
+import { showToast } from './toast';
 
 interface FieldRule {
   readonly required: boolean;
@@ -167,14 +172,30 @@ export function initContactForm(): void {
         body: new FormData(form),
       });
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json().catch(() => null);
+
+      if (!data?.success) {
+        window.posthog?.capture('contact_form_error', {
+          status: response.status,
+          response: data,
+        });
+        setStatus(
+          'Não consegui enviar agora. Escreva direto para tibolamakley1@gmail.com.',
+          'error',
+        );
+        return;
+      }
 
       window.posthog?.capture('contact_form_submitted', {
         submission_method: 'configured_endpoint',
       });
       form.reset();
-      setStatus('Mensagem enviada. Respondo em até 48 horas.', 'success');
-    } catch {
+      setStatus('', '');
+      showToast('Obrigado pelo contato! Responderei assim que possível.', 'success');
+    } catch (error) {
+      window.posthog?.capture('contact_form_error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       setStatus(
         'Não consegui enviar agora. Escreva direto para tibolamakley1@gmail.com.',
         'error',

@@ -1,0 +1,67 @@
+---
+/**
+ * Toast — atom. A single, site-wide notification slot.
+ *
+ * Rendered once in `BaseLayout`; any script on the page surfaces a message by
+ * calling `showToast()` from `presentation/scripts/toast.ts`, which talks to
+ * this element through `[data-toast]`. Visibility is driven purely by a
+ * `data-visible` attribute toggling opacity/transform — never `hidden` — so
+ * there is no risk of the scoped-style specificity trap that silently keeps
+ * an element painted (see `ProjectCard.astro`'s `.card[hidden]` override).
+ */
+---
+
+<div class="toast" data-toast role="status" aria-live="polite" aria-atomic="true">
+  <p class="toast__message" data-toast-message></p>
+</div>
+
+<style>
+  .toast {
+    position: fixed;
+    inset-block-end: var(--space-6);
+    inset-inline: 0;
+    z-index: var(--z-toast);
+    display: flex;
+    justify-content: center;
+    padding-inline: var(--space-4);
+    pointer-events: none;
+  }
+
+  .toast__message {
+    margin: 0;
+    max-width: 28rem;
+    padding: var(--space-3) var(--space-5);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-full);
+    background-color: var(--color-surface-raised);
+    box-shadow: var(--highlight-top), var(--shadow-lg);
+    color: var(--color-text);
+    font-size: var(--fs-sm);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(0.5rem);
+    transition:
+      opacity var(--duration-base) var(--ease-out-quart),
+      transform var(--duration-base) var(--ease-out-quart);
+  }
+
+  .toast[data-visible] .toast__message {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .toast[data-state='success'] .toast__message {
+    border-color: color-mix(in oklab, var(--color-positive) 45%, var(--border-default));
+  }
+
+  .toast[data-state='error'] .toast__message {
+    border-color: color-mix(in oklab, var(--aurora-rose) 45%, var(--border-default));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast__message {
+      transition: none;
+    }
+  }
+</style>

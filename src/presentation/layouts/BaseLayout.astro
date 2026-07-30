@@ -13,6 +13,7 @@ import SiteHeader from '@organisms/SiteHeader.astro';
 import SiteFooter from '@organisms/SiteFooter.astro';
 import CommandPalette from '@organisms/CommandPalette.astro';
 import PostHog from '@presentation/components/posthog.astro';
+import Toast from '@atoms/Toast.astro';
 
 import '@styles/global.css';
 
@@ -102,6 +103,8 @@ const linkedin = profile.social('linkedin');
       githubUrl={github?.url}
       linkedinUrl={linkedin?.url}
     />
+
+    <Toast />
 
     <script>
       import { initReveal } from '@presentation/scripts/reveal';
