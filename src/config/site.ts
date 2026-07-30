@@ -39,6 +39,7 @@ export const FEATURES = {
    * never ships a broken call-to-action.
    */
   contactEndpoint: (import.meta.env?.PUBLIC_CONTACT_ENDPOINT as string | undefined) ?? '',
+  contactAccessKey: (import.meta.env?.PUBLIC_CONTACT_ACCESS_KEY as string | undefined) ?? '',
 } as const;
 
 export type SiteConfig = typeof SITE;
