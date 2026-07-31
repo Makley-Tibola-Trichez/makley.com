@@ -1,0 +1,19 @@
+role: Full-stack Developer
+seniority: Junior
+location: Marau, RS · Brazil
+
+summary: >-
+  First professional experience, working end to end on a management system
+  for woodworking shops — from the database to the interface.
+
+responsibilities:
+  - Building a management system for woodworking shops, including goods checkout.
+  - Implementing APIs in PHP and integrating back-end with front-end.
+  - Analyzing error logs and pre-assessing issues for resolution.
+  - Modeling and maintaining a MySQL database.
+
+achievements:
+  - value: Full-stack
+    label: From database to interface
+  - value: "1"
+    label: Management system delivered

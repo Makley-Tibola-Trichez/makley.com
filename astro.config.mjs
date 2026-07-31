@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 import { SITE } from './src/config/site.ts';
+import { DEFAULT_LOCALE, LOCALES } from './src/i18n/locales.ts';
 
 /**
  * Astro configuration.
@@ -24,6 +25,17 @@ import { SITE } from './src/config/site.ts';
 export default defineConfig({
   site: SITE.url,
   trailingSlash: 'ignore',
+
+  // pt-BR stays unprefixed at `/` (no URL/SEO regression); English lives
+  // under `/en/`. See src/i18n/ for the dictionary + content-override layer
+  // that actually makes routes bilingual.
+  i18n: {
+    defaultLocale: DEFAULT_LOCALE,
+    locales: [...LOCALES],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
 
   // Honour a PORT supplied by the environment (preview tooling, containers,
   // CI) and fall back to Astro's default for a plain `npm run dev`.

@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE, type Locale } from '@i18n/locales';
 import { EntityNotFoundError } from '@domain/shared/errors';
 import type { Profile } from '@domain/profile/profile.entity';
 import type { ProfileRepository } from '@domain/profile/profile.repository';
@@ -20,10 +21,10 @@ export class GetProjectDetailUseCase {
     private readonly profiles: ProfileRepository,
   ) {}
 
-  async execute(slug: string): Promise<ProjectDetail> {
+  async execute(slug: string, locale: Locale = DEFAULT_LOCALE): Promise<ProjectDetail> {
     const [all, profile] = await Promise.all([
-      this.projects.findAll(),
-      this.profiles.get(),
+      this.projects.findAll(locale),
+      this.profiles.get(locale),
     ]);
 
     const index = all.findIndex((project) => project.slug.value === slug);

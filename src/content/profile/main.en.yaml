@@ -1,0 +1,110 @@
+# English override of the translatable profile fields — see
+# `profileTranslations` in src/content.config.ts. Anything not listed here
+# (email, socials, stats, avatar, ...) falls back to main.yaml.
+
+headline: >-
+  Software Engineer — from focused solutions to complex architectures that need to scale.
+
+heroStatement:
+  lead: I build digital products that
+  emphasis: scale
+  trail: to thousands of people.
+
+heroIntro: >-
+  I build SaaS products that thousands of people rely on every day for work. Five years
+  across React, TypeScript and design systems — with an obsession for interfaces that are
+  fast, accessible and easy to maintain.
+
+bio:
+  - >-
+    I've been a developer for over five years, and I've spent almost all of
+    that time inside real SaaS products: tax, financial and logistics systems
+    used daily by rural producers, carriers and accounting offices across
+    Brazil. It's a context that doesn't forgive a slow interface or a
+    confusing flow — if a document fails to issue, the truck doesn't leave.
+  - >-
+    My work goes beyond shipping screens. I was responsible for maintaining
+    two design systems used across multiple products, led the migration from
+    Next.js to Vite to cut infrastructure costs, and brought deploy time down
+    from 25 to 4 minutes. I like tackling what blocks the whole team, not
+    just my own task.
+  - >-
+    I hold a bachelor's degree in Computer Science from Atitus Educação,
+    where I researched the feasibility of running large AI models directly
+    on mobile devices. I currently work as a systems developer at Sicredi
+    Aliança, building APIs in Python/FastAPI and automating workflows via
+    API and RPA to reduce manual work across headquarters departments —
+    alongside a school-management product I'm building with two partners.
+
+location: Marau, Rio Grande do Sul, Brazil
+
+availabilityNote: >-
+  I currently work as a systems developer at Sicredi Aliança, but I'm open
+  to conversations about new opportunities — especially in software
+  architecture, back-end and DevOps — as well as occasional freelance
+  projects.
+
+specialties:
+  - React & TypeScript
+  - Software Architecture
+  - Design Systems
+  - Back-end & Automation
+  - DevOps
+  - Web Performance
+  - User Experience
+
+focusAreas:
+  - title: SaaS Product
+    description: >-
+      Interfaces for complex systems — tax, financial and logistics — where
+      information density is high and errors cost the user money.
+  - title: Design Systems
+    description: >-
+      Versioned, documented component libraries consumed by several
+      products, with stable API contracts and an automated release cycle.
+  - title: Performance & Core Web Vitals
+    description: >-
+      Diagnosing and fixing real bottlenecks: bundle, rendering, cache and
+      build pipeline. Less JavaScript, more perceived speed.
+  - title: Quality & DX
+    description: >-
+      Automated tests, coding standards agreed with the team, code review,
+      and CI/CD pipelines that shorten the path from commit to production.
+  - title: Architecture & Back-end
+    description: >-
+      I also work directly on back-end and automation — APIs, data
+      integration and observability — combining the product mindset I bring
+      from front-end with infrastructure and scalability decisions.
+
+goals:
+  - >-
+    Grow into a software architecture role, combining the product and
+    front-end perspective I've built with my current work in back-end,
+    automation and observability.
+  - >-
+    Deepen hands-on DevOps — CI/CD, observability and infrastructure as
+    code — building on what I already use at Sicredi Aliança (Grafana,
+    Prefect, GitLab CI).
+  - Bring my own school-management product to market.
+
+languages:
+  - name: Portuguese
+    level: Native
+  - name: English
+    level: Conversational — B1
+
+stats:
+  - value: 5+
+    label: years of experience
+    detail: Since 2021, always on products in production
+  - value: 22k+
+    label: users impacted
+    detail: Customers of the AgroNota and SimplesCTe products, where I worked as a developer
+  - value: "2"
+    label: design systems
+    detail: Maintained and evolved for multiple products
+  - value: −84%
+    label: deploy time
+    detail: From 25 to 4 minutes on the design system
+
+resumePath: /curriculo/makley-trichez-cv-en-us.pdf

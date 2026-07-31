@@ -8,6 +8,9 @@
  * domain models it as an enum instead of free text.
  */
 import type { Education, EducationKind } from '@domain/education/education.entity';
+import { getDictionary } from '@i18n/dictionary';
+import { formatEducationPeriodLabel, getEducationKindLabel } from '@i18n/dictionaries/education';
+import { resolveLocale } from '@i18n/locales';
 import Badge from '@atoms/Badge.astro';
 import Icon, { type IconName } from '@atoms/Icon.astro';
 
@@ -24,6 +27,11 @@ const KIND_ICONS: Record<EducationKind, IconName> = {
   evento: 'users',
   publicacao: 'file-text',
 };
+
+const locale = resolveLocale(Astro.currentLocale);
+const { education: t } = getDictionary(locale);
+const kindLabel = getEducationKindLabel(item.kind, locale, item.kindLabel);
+const periodLabel = formatEducationPeriodLabel(item, locale);
 ---
 
 <li class="edu" data-education-item data-kind={item.kind} data-reveal>
@@ -34,9 +42,9 @@ const KIND_ICONS: Record<EducationKind, IconName> = {
   <div class="edu__content">
     <div class="edu__meta">
       <Badge tone={item.kind === 'graduacao' ? 'accent' : 'neutral'} size="sm">
-        {item.kindLabel}
+        {kindLabel}
       </Badge>
-      <time class="edu__period" datetime={item.period.startISO}>{item.periodLabel}</time>
+      <time class="edu__period" datetime={item.period.startISO}>{periodLabel}</time>
     </div>
 
     <h3 class="edu__credential">
@@ -45,7 +53,7 @@ const KIND_ICONS: Record<EducationKind, IconName> = {
           <a href={item.credentialUrl} target="_blank" rel="noopener noreferrer">
             {item.credential}
             <Icon name="arrow-up-right" size={13} />
-            <span class="u-visually-hidden">(abre em nova aba)</span>
+            <span class="u-visually-hidden">{t.opensInNewTab}</span>
           </a>
         ) : (
           item.credential

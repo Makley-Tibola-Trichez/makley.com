@@ -1,0 +1,68 @@
+title: makley.com
+
+cover:
+  alt: Abstract representation of this portfolio's layered architecture.
+
+technologies:
+  - Astro
+  - TypeScript
+  - Modern CSS
+  - Atomic Design
+  - DDD
+  - Schema.org
+  - View Transitions API
+tagline: >-
+  This portfolio — Astro, TypeScript and layered architecture, with
+  virtually zero client-side JavaScript.
+
+role: Design & Development
+
+summary: >-
+  Portfolio built from scratch with Astro and TypeScript, using DDD, SOLID principles and
+  Atomic Design. No UI framework ships to the browser: all interactivity is handled by
+  plain TypeScript islands measured in kilobytes.
+
+context: Personal project
+
+problem: >-
+  Most developer portfolios fall into one of two extremes: either they look great and ship
+  hundreds of kilobytes of JavaScript to render static text, or they're fast and convey no
+  design care at all. A portfolio is itself a work sample — if it contradicts what the
+  resume claims about performance and accessibility, it works against its own owner.
+
+solution: >-
+  Astro generates static HTML, with interactivity implemented in plain TypeScript islands —
+  no React, no hydration. Content is modeled as the actual domain (entities, value objects
+  and repositories), validated by schemas at build time, with components organized under
+  Atomic Design. Page transitions use the browser's native View Transitions API, with no
+  client-side router.
+
+challenges:
+  - >-
+    Shipping filters, a command palette, theme switching and scroll animations while
+    keeping the JavaScript sent to the client down to a handful of kilobytes.
+  - >-
+    Applying DDD to a static site without tipping into over-abstraction — every layer has
+    to earn its own existence.
+  - >-
+    Making sure no animation hurts accessibility, respecting prefers-reduced-motion and
+    keeping content readable with JavaScript disabled.
+  - >-
+    Supporting both light and dark themes with WCAG-compliant contrast in each, without
+    duplicating stylesheets.
+
+links:
+  - url: https://makley.com
+    label: You're looking at it
+    kind: website
+
+results:
+  - value: 0 KB
+    label: of UI framework
+    detail: No React, Vue or Svelte runtime shipped to the browser
+  - value: WCAG AA
+    label: contrast
+    detail: Verified in both light and dark themes
+  - value: 100%
+    label: static
+    detail: Pre-rendered at build time, served straight from the CDN

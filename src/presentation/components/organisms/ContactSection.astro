@@ -17,6 +17,8 @@
  */
 import type { Profile } from '@domain/profile/profile.entity';
 import { FEATURES } from '@config/site';
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
 import Button from '@atoms/Button.astro';
 import Icon from '@atoms/Icon.astro';
 import SectionHeader from '@molecules/SectionHeader.astro';
@@ -32,6 +34,10 @@ const hasEndpoint = FEATURES.contactEndpoint.length > 0;
 
 /** Layer-2 fallback: a plain-text mail composition. */
 const mailtoAction = `mailto:${profile.email}`;
+
+const locale = resolveLocale(Astro.currentLocale);
+const { contact: t } = getDictionary(locale);
+const copyEmailAriaLabel = t.copyEmailAriaLabel.replace('{email}', profile.email);
 ---
 
 <section id="contato" class="u-section contact" aria-labelledby="contact-title">
@@ -40,8 +46,8 @@ const mailtoAction = `mailto:${profile.email}`;
       <div class="contact__aside" data-reveal>
         <SectionHeader
           index="06"
-          eyebrow="Contato"
-          title="Vamos conversar sobre o seu próximo projeto"
+          eyebrow={t.eyebrow}
+          title={t.title}
           description={profile.availabilityNote}
           id="contact-title"
         />
@@ -57,20 +63,20 @@ const mailtoAction = `mailto:${profile.email}`;
             class="contact__copy"
             data-copy-email
             data-value={profile.email}
-            aria-label={`Copiar o e-mail ${profile.email}`}
+            aria-label={copyEmailAriaLabel}
           >
             <Icon name="copy" size={15} />
-            <span data-copy-label>Copiar</span>
+            <span data-copy-label>{t.copyLabel}</span>
           </button>
         </div>
 
         <p class="contact__location">
           <Icon name="map-pin" size={14} />
-          {profile.location} — disponível para trabalho remoto
+          {profile.location} {t.locationSuffix}
         </p>
 
         <div class="contact__socials">
-          <h3 class="contact__socials-title">Ou me encontre em</h3>
+          <h3 class="contact__socials-title">{t.socialsTitle}</h3>
           <SocialLinks profile={profile} scope="all" showLabels />
         </div>
       </div>
@@ -87,52 +93,49 @@ const mailtoAction = `mailto:${profile.email}`;
       >
         {hasEndpoint && <input type="hidden" name="access_key" value={FEATURES.contactAccessKey} />}
         <div class="field">
-          <label for="contact-name">Nome</label>
+          <label for="contact-name">{t.fields.name}</label>
           <input
             type="text"
             id="contact-name"
             name="nome"
             required
             autocomplete="name"
-            placeholder="Como devo te chamar?"
+            placeholder={t.fields.namePlaceholder}
             aria-describedby="contact-name-error"
           />
           <p class="field__error" id="contact-name-error" data-error-for="nome" hidden></p>
         </div>
 
         <div class="field">
-          <label for="contact-email">E-mail</label>
+          <label for="contact-email">{t.fields.email}</label>
           <input
             type="email"
             id="contact-email"
             name="email"
             required
             autocomplete="email"
-            placeholder="voce@empresa.com"
+            placeholder={t.fields.emailPlaceholder}
             aria-describedby="contact-email-error"
           />
           <p class="field__error" id="contact-email-error" data-error-for="email" hidden></p>
         </div>
 
         <div class="field">
-          <label for="contact-subject">Assunto</label>
+          <label for="contact-subject">{t.fields.subject}</label>
           <select id="contact-subject" name="assunto">
-            <option value="Oportunidade de trabalho">Oportunidade de trabalho</option>
-            <option value="Projeto freelance">Projeto freelance</option>
-            <option value="Parceria">Parceria</option>
-            <option value="Outro">Outro</option>
+            {t.fields.subjectOptions.map((option) => <option value={option}>{option}</option>)}
           </select>
         </div>
 
         <div class="field">
-          <label for="contact-message">Mensagem</label>
+          <label for="contact-message">{t.fields.message}</label>
           <textarea
             id="contact-message"
             name="mensagem"
             rows="5"
             required
             minlength="20"
-            placeholder="Conte um pouco sobre o contexto, o desafio e o prazo."
+            placeholder={t.fields.messagePlaceholder}
             aria-describedby="contact-message-error"></textarea>
           <p class="field__error" id="contact-message-error" data-error-for="mensagem" hidden></p>
         </div>
@@ -140,12 +143,12 @@ const mailtoAction = `mailto:${profile.email}`;
         {/* Honeypot: invisible to humans, irresistible to naive bots. Hidden
             from assistive tech too, so nobody is ever asked to fill it in. */}
         <div class="field field--honeypot" aria-hidden="true">
-          <label for="contact-website">Não preencha este campo</label>
+          <label for="contact-website">{t.fields.honeypotLabel}</label>
           <input type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off" />
         </div>
 
         <Button type="submit" variant="primary" size="lg" icon="send" fullWidth class="contact__submit">
-          Enviar mensagem
+          {t.submit}
         </Button>
 
         <p class="contact__status" role="status" aria-live="polite" data-form-status></p>
@@ -154,7 +157,7 @@ const mailtoAction = `mailto:${profile.email}`;
           !hasEndpoint && (
             <p class="contact__note">
               <Icon name="mail" size={13} />
-              O envio abre o seu cliente de e-mail. Prefere escrever direto?
+              {t.mailtoNote}
               <a href={profile.mailto}>{profile.email}</a>
             </p>
           )

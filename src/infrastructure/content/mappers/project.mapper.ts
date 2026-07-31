@@ -8,14 +8,16 @@ import { Project } from '@domain/projects/project.entity';
  * Keeping the translation in one function means the shape of the markdown
  * frontmatter can change without any of the domain, application or presentation
  * code noticing — only this file has to follow.
+ *
+ * Takes the slug and data separately (rather than the raw entry) so the
+ * repository can hand it a locale-merged data object that no longer
+ * corresponds to any single real entry in the `projects` collection.
  */
-export function toProject(entry: CollectionEntry<'projects'>): Project {
-  const { data } = entry;
-
+export function toProject(slug: string, data: CollectionEntry<'projects'>['data']): Project {
   return Project.create({
     // The filename is the slug — one identifier, no chance of it drifting from
     // the URL that Astro generates for the file.
-    slug: entry.id,
+    slug,
     title: data.title,
     tagline: data.tagline,
     category: data.category,

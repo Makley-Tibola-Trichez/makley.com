@@ -1,0 +1,58 @@
+title: LLMs on mobile devices
+
+cover:
+  alt: Abstract representation of a language model running on a mobile device.
+
+technologies:
+  - Artificial Intelligence
+  - LLMs
+  - Model Quantization
+  - Applied Research
+tagline: >-
+  Academic research on the real feasibility of running large language models
+  directly on a phone.
+
+role: Author
+
+summary: >-
+  Academic paper written during my undergraduate degree, investigating whether — and under
+  what conditions — large language models can run locally on smartphones without relying on
+  cloud inference.
+
+context: Atitus Educação · Computer Science
+
+problem: >-
+  Language-model adoption was built on top of cloud inference, which brings three
+  limitations that are hard to ignore: cost per request, network-dependent latency, and
+  sending potentially sensitive user data to third-party servers. Running the model on the
+  device itself would solve all three at once — the question is whether an average phone's
+  hardware can actually handle it.
+
+solution: >-
+  The research assessed the feasibility of that local execution, taking into account the
+  device's real constraints: available memory, processing power, battery consumption and
+  the impact of quantization techniques on answer quality.
+
+challenges:
+  - >-
+    Defining what "feasible" means in measurable terms, rather than as a subjective
+    impression of performance.
+  - >-
+    Comparing models and quantization levels under consistent criteria, isolating the
+    effect of each variable.
+  - >-
+    Working in a fast-moving field, where part of the literature aged during the writing of
+    the paper itself.
+
+links:
+  - url: https://github.com/Makley-Tibola-Trichez/Integration_LLM_Android_Keyboard
+    label: View repository
+    kind: repository
+
+results:
+  - value: "1"
+    label: research paper
+    detail: Conducted and defended during a Computer Science degree
+  - value: On-device
+    label: research focus
+    detail: Local inference as an alternative to cost, latency and data exposure

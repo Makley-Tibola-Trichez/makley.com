@@ -14,6 +14,9 @@
 import { Image } from 'astro:assets';
 
 import type { Project } from '@domain/projects/project.entity';
+import { getDictionary } from '@i18n/dictionary';
+import { getProjectCategoryLabel, getProjectHref } from '@i18n/dictionaries/projects';
+import { resolveLocale } from '@i18n/locales';
 import Badge from '@atoms/Badge.astro';
 import Heading from '@atoms/Heading.astro';
 import Icon from '@atoms/Icon.astro';
@@ -37,6 +40,12 @@ const {
 } = Astro.props as Props;
 
 const result = project.headlineResult;
+
+const locale = resolveLocale(Astro.currentLocale);
+const { projects: t } = getDictionary(locale);
+const categoryLabel = getProjectCategoryLabel(project.category, locale, project.categoryLabel);
+const technologiesAriaLabel = t.technologiesOfAriaLabel.replace('{title}', project.title);
+const href = getProjectHref(project, locale);
 ---
 
 <article
@@ -71,20 +80,20 @@ const result = project.headlineResult;
 
   <div class="card__body">
     <div class="card__meta">
-      <Badge tone="accent" size="sm">{project.categoryLabel}</Badge>
+      <Badge tone="accent" size="sm">{categoryLabel}</Badge>
       <span class="card__year">{project.year}</span>
       {
         project.isConfidential && (
-          <span class="card__private" title="Código-fonte privado">
+          <span class="card__private" title={t.privateSource}>
             <Icon name="lock" size={12} />
-            <span class="u-visually-hidden">Código-fonte privado</span>
+            <span class="u-visually-hidden">{t.privateSource}</span>
           </span>
         )
       }
     </div>
 
     <Heading level={headingLevel} class="card__title">
-      <a href={project.href} class="card__link">{project.title}</a>
+      <a href={href} class="card__link">{project.title}</a>
     </Heading>
 
     <p class="card__tagline">{project.tagline}</p>
@@ -98,7 +107,7 @@ const result = project.headlineResult;
       )
     }
 
-    <ul class="card__tech u-list-reset" aria-label={`Tecnologias de ${project.title}`}>
+    <ul class="card__tech u-list-reset" aria-label={technologiesAriaLabel}>
       {project.primaryTechnologies().map((tech) => <TechTag size="sm">{tech}</TechTag>)}
       {
         project.remainingTechnologyCount > 0 && (
@@ -108,7 +117,7 @@ const result = project.headlineResult;
     </ul>
 
     <span class="card__cta" aria-hidden="true">
-      Ver estudo de caso
+      {t.viewCaseStudy}
       <Icon name="arrow-right" size={15} />
     </span>
   </div>

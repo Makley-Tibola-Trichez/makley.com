@@ -10,6 +10,7 @@ export function initHeader(): void {
   initScrollState();
   initScrollSpy();
   initMobileMenu();
+  initLanguageSwitcher();
 }
 
 /** Adds `data-scrolled` once the page leaves the top, for the frosted bar. */
@@ -111,4 +112,54 @@ function initMobileMenu(): void {
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) close();
   });
+}
+
+/**
+ * Each option is a real `<a href>` to the target locale's home URL (computed
+ * server-side via `getRelativeLocaleUrl`) — the menu works with JS disabled,
+ * just without the toggle or the hash-preserving enhancement below.
+ */
+function initLanguageSwitcher(): void {
+  const root = document.querySelector<HTMLElement>('[data-lang-switcher]');
+  const trigger = root?.querySelector<HTMLButtonElement>('[data-lang-trigger]');
+  const menu = root?.querySelector<HTMLElement>('[data-lang-menu]');
+  if (!root || !trigger || !menu) return;
+
+  const close = (): void => {
+    menu.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+  };
+
+  const open = (): void => {
+    menu.hidden = false;
+    trigger.setAttribute('aria-expanded', 'true');
+  };
+
+  trigger.addEventListener('click', () => {
+    if (menu.hidden) open();
+    else close();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!menu.hidden && !root.contains(event.target as Node)) close();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !menu.hidden) {
+      close();
+      trigger.focus();
+    }
+  });
+
+  // On the home page, carry the current section hash over so switching
+  // language keeps the visitor on the same section instead of dropping them
+  // at the top of the page.
+  for (const option of menu.querySelectorAll<HTMLAnchorElement>('[data-lang-option]')) {
+    option.addEventListener('click', (event) => {
+      if (option.dataset.preserveHash === 'true' && window.location.hash) {
+        event.preventDefault();
+        window.location.href = option.href + window.location.hash;
+      }
+    });
+  }
 }

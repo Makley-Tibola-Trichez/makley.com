@@ -14,6 +14,8 @@
  * message }` for validation failures — an HTTP status check alone misses
  * those, so the response body's `success` flag is the actual source of truth.
  */
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
 import { showToast } from './toast';
 
 interface FieldRule {
@@ -27,45 +29,21 @@ interface FieldRule {
   };
 }
 
-const RULES: Record<string, FieldRule> = {
-  nome: {
-    required: true,
-    minLength: 2,
-    messages: {
-      required: 'Informe o seu nome.',
-      tooShort: 'O nome está muito curto.',
-    },
-  },
-  email: {
-    required: true,
-    email: true,
-    messages: {
-      required: 'Informe o seu e-mail para que eu possa responder.',
-      invalid: 'Esse e-mail não parece válido.',
-    },
-  },
-  mensagem: {
-    required: true,
-    minLength: 20,
-    messages: {
-      required: 'Escreva uma mensagem.',
-      tooShort: 'Conte um pouco mais — pelo menos 20 caracteres.',
-    },
-  },
-};
-
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-function validateField(field: HTMLInputElement | HTMLTextAreaElement): string | null {
-  const rule = RULES[field.name];
+function validateField(
+  field: HTMLInputElement | HTMLTextAreaElement,
+  rules: Record<string, FieldRule>,
+): string | null {
+  const rule = rules[field.name];
   if (!rule) return null;
 
   const value = field.value.trim();
 
   if (rule.required && value.length === 0) return rule.messages.required;
-  if (rule.email && !EMAIL_PATTERN.test(value)) return rule.messages.invalid ?? 'Valor inválido.';
+  if (rule.email && !EMAIL_PATTERN.test(value)) return rule.messages.invalid ?? null;
   if (rule.minLength && value.length < rule.minLength) {
-    return rule.messages.tooShort ?? 'Valor muito curto.';
+    return rule.messages.tooShort ?? null;
   }
 
   return null;
@@ -74,6 +52,39 @@ function validateField(field: HTMLInputElement | HTMLTextAreaElement): string | 
 export function initContactForm(): void {
   const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
   if (!form) return;
+
+  // `<html lang>` is set by BaseLayout from the resolved route locale — the
+  // single source of truth this client-side script reads from, so it never
+  // needs the locale threaded through as a separate prop.
+  const locale = resolveLocale(document.documentElement.lang);
+  const { contact: t } = getDictionary(locale);
+
+  const RULES: Record<string, FieldRule> = {
+    nome: {
+      required: true,
+      minLength: 2,
+      messages: {
+        required: t.validation.nameRequired,
+        tooShort: t.validation.nameTooShort,
+      },
+    },
+    email: {
+      required: true,
+      email: true,
+      messages: {
+        required: t.validation.emailRequired,
+        invalid: t.validation.emailInvalid,
+      },
+    },
+    mensagem: {
+      required: true,
+      minLength: 20,
+      messages: {
+        required: t.validation.messageRequired,
+        tooShort: t.validation.messageTooShort,
+      },
+    },
+  };
 
   const status = form.querySelector<HTMLElement>('[data-form-status]');
   const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
@@ -107,13 +118,13 @@ export function initContactForm(): void {
   for (const field of fields) {
     field.addEventListener('blur', () => {
       if (field.getAttribute('aria-invalid') === 'true') {
-        showError(field, validateField(field));
+        showError(field, validateField(field, RULES));
       }
     });
 
     field.addEventListener('input', () => {
       if (field.getAttribute('aria-invalid') === 'true') {
-        showError(field, validateField(field));
+        showError(field, validateField(field, RULES));
       }
     });
   }
@@ -132,7 +143,7 @@ export function initContactForm(): void {
     let firstInvalid: HTMLElement | null = null;
 
     for (const field of fields) {
-      const message = validateField(field);
+      const message = validateField(field, RULES);
       showError(field, message);
       if (message && !firstInvalid) firstInvalid = field;
     }
@@ -140,7 +151,7 @@ export function initContactForm(): void {
     if (firstInvalid) {
       event.preventDefault();
       firstInvalid.focus();
-      setStatus('Revise os campos destacados antes de enviar.', 'error');
+      setStatus(t.status.reviewFields, 'error');
       return;
     }
 
@@ -148,7 +159,7 @@ export function initContactForm(): void {
     const honeypot = form.querySelector<HTMLInputElement>('input[name="website"]');
     if (honeypot && honeypot.value.length > 0) {
       event.preventDefault();
-      setStatus('Mensagem enviada. Obrigado!', 'success');
+      setStatus(t.status.submittedNoEndpoint, 'success');
       form.reset();
       return;
     }
@@ -156,14 +167,14 @@ export function initContactForm(): void {
     // Without an endpoint the browser handles the `mailto:` action natively —
     // do not intercept, or the mail client never opens.
     if (!endpoint) {
-      setStatus('Abrindo o seu cliente de e-mail…', '');
+      setStatus(t.status.openingMailClient, '');
       return;
     }
 
     event.preventDefault();
 
     submit?.setAttribute('disabled', '');
-    setStatus('Enviando…', '');
+    setStatus(t.status.sending, '');
 
     try {
       const response = await fetch(endpoint, {
@@ -179,10 +190,7 @@ export function initContactForm(): void {
           status: response.status,
           response: data,
         });
-        setStatus(
-          'Não consegui enviar agora. Escreva direto para tibolamakley1@gmail.com.',
-          'error',
-        );
+        setStatus(t.status.sendFailedFallback, 'error');
         return;
       }
 
@@ -191,15 +199,12 @@ export function initContactForm(): void {
       });
       form.reset();
       setStatus('', '');
-      showToast('Obrigado pelo contato! Responderei assim que possível.', 'success');
+      showToast(t.status.toastSuccess, 'success');
     } catch (error) {
       window.posthog?.capture('contact_form_error', {
         error: error instanceof Error ? error.message : String(error),
       });
-      setStatus(
-        'Não consegui enviar agora. Escreva direto para tibolamakley1@gmail.com.',
-        'error',
-      );
+      setStatus(t.status.sendFailedFallback, 'error');
     } finally {
       submit?.removeAttribute('disabled');
     }

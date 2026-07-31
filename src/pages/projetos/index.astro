@@ -6,26 +6,36 @@
  * project is reachable from a stable, indexable URL and so filtered views can be
  * shared as `/projetos?categoria=produto`.
  */
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
 import { useCases } from '@infrastructure/container';
 import BaseLayout from '@presentation/layouts/BaseLayout.astro';
 import ProjectsSection from '@organisms/ProjectsSection.astro';
 import Breadcrumbs from '@molecules/Breadcrumbs.astro';
 import { buildBreadcrumbNode, buildGraph } from '@presentation/seo/structured-data';
 
-const { projects, filters } = await useCases.getProjectCatalog.execute();
+const locale = resolveLocale(Astro.currentLocale);
+const { projects: t, common } = getDictionary(locale);
+
+const { projects, filters } = await useCases.getProjectCatalog.execute(locale);
+
+const homeHref = getRelativeLocaleUrl(locale, '/');
+const projetosHref = getRelativeLocaleUrl(locale, '/projetos');
 
 const breadcrumbs = [
-  { name: 'Início', url: '/' },
-  { name: 'Projetos', url: '/projetos' },
+  { name: common.homeLabel, url: homeHref },
+  { name: t.eyebrow, url: projetosHref },
 ];
 
 const jsonLd = buildGraph([buildBreadcrumbNode(breadcrumbs)]);
 ---
 
 <BaseLayout
-  title="Projetos"
-  description="Estudos de caso completos: problema, solução, desafios, resultados e stack de cada projeto que desenvolvi — de SaaS fiscal a design systems."
-  path="/projetos"
+  title={t.catalogPageTitle}
+  description={t.catalogPageDescription}
+  path={projetosHref}
   jsonLd={jsonLd}
 >
   <div class="page-top">
@@ -38,8 +48,8 @@ const jsonLd = buildGraph([buildBreadcrumbNode(breadcrumbs)]);
     projects={projects}
     filters={filters}
     index="—"
-    title="Todos os projetos"
-    description="Filtre por categoria para ver o tipo de trabalho que mais te interessa. Cada projeto tem um estudo de caso com problema, solução, desafios e resultados."
+    title={t.catalogTitle}
+    description={t.catalogDescription}
   />
 </BaseLayout>
 

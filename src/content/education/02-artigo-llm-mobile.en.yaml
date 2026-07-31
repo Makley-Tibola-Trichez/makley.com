@@ -1,0 +1,10 @@
+credential: Research Paper — LLMs on Mobile Devices
+
+description: >-
+  Research on the feasibility of running large language models locally on
+  smartphones, evaluating memory, processing power, battery consumption and
+  the impact of quantization on response quality.
+
+highlights:
+  - Investigated local inference as an alternative to cloud cost, latency and data exposure.
+  - Compared models and quantization levels under consistent criteria.

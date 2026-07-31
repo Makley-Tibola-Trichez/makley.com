@@ -1,0 +1,27 @@
+role: Front-end Developer
+seniority: Senior
+location: Marau, RS · Brazil
+
+summary: >-
+  Four years building tax and logistics SaaS products used across Brazil, in
+  partnership with Smarten Venture Builder. Beyond shipping features, I took
+  ownership of the company's design systems and the delivery pipeline.
+
+responsibilities:
+  - Building new features and screens for the AgroNota and SimplesCTe products.
+  - Maintaining and evolving two design systems consumed by multiple products.
+  - Defining code structure and front-end library standards across projects.
+  - Integrating with REST APIs and handling complex tax rules in the UI layer.
+  - Maintaining legacy React and Next.js code, with continuous refactoring.
+  - Unit and end-to-end testing, code review and pair programming with the team.
+  - Organizing and refining work items in Jira alongside the product team.
+
+achievements:
+  - value: 25 → 4 min
+    label: Design system deploy time
+  - value: 15 → 3 min
+    label: Product deploy time
+  - value: Next.js → Vite
+    label: Migration that cut cloud cost
+  - value: "2"
+    label: Design systems under my maintenance

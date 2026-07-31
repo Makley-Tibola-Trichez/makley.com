@@ -11,7 +11,12 @@
  *    in an `<iframe>`, which is unreliable on mobile and costs ~100 kB nobody
  *    asked for.
  */
-import { useCases } from '@infrastructure/container';
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
+import { getDictionary } from '@i18n/dictionary';
+import { getTechCategoryLabel, getTechName } from '@i18n/dictionaries/stack';
+import { resolveLocale } from '@i18n/locales';
+import { repositories, useCases } from '@infrastructure/container';
 import BaseLayout from '@presentation/layouts/BaseLayout.astro';
 import Button from '@atoms/Button.astro';
 import Icon from '@atoms/Icon.astro';
@@ -23,17 +28,26 @@ import {
   buildPersonNode,
 } from '@presentation/seo/structured-data';
 
+const locale = resolveLocale(Astro.currentLocale);
+const { resumePage: t, common } = getDictionary(locale);
+const otherLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
+
 const { profile, experiences, education, techGroups } =
-  await useCases.getPortfolioOverview.execute();
+  await useCases.getPortfolioOverview.execute(locale);
+
+const otherLocaleProfile = await repositories.profile.get(otherLocale);
 
 const coreSkills = techGroups
   .flatMap((group) => group.technologies)
   .filter((technology) => technology.isCore)
   .map((technology) => technology.name);
 
+const homeHref = getRelativeLocaleUrl(locale, '/');
+const curriculoHref = getRelativeLocaleUrl(locale, '/curriculo');
+
 const breadcrumbs = [
-  { name: 'Início', url: '/' },
-  { name: 'Currículo', url: '/curriculo' },
+  { name: common.homeLabel, url: homeHref },
+  { name: t.pageTitle, url: curriculoHref },
 ];
 
 const jsonLd = buildGraph([
@@ -43,14 +57,13 @@ const jsonLd = buildGraph([
 
 const degree = education.filter((item) => item.kind === 'graduacao');
 const credentials = education.filter((item) => item.kind !== 'graduacao');
+
+const description = t.pageDescriptionTemplate
+  .replace('{name}', profile.name)
+  .replace('{title}', profile.title);
 ---
 
-<BaseLayout
-  title="Currículo"
-  description={`Currículo completo de ${profile.name} — ${profile.title}. Experiência profissional, formação acadêmica, certificações e stack tecnológica.`}
-  path="/curriculo"
-  jsonLd={jsonLd}
->
+<BaseLayout title={t.pageTitle} description={description} path={curriculoHref} jsonLd={jsonLd}>
   <div class="cv">
     <div class="u-container">
       <Breadcrumbs items={breadcrumbs} class="cv__breadcrumbs" />
@@ -98,21 +111,21 @@ const credentials = education.filter((item) => item.kind !== 'graduacao');
 
         <div class="cv__actions">
           <Button href={profile.resumePath} variant="primary" icon="download" download>
-            Baixar PDF
+            {t.downloadPdfButton}
           </Button>
           <Button
-            href="/curriculo/makley-trichez-cv-en-us.pdf"
+            href={otherLocaleProfile.resumePath}
             variant="secondary"
             icon="download"
             download
           >
-            English version
+            {t.otherVersionButton}
           </Button>
         </div>
       </header>
 
       <section class="cv__section" aria-labelledby="cv-summary">
-        <h2 class="cv__section-title" id="cv-summary">Resumo profissional</h2>
+        <h2 class="cv__section-title" id="cv-summary">{t.summaryHeading}</h2>
         <p class="cv__summary">{profile.heroIntro}</p>
         <ul class="cv__specialties u-list-reset">
           {profile.specialties.map((specialty) => <li>{specialty}</li>)}
@@ -120,7 +133,7 @@ const credentials = education.filter((item) => item.kind !== 'graduacao');
       </section>
 
       <section class="cv__section" aria-labelledby="cv-experience">
-        <h2 class="cv__section-title" id="cv-experience">Experiência profissional</h2>
+        <h2 class="cv__section-title" id="cv-experience">{t.experienceHeading}</h2>
 
         <ol class="cv__list u-list-reset">
           {
@@ -147,7 +160,7 @@ const credentials = education.filter((item) => item.kind !== 'graduacao');
 
                 {experience.achievements.length > 0 && (
                   <p class="cv-entry__achievements">
-                    <strong>Resultados:</strong>{' '}
+                    <strong>{t.resultsLabel}</strong>{' '}
                     {experience.achievements
                       .map((achievement) => `${achievement.label} — ${achievement.value}`)
                       .join(' · ')}
@@ -156,7 +169,7 @@ const credentials = education.filter((item) => item.kind !== 'graduacao');
 
                 {experience.technologies.length > 0 && (
                   <p class="cv-entry__tech">
-                    <strong>Tecnologias:</strong> {experience.technologies.join(', ')}
+                    <strong>{t.technologiesLabel}</strong> {experience.technologies.join(', ')}
                   </p>
                 )}
               </li>
@@ -166,7 +179,7 @@ const credentials = education.filter((item) => item.kind !== 'graduacao');
       </section>
 
       <section class="cv__section" aria-labelledby="cv-education">
-        <h2 class="cv__section-title" id="cv-education">Formação acadêmica</h2>
+        <h2 class="cv__section-title" id="cv-education">{t.educationHeading}</h2>
 
         <ol class="cv__list u-list-reset">
           {
@@ -198,7 +211,7 @@ const credentials = education.filter((item) => item.kind !== 'graduacao');
       </section>
 
       <section class="cv__section" aria-labelledby="cv-credentials">
-        <h2 class="cv__section-title" id="cv-credentials">Certificações, cursos e eventos</h2>
+        <h2 class="cv__section-title" id="cv-credentials">{t.credentialsHeading}</h2>
 
         <ul class="cv__credentials u-list-reset">
           {
@@ -215,18 +228,18 @@ const credentials = education.filter((item) => item.kind !== 'graduacao');
       </section>
 
       <section class="cv__section" aria-labelledby="cv-stack">
-        <h2 class="cv__section-title" id="cv-stack">Stack tecnológica</h2>
+        <h2 class="cv__section-title" id="cv-stack">{t.stackHeading}</h2>
 
         <dl class="cv__stack">
           {
             techGroups.map((group) => (
               <div class="cv__stack-group">
-                <dt>{group.label}</dt>
+                <dt>{getTechCategoryLabel(group.category, locale, group.label)}</dt>
                 <dd>
                   <ul class="cv__stack-list u-list-reset">
                     {group.technologies.map((technology) => (
                       <TechTag size="sm" core={technology.isCore}>
-                        {technology.name}
+                        {getTechName(technology.id.value, locale, technology.name)}
                       </TechTag>
                     ))}
                   </ul>
@@ -238,7 +251,7 @@ const credentials = education.filter((item) => item.kind !== 'graduacao');
       </section>
 
       <section class="cv__section" aria-labelledby="cv-languages">
-        <h2 class="cv__section-title" id="cv-languages">Idiomas</h2>
+        <h2 class="cv__section-title" id="cv-languages">{t.languagesHeading}</h2>
         <ul class="cv__languages u-list-reset">
           {
             profile.languages.map((language) => (

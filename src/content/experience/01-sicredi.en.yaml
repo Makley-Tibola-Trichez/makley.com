@@ -1,0 +1,30 @@
+role: Systems Developer
+location: Rio Grande do Sul, Brazil
+
+summary: >-
+  Systems developer at Sicredi Aliança, a credit union within the Sicredi
+  network. I work on the development team building APIs and automating
+  workflows — via API or RPA — to reduce manual work across headquarters
+  departments.
+
+responsibilities:
+  - Building APIs with Python and FastAPI to integrate internal systems.
+  - Automating operational workflows via API and RPA (Playwright) to eliminate manual work in headquarters departments.
+  - Building data pipelines and orchestrating jobs with Prefect and CronJob.
+  - Integrating and querying corporate data via Databricks and Denodo, persisted in PostgreSQL.
+  - Observability of systems and automations with Grafana.
+  - Designing microservice-based solutions, managing Python environments with UV.
+
+technologies:
+  - Python
+  - FastAPI
+  - Playwright
+  - PostgreSQL
+  - Databricks
+  - Denodo
+  - Grafana
+  - Prefect
+  - CronJob
+  - Microservices
+  - UV
+  - Git

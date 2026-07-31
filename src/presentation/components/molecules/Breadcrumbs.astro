@@ -7,6 +7,8 @@
  * same array passed by the page, so they cannot fall out of sync.
  */
 import type { Breadcrumb } from '@presentation/seo/structured-data';
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
 import Icon from '@atoms/Icon.astro';
 
 interface Props {
@@ -15,9 +17,12 @@ interface Props {
 }
 
 const { items, class: className } = Astro.props as Props;
+
+const locale = resolveLocale(Astro.currentLocale);
+const { common: t } = getDictionary(locale);
 ---
 
-<nav class:list={['breadcrumbs', className]} aria-label="Trilha de navegação">
+<nav class:list={['breadcrumbs', className]} aria-label={t.breadcrumbsAriaLabel}>
   <ol class="breadcrumbs__list u-list-reset">
     {
       items.map((item, index) => {

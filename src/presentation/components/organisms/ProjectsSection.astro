@@ -10,8 +10,12 @@
  *  - The filter state is mirrored into `?categoria=` so a filtered view is a
  *    shareable, back-button-friendly URL.
  */
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
 import type { CategoryFilter } from '@application/use-cases/get-project-catalog.use-case';
 import type { Project } from '@domain/projects/project.entity';
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
 import Button from '@atoms/Button.astro';
 import SectionHeader from '@molecules/SectionHeader.astro';
 import ProjectCard from '@molecules/ProjectCard.astro';
@@ -28,6 +32,9 @@ interface Props {
   description?: string;
 }
 
+const locale = resolveLocale(Astro.currentLocale);
+const { projects: t } = getDictionary(locale);
+
 const {
   projects,
   filters,
@@ -35,26 +42,27 @@ const {
   showFilters = true,
   showAllLink = false,
   index = '03',
-  title = 'Projetos que resolveram problemas reais',
-  description = 'Cada estudo de caso descreve o problema, a solução implementada, os desafios enfrentados e os resultados alcançados.',
+  title = t.defaultTitle,
+  description = t.defaultDescription,
 } = Astro.props as Props;
 
 const visible = typeof limit === 'number' ? projects.slice(0, limit) : projects;
+const projetosHref = getRelativeLocaleUrl(locale, '/projetos');
 ---
 
 <section id="projetos" class="u-section projects" aria-labelledby="projects-title">
   <div class="u-container u-container--wide">
     <SectionHeader
       index={index}
-      eyebrow="Projetos"
+      eyebrow={t.eyebrow}
       title={title}
       description={description}
       id="projects-title"
     >
       {
         showAllLink && (
-          <Button href="/projetos" variant="secondary" icon="arrow-right" slot="action">
-            Ver todos
+          <Button href={projetosHref} variant="secondary" icon="arrow-right" slot="action">
+            {t.viewAll}
           </Button>
         )
       }
@@ -66,7 +74,7 @@ const visible = typeof limit === 'number' ? projects.slice(0, limit) : projects;
           <div
             class="projects__filter-list"
             role="group"
-            aria-label="Filtrar projetos por categoria"
+            aria-label={t.filterAriaLabel}
             data-project-filters
           >
             {filters.map((filter, position) => (
@@ -85,7 +93,7 @@ const visible = typeof limit === 'number' ? projects.slice(0, limit) : projects;
           </div>
 
           <p class="projects__count" role="status" aria-live="polite" data-project-count>
-            {visible.length} {visible.length === 1 ? 'projeto' : 'projetos'}
+            {visible.length} {visible.length === 1 ? t.countSingular : t.countPlural}
           </p>
         </div>
       )
@@ -104,7 +112,7 @@ const visible = typeof limit === 'number' ? projects.slice(0, limit) : projects;
     </div>
 
     <p class="projects__empty" data-project-empty hidden>
-      Nenhum projeto nesta categoria ainda.
+      {t.emptyState}
     </p>
   </div>
 </section>

@@ -1,0 +1,53 @@
+title: Next.js → Vite Migration
+
+cover:
+  alt: Abstract diagram representing the migration from a server-based architecture to a static application.
+tagline: >-
+  Removed the SSR runtime from applications that didn't need it, cutting
+  cloud cost and 80% of deploy time.
+
+role: Technical lead of the migration
+
+summary: >-
+  I led the migration of Next.js applications to React with Vite, eliminating a rendering
+  server that brought no benefit to authenticated products and cutting infrastructure costs
+  along with delivery time.
+
+problem: >-
+  The products were closed systems behind a login: all the content is private, nothing is
+  indexed by search engines, and there was no SEO or public first-load benefit to extract
+  from SSR. Even so, we paid the framework's full price — a Node server running in
+  production, recurring cloud cost, slow builds and a layer of complexity that showed up in
+  every hydration bug. Deploys took 15 minutes.
+
+solution: >-
+  I led the migration to a React SPA bundled with Vite. The decision came from the
+  product's actual usage profile, not a tooling preference: with no need for server
+  rendering, the runtime stops being an advantage and becomes pure cost. The migration was
+  done incrementally, screen by screen, keeping the product live throughout the whole
+  process.
+
+challenges:
+  - >-
+    Replacing Next's file-based routing with an explicit router, while preserving every URL
+    customers were already using.
+  - >-
+    Migrating without freezing the roadmap: the application kept shipping new features
+    while its foundation was being swapped underneath.
+  - >-
+    Reproducing what the framework delivered for free — route-based code splitting, asset
+    optimization and environment variables — explicitly and auditably.
+  - >-
+    Convincing the team with data instead of opinion, measuring build time, bundle size and
+    infrastructure cost before and after.
+
+results:
+  - value: −80%
+    label: deploy time
+    detail: Product delivery dropped from 15 to 3 minutes
+  - value: −1
+    label: server in production
+    detail: SSR runtime eliminated, with a direct cloud cost reduction
+  - value: "0"
+    label: downtime windows
+    detail: Incremental migration, with the product live the whole time

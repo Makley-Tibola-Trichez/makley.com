@@ -12,6 +12,8 @@
  * search library for a list this size.
  */
 
+import { formatResultsCount } from '@i18n/dictionaries/palette';
+import { resolveLocale } from '@i18n/locales';
 import { setPreference, toggleTheme } from './theme';
 
 interface PaletteElements {
@@ -97,8 +99,7 @@ export function initCommandPalette(): void {
 
     const count = visibleItems().length;
     elements.empty.hidden = count > 0;
-    elements.status.textContent =
-      count === 0 ? 'Nenhum resultado' : `${count} ${count === 1 ? 'resultado' : 'resultados'}`;
+    elements.status.textContent = formatResultsCount(count, resolveLocale(document.documentElement.lang));
 
     setActive(0);
   };

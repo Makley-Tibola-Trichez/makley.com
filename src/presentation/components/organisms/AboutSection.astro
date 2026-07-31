@@ -10,6 +10,8 @@
 import { Image } from 'astro:assets';
 
 import type { Profile } from '@domain/profile/profile.entity';
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
 import Icon from '@atoms/Icon.astro';
 import SectionHeader from '@molecules/SectionHeader.astro';
 
@@ -18,15 +20,18 @@ interface Props {
 }
 
 const { profile } = Astro.props as Props;
+
+const locale = resolveLocale(Astro.currentLocale);
+const { about: t } = getDictionary(locale);
 ---
 
 <section id="sobre" class="u-section about" aria-labelledby="about-title">
   <div class="u-container">
     <SectionHeader
       index="01"
-      eyebrow="Sobre"
-      title="Cinco anos resolvendo problemas reais de produto"
-      description="Front-end com profundidade de produto: entendo a regra de negócio antes de escrever a interface."
+      eyebrow={t.eyebrow}
+      title={t.title}
+      description={t.description}
       id="about-title"
     />
 
@@ -37,7 +42,7 @@ const { profile } = Astro.props as Props;
         <div class="about__goals">
           <h3 class="about__goals-title">
             <Icon name="sparkles" size={16} />
-            Para onde estou indo
+            {t.goalsHeading}
           </h3>
           <ul class="about__goals-list">
             {profile.goals.map((goal) => <li>{goal}</li>)}
@@ -45,7 +50,7 @@ const { profile } = Astro.props as Props;
         </div>
       </div>
 
-      <aside class="about__facts" aria-label="Informações rápidas" data-reveal>
+      <aside class="about__facts" aria-label={t.factsAriaLabel} data-reveal>
         {
           profile.avatar && (
             <Image
@@ -60,15 +65,15 @@ const { profile } = Astro.props as Props;
         }
         <dl class="about__fact-list">
           <div class="about__fact">
-            <dt>Localização</dt>
+            <dt>{t.facts.location}</dt>
             <dd>{profile.location}</dd>
           </div>
           <div class="about__fact">
-            <dt>Disponibilidade</dt>
+            <dt>{t.facts.availability}</dt>
             <dd>{profile.availabilityNote}</dd>
           </div>
           <div class="about__fact">
-            <dt>Idiomas</dt>
+            <dt>{t.facts.languages}</dt>
             <dd>
               <ul class="u-list-reset about__languages">
                 {
@@ -82,7 +87,7 @@ const { profile } = Astro.props as Props;
             </dd>
           </div>
           <div class="about__fact">
-            <dt>Especialidades</dt>
+            <dt>{t.facts.specialties}</dt>
             <dd>
               <ul class="u-list-reset about__specialties">
                 {profile.specialties.map((specialty) => <li>{specialty}</li>)}
@@ -94,7 +99,7 @@ const { profile } = Astro.props as Props;
     </div>
 
     <div class="about__focus">
-      <h3 class="about__focus-title">Onde eu gero mais valor</h3>
+      <h3 class="about__focus-title">{t.focusHeading}</h3>
       <ul class="about__focus-grid u-list-reset">
         {
           profile.focusAreas.map((area, index) => (

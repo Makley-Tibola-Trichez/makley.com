@@ -7,6 +7,8 @@
  * page than download a file. Offering only one loses the other.
  */
 import type { Profile } from '@domain/profile/profile.entity';
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
 import Button from '@atoms/Button.astro';
 import Icon from '@atoms/Icon.astro';
 
@@ -15,40 +17,41 @@ interface Props {
 }
 
 const { profile } = Astro.props as Props;
+
+const locale = resolveLocale(Astro.currentLocale);
+const { resume: t } = getDictionary(locale);
 ---
 
 <section class="resume-cta" aria-labelledby="resume-cta-title">
   <div class="u-container">
     <div class="resume-cta__panel u-grid-backdrop" data-reveal>
       <div class="resume-cta__content">
-        <span class="u-eyebrow">Currículo</span>
+        <span class="u-eyebrow">{t.eyebrow}</span>
         <h2 class="resume-cta__title" id="resume-cta-title">
-          Leia online ou leve o PDF
+          {t.title}
         </h2>
         <p class="resume-cta__text">
-          A versão online é sempre a mais atual e está estruturada com dados
-          semânticos. O PDF segue o formato tradicional, pronto para processos
-          seletivos.
+          {t.text}
         </p>
 
         <div class="resume-cta__actions">
           <Button href="/curriculo" variant="primary" icon="file-text" iconPosition="start">
-            Ver currículo online
+            {t.viewOnline}
           </Button>
           <Button href={profile.resumePath} variant="secondary" icon="download" download>
-            Baixar PDF
+            {t.downloadPdf}
           </Button>
         </div>
       </div>
 
-      <ul class="resume-cta__facts u-list-reset" aria-label="Resumo do currículo">
+      <ul class="resume-cta__facts u-list-reset" aria-label={t.factsAriaLabel}>
         <li>
           <Icon name="briefcase" size={16} />
           <span>{profile.title}</span>
         </li>
         <li>
           <Icon name="graduation-cap" size={16} />
-          <span>Bacharel em Ciência da Computação</span>
+          <span>{t.degreeFact}</span>
         </li>
         <li>
           <Icon name="map-pin" size={16} />

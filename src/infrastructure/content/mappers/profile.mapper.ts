@@ -2,9 +2,12 @@ import type { CollectionEntry } from 'astro:content';
 
 import { Profile } from '@domain/profile/profile.entity';
 
-export function toProfile(entry: CollectionEntry<'profile'>): Profile {
-  const { data } = entry;
-
+/**
+ * Takes the validated data shape directly (not a full collection entry):
+ * the repository may hand it a locale-merged object that no longer
+ * corresponds to any single real entry in the `profile` collection.
+ */
+export function toProfile(data: CollectionEntry<'profile'>['data']): Profile {
   return Profile.create({
     name: data.name,
     shortName: data.shortName,

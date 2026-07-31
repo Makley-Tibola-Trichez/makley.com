@@ -9,6 +9,9 @@
  * the browser's find-in-page, and costs zero JavaScript.
  */
 import type { Experience } from '@domain/experience/experience.entity';
+import { getDictionary } from '@i18n/dictionary';
+import { formatDurationLabel, formatPeriodLabel } from '@i18n/dictionaries/experience';
+import { resolveLocale } from '@i18n/locales';
 import Badge from '@atoms/Badge.astro';
 import Icon from '@atoms/Icon.astro';
 import TechTag from '@atoms/TechTag.astro';
@@ -18,6 +21,12 @@ interface Props {
 }
 
 const { experience } = Astro.props as Props;
+
+const locale = resolveLocale(Astro.currentLocale);
+const { experience: t } = getDictionary(locale);
+const periodLabel = formatPeriodLabel(experience.period, locale);
+const durationLabel = formatDurationLabel(experience.period, locale);
+const technologiesAriaLabel = t.technologiesAriaLabel.replace('{company}', experience.company);
 ---
 
 <li class="xp" data-reveal>
@@ -27,8 +36,8 @@ const { experience } = Astro.props as Props;
 
   <div class="xp__content">
     <div class="xp__period">
-      <time datetime={experience.period.startISO}>{experience.periodLabel}</time>
-      <span class="xp__duration">· {experience.durationLabel}</span>
+      <time datetime={experience.period.startISO}>{periodLabel}</time>
+      <span class="xp__duration">· {durationLabel}</span>
     </div>
 
     <div class="xp__heading">
@@ -49,7 +58,7 @@ const { experience } = Astro.props as Props;
       </p>
     </div>
 
-    {experience.isCurrent && <Badge tone="positive" size="sm" pulse>Atual</Badge>}
+    {experience.isCurrent && <Badge tone="positive" size="sm" pulse>{t.currentBadge}</Badge>}
 
     <p class="xp__summary">{experience.summary}</p>
 
@@ -69,7 +78,7 @@ const { experience } = Astro.props as Props;
     <details class="xp__details">
       <summary class="xp__summary-toggle">
         <Icon name="chevron-right" size={15} class="xp__chevron" />
-        <span>Responsabilidades e tecnologias</span>
+        <span>{t.disclosureLabel}</span>
       </summary>
 
       <div class="xp__disclosure">
@@ -79,10 +88,7 @@ const { experience } = Astro.props as Props;
 
         {
           experience.technologies.length > 0 && (
-            <ul
-              class="xp__tech u-list-reset"
-              aria-label={`Tecnologias utilizadas na ${experience.company}`}
-            >
+            <ul class="xp__tech u-list-reset" aria-label={technologiesAriaLabel}>
               {experience.technologies.map((tech) => (
                 <TechTag size="sm">{tech}</TechTag>
               ))}

@@ -1,0 +1,46 @@
+title: School management platform
+
+cover:
+  alt: Abstract representation of a school performance tracking dashboard.
+tagline: >-
+  Own product, in development with two partners, for school management and
+  student performance analysis.
+
+role: Co-founder & Front-end Developer
+
+summary: >-
+  Product in development since 2024 together with two future partners. Focused on giving
+  schools a clear read on each student's performance over time, instead of isolated
+  bimonthly report cards.
+
+context: Own project
+
+problem: >-
+  Schools accumulate a huge amount of assessment data and manage to get very little out of
+  it. Grades stay trapped in spreadsheets and report cards, historical records aren't
+  comparable across periods, and a student's declining performance is usually noticed too
+  late to be turned around within the same school year.
+
+solution: >-
+  A platform that centralizes academic records and turns that data into continuous
+  tracking: progress by student, by class and by subject, with early flags for downward
+  trends. I own the front-end and the product's interface architecture decisions.
+
+challenges:
+  - >-
+    Presenting dense performance data in a way teachers and coordinators can read in
+    seconds, with no prior training required.
+  - >-
+    Building a scalable foundation from day one as a small team, without falling into
+    over-engineering that stalls product validation.
+  - >-
+    Balancing development with a full-time job, which demands disciplined scope and
+    technical decisions that don't require constant upkeep.
+
+results:
+  - value: In development
+    label: current phase
+    detail: Product under construction since January 2024
+  - value: "3"
+    label: founding partners
+    detail: Small team, with front-end technical ownership on my side

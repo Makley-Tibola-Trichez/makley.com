@@ -6,7 +6,7 @@
  * rather than requiring each page to thread them down to the header, footer and
  * command palette. The repositories memoise, so this costs one read per build.
  */
-import { SITE } from '@config/site';
+import { resolveLocale } from '@i18n/locales';
 import { useCases } from '@infrastructure/container';
 import BaseHead from '@presentation/components/templates/BaseHead.astro';
 import SiteHeader from '@organisms/SiteHeader.astro';
@@ -41,14 +41,15 @@ const {
   isHome = false,
 } = Astro.props as Props;
 
-const { profile, allProjects } = await useCases.getPortfolioOverview.execute();
+const locale = resolveLocale(Astro.currentLocale);
+const { profile, allProjects } = await useCases.getPortfolioOverview.execute(locale);
 
 const github = profile.social('github');
 const linkedin = profile.social('linkedin');
 ---
 
 <!doctype html>
-<html lang={SITE.locale} data-theme="dark">
+<html lang={locale} data-theme="dark">
   <head>
     <PostHog />
 

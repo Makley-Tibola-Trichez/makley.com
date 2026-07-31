@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE, type Locale } from '@i18n/locales';
+
 import type { Education } from '@domain/education/education.entity';
 import type { EducationRepository } from '@domain/education/education.repository';
 import type { Experience } from '@domain/experience/experience.entity';
@@ -39,14 +41,14 @@ export class GetPortfolioOverviewUseCase {
     private readonly techStack: TechStackRepository,
   ) {}
 
-  async execute(): Promise<PortfolioOverview> {
+  async execute(locale: Locale = DEFAULT_LOCALE): Promise<PortfolioOverview> {
     const [profile, allProjects, featuredProjects, experiences, education, techGroups] =
       await Promise.all([
-        this.profiles.get(),
-        this.projects.findAll(),
-        this.projects.findFeatured(),
-        this.experiences.findAll(),
-        this.education.findAll(),
+        this.profiles.get(locale),
+        this.projects.findAll(locale),
+        this.projects.findFeatured(undefined, locale),
+        this.experiences.findAll(locale),
+        this.education.findAll(locale),
         this.techStack.findGrouped(),
       ]);
 

@@ -10,6 +10,8 @@
  * The flash-of-wrong-theme is prevented by an inline blocking script in
  * `BaseLayout` that stamps `data-theme` on `<html>` before first paint.
  */
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
 import Icon from '@atoms/Icon.astro';
 
 interface Props {
@@ -17,14 +19,17 @@ interface Props {
 }
 
 const { class: className } = Astro.props as Props;
+
+const locale = resolveLocale(Astro.currentLocale);
+const { palette: t } = getDictionary(locale);
 ---
 
 <button
   type="button"
   class:list={['theme-toggle', className]}
   data-theme-toggle
-  aria-label="Alternar entre tema claro e escuro"
-  title="Alternar tema"
+  aria-label={t.actions.toggleTheme}
+  title={t.actions.toggleTheme}
 >
   <span class="theme-toggle__track" aria-hidden="true">
     <Icon name="sun" size={15} class="theme-toggle__icon theme-toggle__icon--sun" />

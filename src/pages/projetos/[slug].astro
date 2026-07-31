@@ -12,7 +12,11 @@
  */
 import type { GetStaticPaths } from 'astro';
 import { Image } from 'astro:assets';
+import { getRelativeLocaleUrl } from 'astro:i18n';
 
+import { getDictionary } from '@i18n/dictionary';
+import { getProjectCategoryLabel, getProjectHref } from '@i18n/dictionaries/projects';
+import { resolveLocale } from '@i18n/locales';
 import { repositories, useCases } from '@infrastructure/container';
 import BaseLayout from '@presentation/layouts/BaseLayout.astro';
 import Badge from '@atoms/Badge.astro';
@@ -37,17 +41,26 @@ export const getStaticPaths = (async () => {
 
 const { slug } = Astro.params;
 
+const locale = resolveLocale(Astro.currentLocale);
+const { projects: projectsT, projectDetail: t, common } = getDictionary(locale);
+
 const { project, profile, previous, next, related } = await useCases.getProjectDetail.execute(
   slug as string,
+  locale,
 );
 
-const body = await repositories.project.renderBody(slug as string);
+const body = await repositories.project.renderBody(slug as string, locale);
 const Content = body?.Content;
 
+const homeHref = getRelativeLocaleUrl(locale, '/');
+const projetosHref = getRelativeLocaleUrl(locale, '/projetos');
+const projectHref = getProjectHref(project, locale);
+const categoryLabel = getProjectCategoryLabel(project.category, locale, project.categoryLabel);
+
 const breadcrumbs = [
-  { name: 'Início', url: '/' },
-  { name: 'Projetos', url: '/projetos' },
-  { name: project.title, url: project.href },
+  { name: common.homeLabel, url: homeHref },
+  { name: projectsT.eyebrow, url: projetosHref },
+  { name: project.title, url: projectHref },
 ];
 
 const jsonLd = buildGraph([
@@ -56,15 +69,15 @@ const jsonLd = buildGraph([
 ]);
 
 const CASE_BLOCKS = [
-  { key: 'problema', label: 'O problema', icon: 'x' as const, text: project.problem },
-  { key: 'solucao', label: 'A solução', icon: 'check' as const, text: project.solution },
+  { key: 'problema', label: t.problemLabel, icon: 'x' as const, text: project.problem },
+  { key: 'solucao', label: t.solutionLabel, icon: 'check' as const, text: project.solution },
 ];
 ---
 
 <BaseLayout
   title={project.title}
   description={project.tagline}
-  path={project.href}
+  path={projectHref}
   type="article"
   image={project.cover?.image.src}
   imageAlt={project.cover?.alt}
@@ -76,12 +89,12 @@ const CASE_BLOCKS = [
 
       <header class="project__header">
         <div class="project__meta">
-          <Badge tone="accent">{project.categoryLabel}</Badge>
+          <Badge tone="accent">{categoryLabel}</Badge>
           <span class="project__year">{project.year}</span>
           {
             project.isConfidential && (
               <Badge tone="outline" icon="lock" size="sm">
-                Código privado
+                {t.privateSourceBadge}
               </Badge>
             )
           }
@@ -92,16 +105,16 @@ const CASE_BLOCKS = [
 
         <dl class="project__attributes">
           <div>
-            <dt>Meu papel</dt>
+            <dt>{t.roleLabel}</dt>
             <dd>{project.role}</dd>
           </div>
           <div>
-            <dt>Contexto</dt>
+            <dt>{t.contextLabel}</dt>
             <dd>{project.context}</dd>
           </div>
           <div>
-            <dt>Categoria</dt>
-            <dd>{project.categoryLabel}</dd>
+            <dt>{t.categoryLabel}</dt>
+            <dd>{categoryLabel}</dd>
           </div>
         </dl>
 
@@ -149,7 +162,7 @@ const CASE_BLOCKS = [
           <section class="project__results" aria-labelledby="project-results" data-reveal>
             <h2 class="project__section-title" id="project-results">
               <Icon name="gauge" size={17} />
-              Resultados
+              {t.resultsHeading}
             </h2>
 
             <dl class="project__result-grid">
@@ -188,7 +201,7 @@ const CASE_BLOCKS = [
           <section class="project__challenges" aria-labelledby="project-challenges" data-reveal>
             <h2 class="project__section-title" id="project-challenges">
               <Icon name="layers" size={17} />
-              Principais desafios
+              {t.challengesHeading}
             </h2>
 
             <ol class="challenge-list u-list-reset">
@@ -208,7 +221,7 @@ const CASE_BLOCKS = [
       <section class="project__stack" aria-labelledby="project-stack" data-reveal>
         <h2 class="project__section-title" id="project-stack">
           <Icon name="code" size={17} />
-          Tecnologias utilizadas
+          {t.stackHeading}
         </h2>
         <ul class="project__tech u-list-reset">
           {project.technologies.map((technology) => <TechTag>{technology}</TechTag>)}
@@ -228,7 +241,7 @@ const CASE_BLOCKS = [
           <section class="project__related" aria-labelledby="project-related">
             <h2 class="project__section-title" id="project-related">
               <Icon name="sparkles" size={17} />
-              Projetos relacionados
+              {t.relatedHeading}
             </h2>
             <div class="project__related-grid">
               {related.map((item) => (
@@ -239,13 +252,13 @@ const CASE_BLOCKS = [
         )
       }
 
-      <nav class="project__pager" aria-label="Navegar entre projetos">
+      <nav class="project__pager" aria-label={t.pagerAriaLabel}>
         {
           previous ? (
-            <a href={previous.href} class="pager pager--prev" rel="prev">
+            <a href={getProjectHref(previous, locale)} class="pager pager--prev" rel="prev">
               <Icon name="arrow-left" size={16} />
               <span class="pager__body">
-                <span class="pager__label">Anterior</span>
+                <span class="pager__label">{t.previousLabel}</span>
                 <span class="pager__title">{previous.title}</span>
               </span>
             </a>
@@ -256,9 +269,9 @@ const CASE_BLOCKS = [
 
         {
           next && (
-            <a href={next.href} class="pager pager--next" rel="next">
+            <a href={getProjectHref(next, locale)} class="pager pager--next" rel="next">
               <span class="pager__body">
-                <span class="pager__label">Próximo</span>
+                <span class="pager__label">{t.nextLabel}</span>
                 <span class="pager__title">{next.title}</span>
               </span>
               <Icon name="arrow-right" size={16} />
@@ -268,12 +281,12 @@ const CASE_BLOCKS = [
       </nav>
 
       <aside class="project__cta" data-reveal>
-        <h2>Tem um desafio parecido?</h2>
-        <p>
-          Se esse tipo de problema é o que a sua equipe está enfrentando, vamos conversar.
-        </p>
+        <h2>{t.ctaHeading}</h2>
+        <p>{t.ctaText}</p>
         <div class="project__cta-actions">
-          <Button href="/#contato" variant="primary" icon="arrow-right">Entrar em contato</Button>
+          <Button href={`${homeHref}#contato`} variant="primary" icon="arrow-right">
+            {t.ctaButton}
+          </Button>
           <Button href={profile.mailto} variant="secondary" icon="mail" iconPosition="start">
             {profile.email}
           </Button>

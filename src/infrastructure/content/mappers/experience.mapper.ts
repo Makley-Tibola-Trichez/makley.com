@@ -6,12 +6,13 @@ import { Experience } from '@domain/experience/experience.entity';
  * Filenames are numbered (`01-sicredi.yaml`) so the content directory reads in
  * chronological order for a human editor. The numeric prefix is stripped here
  * because it is an authoring convenience, not part of the identity.
+ *
+ * Takes the id and data separately (rather than the raw entry) so the
+ * repository can hand it a locale-merged data object.
  */
-export function toExperience(entry: CollectionEntry<'experience'>): Experience {
-  const { data } = entry;
-
+export function toExperience(id: string, data: CollectionEntry<'experience'>['data']): Experience {
   return Experience.create({
-    id: entry.id.replace(/^\d+-/, ''),
+    id: id.replace(/^\d+-/, ''),
     company: data.company,
     companyUrl: data.companyUrl,
     role: data.role,

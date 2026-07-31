@@ -1,3 +1,5 @@
+import type { Locale } from '@i18n/locales';
+
 import type { Project, ProjectCategory } from './project.entity';
 
 /**
@@ -9,8 +11,8 @@ import type { Project, ProjectCategory } from './project.entity';
  * component changes.
  */
 export interface ProjectRepository {
-  findAll(): Promise<readonly Project[]>;
-  findBySlug(slug: string): Promise<Project | null>;
-  findFeatured(limit?: number): Promise<readonly Project[]>;
-  findByCategory(category?: ProjectCategory): Promise<readonly Project[]>;
+  findAll(locale?: Locale): Promise<readonly Project[]>;
+  findBySlug(slug: string, locale?: Locale): Promise<Project | null>;
+  findFeatured(limit?: number, locale?: Locale): Promise<readonly Project[]>;
+  findByCategory(category?: ProjectCategory, locale?: Locale): Promise<readonly Project[]>;
 }

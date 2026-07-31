@@ -1,0 +1,58 @@
+title: SimplesCTe
+
+cover:
+  alt: SimplesCTe home screen showing the CT-e and MDF-e issuance platform.
+tagline: >-
+  Freight tax document issuance in seconds for carriers and independent
+  truckers.
+
+role: Front-end Developer
+
+summary: >-
+  Web and mobile platform for issuing freight tax documents. I worked on the product's
+  front-end, focused on the issuance flow, the SEFAZ integration, and the mobile experience
+  used by drivers on the road.
+
+problem: >-
+  Carriers and independent truckers need to issue CT-e, MDF-e and CIOT documents to
+  operate legally. The available options were the government portal — slow, unfriendly and
+  full of re-typed fields — or management systems too heavy for a sole proprietor with one
+  truck. The result was repeated manual data entry, filing mistakes, rejected documents and
+  a truck stuck in the yard waiting for it all to get sorted out.
+
+solution: >-
+  A product that resolves issuance in around eleven seconds: documents are pulled
+  automatically from SEFAZ, the manifest route is suggested by the system, insurance
+  endorsement happens through integration, and batch issuance covers anyone dispatching
+  dozens of documents a day. On the front-end, the challenge was turning a huge tax form
+  into a flow a driver can complete on their phone, standing next to the truck.
+
+challenges:
+  - >-
+    Reducing a tax form with dozens of required fields to a short flow, pre-filling as much
+    as possible from data already returned by SEFAZ.
+  - >-
+    Guaranteeing a genuinely usable mobile experience out in the field — large touch
+    targets, clear loading states and tolerance for an unstable connection.
+  - >-
+    Handling batch issuance without blocking the interface, with per-document feedback and
+    recovery from partial failures.
+  - >-
+    Translating SEFAZ rejection messages — raw, barely descriptive codes — into guidance
+    the end user can act on alone, without opening a support ticket.
+
+links:
+  - url: https://simplescte.com.br
+    label: Visit the product
+    kind: website
+
+results:
+  - value: 15,000+
+    label: active customers
+    detail: Carriers, independent truckers and accounting offices
+  - value: ~11s
+    label: per document issued
+    detail: From the start of filling in to authorization
+  - value: 2 min
+    label: average support time
+    detail: Public metric disclosed by the product

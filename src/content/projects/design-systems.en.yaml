@@ -1,0 +1,52 @@
+title: Multi-product Design Systems
+
+cover:
+  alt: Abstract representation of a design system with connected interface components.
+tagline: >-
+  Two component libraries serving distinct products, with automated releases
+  and 84% faster deploys.
+
+role: Maintainer & Front-end Developer
+
+summary: >-
+  I was responsible for maintaining and evolving two design systems consumed by multiple
+  products across the company, including defining standards with the team and reworking
+  the libraries' publishing pipeline.
+
+problem: >-
+  With several products being built in parallel, each team solved the same interface
+  problems in a different way. Buttons, tables and forms diverged between systems from the
+  same company, which created rework, visual inconsistency and an unnecessary learning
+  curve for any user who touched more than one product. Publishing a fix to the library
+  took 25 minutes, which discouraged small, incremental changes.
+
+solution: >-
+  I treated the design system as a product, not a shared folder: stable component
+  contracts, predictable versioning, usage documentation and an automated release
+  pipeline. I cut publishing time from 25 to 4 minutes by attacking the build and CI
+  bottleneck — which changed how the team behaved, because fixing small details in place
+  started being worth the effort instead of piling up.
+
+challenges:
+  - >-
+    Evolving the components' API without breaking the products already consuming them, by
+    adopting gradual deprecation instead of abrupt changes.
+  - >-
+    Balancing flexibility and consistency: components that are too rigid get worked around
+    with hacks, too flexible and they stop being a system at all.
+  - >-
+    Building consensus between developers on different teams around code-structure
+    standards and library choices — as much communication work as engineering.
+  - >-
+    Shortening the release cycle without giving up the pipeline's quality checks.
+
+results:
+  - value: −84%
+    label: deploy time
+    detail: Library publishing dropped from 25 to 4 minutes
+  - value: "2"
+    label: design systems maintained
+    detail: Consumed by multiple products in production
+  - value: "1"
+    label: visual language
+    detail: Unified component and library standards across teams

@@ -1,0 +1,75 @@
+---
+/**
+ * Home (English) — thin locale duplicate of `src/pages/index.astro`.
+ *
+ * Same section composition and use-case call; `Astro.currentLocale`
+ * resolves to `'en'` here purely from the URL path (`/en/...`), which is
+ * what makes every section, the dictionary and the content-override
+ * repositories pick up the English translation automatically.
+ */
+import { SITE } from '@config/site';
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
+import { useCases } from '@infrastructure/container';
+import BaseLayout from '@presentation/layouts/BaseLayout.astro';
+import HeroSection from '@organisms/HeroSection.astro';
+import AboutSection from '@organisms/AboutSection.astro';
+import StackSection from '@organisms/StackSection.astro';
+import ProjectsSection from '@organisms/ProjectsSection.astro';
+import ExperienceSection from '@organisms/ExperienceSection.astro';
+import EducationSection from '@organisms/EducationSection.astro';
+import ResumeSection from '@organisms/ResumeSection.astro';
+import ContactSection from '@organisms/ContactSection.astro';
+import {
+  buildGraph,
+  buildPersonNode,
+  buildProfilePageNode,
+  buildWebSiteNode,
+} from '@presentation/seo/structured-data';
+
+const locale = resolveLocale(Astro.currentLocale);
+
+const { profile, featuredProjects, experiences, education, techGroups, yearsOfExperience } =
+  await useCases.getPortfolioOverview.execute(locale);
+
+const { filters } = await useCases.getProjectCatalog.execute(locale);
+const { projects: projectsDict, hero: heroDict } = getDictionary(locale);
+
+/** `knowsAbout` gets the core stack — a 40-item list dilutes the signal. */
+const coreSkills = techGroups
+  .flatMap((group) => group.technologies)
+  .filter((technology) => technology.isCore)
+  .map((technology) => technology.name);
+
+const jsonLd = buildGraph([
+  buildPersonNode(profile, experiences, education, coreSkills),
+  buildWebSiteNode(profile),
+  buildProfilePageNode(profile),
+]);
+---
+
+<BaseLayout
+  title={SITE.title}
+  description={heroDict.metaDescription}
+  path="/en/"
+  type="profile"
+  jsonLd={jsonLd}
+  isHome
+>
+  <HeroSection profile={profile} yearsOfExperience={yearsOfExperience} />
+  <AboutSection profile={profile} />
+  <StackSection groups={techGroups} />
+
+  <ProjectsSection
+    projects={featuredProjects}
+    filters={filters}
+    showFilters={false}
+    showAllLink
+    description={projectsDict.homeDescription}
+  />
+
+  <ExperienceSection experiences={experiences} resumePath={profile.resumePath} />
+  <EducationSection education={education} />
+  <ResumeSection profile={profile} />
+  <ContactSection profile={profile} />
+</BaseLayout>

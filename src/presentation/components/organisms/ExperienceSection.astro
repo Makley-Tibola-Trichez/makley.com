@@ -7,6 +7,8 @@
  * orientation a linear timeline needs.
  */
 import type { Experience } from '@domain/experience/experience.entity';
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
 import Button from '@atoms/Button.astro';
 import SectionHeader from '@molecules/SectionHeader.astro';
 import ExperienceItem from '@molecules/ExperienceItem.astro';
@@ -17,19 +19,22 @@ interface Props {
 }
 
 const { experiences, resumePath } = Astro.props as Props;
+
+const locale = resolveLocale(Astro.currentLocale);
+const { experience: t } = getDictionary(locale);
 ---
 
 <section id="trajetoria" class="u-section experience" aria-labelledby="experience-title">
   <div class="u-container">
     <SectionHeader
       index="04"
-      eyebrow="Trajetória"
-      title="Onde estive e o que entreguei"
-      description="Da primeira experiência full-stack ao trabalho em produtos usados por dezenas de milhares de clientes."
+      eyebrow={t.eyebrow}
+      title={t.title}
+      description={t.description}
       id="experience-title"
     >
       <Button href={resumePath} variant="secondary" icon="download" download slot="action">
-        Currículo em PDF
+        {t.resumeButton}
       </Button>
     </SectionHeader>
 

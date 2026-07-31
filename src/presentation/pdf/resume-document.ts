@@ -59,13 +59,69 @@ import type { Education } from '@domain/education/education.entity';
 import type { Experience } from '@domain/experience/experience.entity';
 import type { Profile } from '@domain/profile/profile.entity';
 import type { TechnologyGroup } from '@domain/tech-stack/technology.entity';
+import { getTechCategoryLabel, getTechName } from '@i18n/dictionaries/stack';
+import type { Locale } from '@i18n/locales';
 
 export interface ResumeData {
   readonly profile: Profile;
   readonly experiences: readonly Experience[];
   readonly education: readonly Education[];
   readonly techGroups: readonly TechnologyGroup[];
+  readonly locale: Locale;
 }
+
+/**
+ * Self-contained pt-BR/en text for this document — kept local rather than
+ * added to `resumePageDictionary` because a couple of labels intentionally
+ * differ from the web page's own wording (e.g. the shorter "Certificações e
+ * cursos" here vs. "Certificações, cursos e eventos" on `/curriculo`, which
+ * predates this file and isn't this change's concern to reconcile).
+ */
+const PDF_TEXT: Record<
+  Locale,
+  {
+    documentTitlePrefix: string;
+    summaryHeading: string;
+    experienceHeading: string;
+    educationHeading: string;
+    credentialsHeading: string;
+    stackHeading: string;
+    languagesHeading: string;
+    technologiesLabel: string;
+    resultsLabel: string;
+    presentLabel: string;
+    footer: (firstName: string, page: number, total: number) => string;
+  }
+> = {
+  'pt-BR': {
+    documentTitlePrefix: 'Currículo',
+    summaryHeading: 'Resumo profissional',
+    experienceHeading: 'Experiência profissional',
+    educationHeading: 'Formação acadêmica',
+    credentialsHeading: 'Certificações e cursos',
+    stackHeading: 'Stack tecnológica',
+    languagesHeading: 'Idiomas',
+    technologiesLabel: 'Tecnologias: ',
+    resultsLabel: 'Resultados: ',
+    presentLabel: 'atual',
+    footer: (firstName, page, total) =>
+      `Gerado a partir de ${firstName}.com.br · página ${page} de ${total}`,
+  },
+  en: {
+    documentTitlePrefix: 'Resume',
+    summaryHeading: 'Professional summary',
+    experienceHeading: 'Professional experience',
+    educationHeading: 'Education',
+    credentialsHeading: 'Certifications & courses',
+    stackHeading: 'Tech stack',
+    languagesHeading: 'Languages',
+    technologiesLabel: 'Technologies: ',
+    resultsLabel: 'Results: ',
+    presentLabel: 'present',
+    footer: (firstName, page, total) =>
+      `Generated from ${firstName}.com.br · page ${page} of ${total}`,
+  },
+};
 
 const COLOR = {
   ink: '#16181a',
@@ -190,9 +246,12 @@ const styles = StyleSheet.create({
   },
 });
 
-/** `nov 2021 — atual` using the same locale rules as the web page. */
-function periodLabel(period: { toLabel(locale?: string, present?: string): string }): string {
-  return period.toLabel('pt-BR', 'atual');
+/** `nov 2021 — present` using the same locale rules as the web page. */
+function periodLabel(
+  period: { toLabel(locale?: string, present?: string): string },
+  locale: Locale,
+): string {
+  return period.toLabel(locale, PDF_TEXT[locale].presentLabel);
 }
 
 /** Every bullet is its own single-line `Text` — see the file header for why. */
@@ -200,13 +259,15 @@ function buildBullets(items: readonly string[]) {
   return items.map((item, index) => h(Text, { key: index, style: styles.bulletText }, `•  ${item}`));
 }
 
-function buildExperienceEntry(experience: Experience) {
+function buildExperienceEntry(experience: Experience, locale: Locale) {
+  const text = PDF_TEXT[locale];
+
   const techLine =
     experience.technologies.length > 0
       ? h(
           Text,
           { style: styles.metaLine },
-          h(Text, { style: styles.metaLabel }, 'Tecnologias: '),
+          h(Text, { style: styles.metaLabel }, text.technologiesLabel),
           experience.technologies.join(', '),
         )
       : null;
@@ -216,7 +277,7 @@ function buildExperienceEntry(experience: Experience) {
       ? h(
           Text,
           { style: styles.metaLine },
-          h(Text, { style: styles.metaLabel }, 'Resultados: '),
+          h(Text, { style: styles.metaLabel }, text.resultsLabel),
           experience.achievements.map((a) => `${a.label} — ${a.value}`).join(' · '),
         )
       : null;
@@ -228,7 +289,7 @@ function buildExperienceEntry(experience: Experience) {
     h(
       Text,
       { style: styles.entryMeta },
-      `${experience.company}  ·  ${periodLabel(experience.period)}  ·  ${experience.location}`,
+      `${experience.company}  ·  ${periodLabel(experience.period, locale)}  ·  ${experience.location}`,
     ),
     h(Text, { style: styles.entrySummary }, experience.summary),
     ...buildBullets(experience.responsibilities),
@@ -257,12 +318,16 @@ function buildCredentialLine(item: Education) {
   );
 }
 
-function buildStackGroup(group: TechnologyGroup) {
+function buildStackGroup(group: TechnologyGroup, locale: Locale) {
   return h(
     View,
     { style: styles.stackGroup, wrap: false },
-    h(Text, { style: styles.stackGroupLabel }, group.label),
-    h(Text, { style: styles.stackGroupItems }, group.technologies.map((t) => t.name).join(' · ')),
+    h(Text, { style: styles.stackGroupLabel }, getTechCategoryLabel(group.category, locale, group.label)),
+    h(
+      Text,
+      { style: styles.stackGroupItems },
+      group.technologies.map((t) => getTechName(t.id.value, locale, t.name)).join(' · '),
+    ),
   );
 }
 
@@ -271,7 +336,8 @@ function buildStackGroup(group: TechnologyGroup) {
  * Pass the result to `renderToBuffer` from the calling Astro route.
  */
 export function buildResumeDocument(data: ResumeData) {
-  const { profile, experiences, education, techGroups } = data;
+  const { profile, experiences, education, techGroups, locale } = data;
+  const text = PDF_TEXT[locale];
 
   const degree = education.filter((item) => item.kind === 'graduacao');
   const credentials = education.filter((item) => item.kind !== 'graduacao');
@@ -284,7 +350,11 @@ export function buildResumeDocument(data: ResumeData) {
 
   return h(
     Document,
-    { title: `Currículo — ${profile.name}`, author: profile.name, language: 'pt-BR' },
+    {
+      title: `${text.documentTitlePrefix} — ${profile.name}`,
+      author: profile.name,
+      language: locale === 'en' ? 'en-US' : 'pt-BR',
+    },
     h(
       Page,
       { size: 'A4', style: styles.page },
@@ -302,7 +372,7 @@ export function buildResumeDocument(data: ResumeData) {
       h(
         View,
         { style: styles.section },
-        h(Text, { style: styles.sectionTitle }, 'Resumo profissional'),
+        h(Text, { style: styles.sectionTitle }, text.summaryHeading),
         h(Text, { style: styles.summary }, profile.heroIntro),
         h(Text, { style: styles.specialtiesLine }, profile.specialties.join('   ·   ')),
       ),
@@ -311,8 +381,8 @@ export function buildResumeDocument(data: ResumeData) {
       h(
         View,
         { style: styles.section },
-        h(Text, { style: styles.sectionTitle }, 'Experiência profissional'),
-        ...experiences.map((experience) => buildExperienceEntry(experience)),
+        h(Text, { style: styles.sectionTitle }, text.experienceHeading),
+        ...experiences.map((experience) => buildExperienceEntry(experience, locale)),
       ),
 
       // ----------------------------------------------------------- education
@@ -320,7 +390,7 @@ export function buildResumeDocument(data: ResumeData) {
         ? h(
             View,
             { style: styles.section },
-            h(Text, { style: styles.sectionTitle }, 'Formação acadêmica'),
+            h(Text, { style: styles.sectionTitle }, text.educationHeading),
             ...degree.map((item) => buildEducationEntry(item)),
           )
         : null,
@@ -330,7 +400,7 @@ export function buildResumeDocument(data: ResumeData) {
         ? h(
             View,
             { style: styles.section },
-            h(Text, { style: styles.sectionTitle }, 'Certificações e cursos'),
+            h(Text, { style: styles.sectionTitle }, text.credentialsHeading),
             ...credentials.map((item) => buildCredentialLine(item)),
           )
         : null,
@@ -339,15 +409,15 @@ export function buildResumeDocument(data: ResumeData) {
       h(
         View,
         { style: styles.section },
-        h(Text, { style: styles.sectionTitle }, 'Stack tecnológica'),
-        ...techGroups.map((group) => buildStackGroup(group)),
+        h(Text, { style: styles.sectionTitle }, text.stackHeading),
+        ...techGroups.map((group) => buildStackGroup(group, locale)),
       ),
 
       // ---------------------------------------------------------- languages
       h(
         View,
         { style: styles.section },
-        h(Text, { style: styles.sectionTitle }, 'Idiomas'),
+        h(Text, { style: styles.sectionTitle }, text.languagesHeading),
         ...profile.languages.map((language, index) =>
           h(
             Text,
@@ -362,7 +432,7 @@ export function buildResumeDocument(data: ResumeData) {
         style: styles.footer,
         fixed: true,
         render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
-          `Gerado a partir de ${profile.name.split(' ')[0]?.toLowerCase()}.com.br · página ${pageNumber} de ${totalPages}`,
+          text.footer(profile.name.split(' ')[0]?.toLowerCase() ?? '', pageNumber, totalPages),
       }),
     ),
   );

@@ -1,0 +1,603 @@
+---
+/**
+ * Online résumé (English) — thin locale duplicate of
+ * `src/pages/curriculo/index.astro`. Same structure, same use-case call;
+ * `Astro.currentLocale` resolves to `'en'` from the `/en/...` URL, which is
+ * what makes the dictionary and every content-override repository pick up
+ * the English translation automatically.
+ *
+ * The path segment stays `curriculo` on purpose (same convention as
+ * `/en/projetos`) — only the `/en/` prefix changes.
+ */
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
+import { getDictionary } from '@i18n/dictionary';
+import { getTechCategoryLabel, getTechName } from '@i18n/dictionaries/stack';
+import { resolveLocale } from '@i18n/locales';
+import { repositories, useCases } from '@infrastructure/container';
+import BaseLayout from '@presentation/layouts/BaseLayout.astro';
+import Button from '@atoms/Button.astro';
+import Icon from '@atoms/Icon.astro';
+import TechTag from '@atoms/TechTag.astro';
+import Breadcrumbs from '@molecules/Breadcrumbs.astro';
+import {
+  buildBreadcrumbNode,
+  buildGraph,
+  buildPersonNode,
+} from '@presentation/seo/structured-data';
+
+const locale = resolveLocale(Astro.currentLocale);
+const { resumePage: t, common } = getDictionary(locale);
+const otherLocale = locale === 'pt-BR' ? 'en' : 'pt-BR';
+
+const { profile, experiences, education, techGroups } =
+  await useCases.getPortfolioOverview.execute(locale);
+
+const otherLocaleProfile = await repositories.profile.get(otherLocale);
+
+const coreSkills = techGroups
+  .flatMap((group) => group.technologies)
+  .filter((technology) => technology.isCore)
+  .map((technology) => technology.name);
+
+const homeHref = getRelativeLocaleUrl(locale, '/');
+const curriculoHref = getRelativeLocaleUrl(locale, '/curriculo');
+
+const breadcrumbs = [
+  { name: common.homeLabel, url: homeHref },
+  { name: t.pageTitle, url: curriculoHref },
+];
+
+const jsonLd = buildGraph([
+  buildPersonNode(profile, experiences, education, coreSkills),
+  buildBreadcrumbNode(breadcrumbs),
+]);
+
+const degree = education.filter((item) => item.kind === 'graduacao');
+const credentials = education.filter((item) => item.kind !== 'graduacao');
+
+const description = t.pageDescriptionTemplate
+  .replace('{name}', profile.name)
+  .replace('{title}', profile.title);
+---
+
+<BaseLayout title={t.pageTitle} description={description} path={curriculoHref} jsonLd={jsonLd}>
+  <div class="cv">
+    <div class="u-container">
+      <Breadcrumbs items={breadcrumbs} class="cv__breadcrumbs" />
+
+      <header class="cv__header">
+        <div class="cv__identity">
+          <h1 class="cv__name">{profile.name}</h1>
+          <p class="cv__role">{profile.title}</p>
+
+          <ul class="cv__contacts u-list-reset">
+            <li>
+              <Icon name="mail" size={14} />
+              <a href={profile.mailto}>{profile.email}</a>
+            </li>
+            <li>
+              <Icon name="map-pin" size={14} />
+              <span>{profile.location}</span>
+            </li>
+            {
+              profile.social('linkedin') && (
+                <li>
+                  <Icon name="linkedin" size={14} />
+                  <a
+                    href={profile.social('linkedin')!.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    linkedin.com/in/{profile.social('linkedin')!.handle}
+                  </a>
+                </li>
+              )
+            }
+            {
+              profile.social('github') && (
+                <li>
+                  <Icon name="github" size={14} />
+                  <a href={profile.social('github')!.url} target="_blank" rel="noopener noreferrer">
+                    github.com/{profile.social('github')!.handle}
+                  </a>
+                </li>
+              )
+            }
+          </ul>
+        </div>
+
+        <div class="cv__actions">
+          <Button href={profile.resumePath} variant="primary" icon="download" download>
+            {t.downloadPdfButton}
+          </Button>
+          <Button
+            href={otherLocaleProfile.resumePath}
+            variant="secondary"
+            icon="download"
+            download
+          >
+            {t.otherVersionButton}
+          </Button>
+        </div>
+      </header>
+
+      <section class="cv__section" aria-labelledby="cv-summary">
+        <h2 class="cv__section-title" id="cv-summary">{t.summaryHeading}</h2>
+        <p class="cv__summary">{profile.heroIntro}</p>
+        <ul class="cv__specialties u-list-reset">
+          {profile.specialties.map((specialty) => <li>{specialty}</li>)}
+        </ul>
+      </section>
+
+      <section class="cv__section" aria-labelledby="cv-experience">
+        <h2 class="cv__section-title" id="cv-experience">{t.experienceHeading}</h2>
+
+        <ol class="cv__list u-list-reset">
+          {
+            experiences.map((experience) => (
+              <li class="cv-entry">
+                <div class="cv-entry__head">
+                  <h3 class="cv-entry__role">
+                    {experience.fullRole}
+                    <span class="cv-entry__company">· {experience.company}</span>
+                  </h3>
+                  <p class="cv-entry__period">
+                    <time datetime={experience.period.startISO}>{experience.periodLabel}</time>
+                    <span class="cv-entry__location">{experience.location}</span>
+                  </p>
+                </div>
+
+                <p class="cv-entry__summary">{experience.summary}</p>
+
+                <ul class="cv-entry__bullets">
+                  {experience.responsibilities.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+
+                {experience.achievements.length > 0 && (
+                  <p class="cv-entry__achievements">
+                    <strong>{t.resultsLabel}</strong>{' '}
+                    {experience.achievements
+                      .map((achievement) => `${achievement.label} — ${achievement.value}`)
+                      .join(' · ')}
+                  </p>
+                )}
+
+                {experience.technologies.length > 0 && (
+                  <p class="cv-entry__tech">
+                    <strong>{t.technologiesLabel}</strong> {experience.technologies.join(', ')}
+                  </p>
+                )}
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class="cv__section" aria-labelledby="cv-education">
+        <h2 class="cv__section-title" id="cv-education">{t.educationHeading}</h2>
+
+        <ol class="cv__list u-list-reset">
+          {
+            degree.map((item) => (
+              <li class="cv-entry">
+                <div class="cv-entry__head">
+                  <h3 class="cv-entry__role">
+                    {item.credential}
+                    <span class="cv-entry__company">· {item.institution}</span>
+                  </h3>
+                  <p class="cv-entry__period">
+                    <time datetime={item.period.startISO}>{item.periodLabel}</time>
+                  </p>
+                </div>
+
+                {item.description && <p class="cv-entry__summary">{item.description}</p>}
+
+                {item.highlights.length > 0 && (
+                  <ul class="cv-entry__bullets">
+                    {item.highlights.map((highlight) => (
+                      <li>{highlight}</li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class="cv__section" aria-labelledby="cv-credentials">
+        <h2 class="cv__section-title" id="cv-credentials">{t.credentialsHeading}</h2>
+
+        <ul class="cv__credentials u-list-reset">
+          {
+            credentials.map((item) => (
+              <li>
+                <span class="cv__credential-name">{item.credential}</span>
+                <span class="cv__credential-meta">
+                  {item.institution} · {item.periodLabel}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="cv__section" aria-labelledby="cv-stack">
+        <h2 class="cv__section-title" id="cv-stack">{t.stackHeading}</h2>
+
+        <dl class="cv__stack">
+          {
+            techGroups.map((group) => (
+              <div class="cv__stack-group">
+                <dt>{getTechCategoryLabel(group.category, locale, group.label)}</dt>
+                <dd>
+                  <ul class="cv__stack-list u-list-reset">
+                    {group.technologies.map((technology) => (
+                      <TechTag size="sm" core={technology.isCore}>
+                        {getTechName(technology.id.value, locale, technology.name)}
+                      </TechTag>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </section>
+
+      <section class="cv__section" aria-labelledby="cv-languages">
+        <h2 class="cv__section-title" id="cv-languages">{t.languagesHeading}</h2>
+        <ul class="cv__languages u-list-reset">
+          {
+            profile.languages.map((language) => (
+              <li>
+                <strong>{language.name}</strong> — {language.level}
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .cv {
+    padding-block: var(--space-8) var(--space-16);
+  }
+
+  .cv__breadcrumbs {
+    margin-block-end: var(--space-8);
+  }
+
+  /* ---------------------------------------------------------------- header */
+
+  .cv__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding-block-end: var(--space-8);
+    border-block-end: 1px solid var(--border-default);
+  }
+
+  .cv__name {
+    margin: 0;
+    font-size: var(--fs-3xl);
+    letter-spacing: -0.04em;
+  }
+
+  .cv__role {
+    margin: var(--space-1) 0 var(--space-4);
+    color: var(--color-accent);
+    font-size: var(--fs-lg);
+  }
+
+  .cv__contacts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+  }
+
+  .cv__contacts li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .cv__contacts a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .cv__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  /* --------------------------------------------------------------- section */
+
+  .cv__section {
+    padding-block: var(--space-10);
+    border-block-end: 1px solid var(--border-subtle);
+  }
+
+  .cv__section:last-of-type {
+    border-block-end: none;
+  }
+
+  .cv__section-title {
+    margin: 0 0 var(--space-6);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  .cv__summary {
+    max-width: 68ch;
+    margin: 0 0 var(--space-5);
+    color: var(--color-text-secondary);
+    font-size: var(--fs-lg);
+    line-height: var(--lh-relaxed);
+  }
+
+  .cv__specialties {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .cv__specialties li {
+    padding: 0.2rem var(--space-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  /* --------------------------------------------------------------- entries */
+
+  .cv__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  .cv-entry__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-6);
+    margin-block-end: var(--space-3);
+  }
+
+  .cv-entry__role {
+    margin: 0;
+    font-size: var(--fs-lg);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .cv-entry__company {
+    color: var(--color-text-muted);
+    font-weight: 400;
+  }
+
+  .cv-entry__period {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  .cv-entry__location {
+    color: var(--color-text-faint);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .cv-entry__summary {
+    max-width: 68ch;
+    margin: 0 0 var(--space-3);
+    color: var(--color-text-muted);
+    line-height: var(--lh-relaxed);
+  }
+
+  .cv-entry__bullets {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-width: 68ch;
+    margin: 0 0 var(--space-3);
+    padding-inline-start: var(--space-5);
+    color: var(--color-text-muted);
+    font-size: var(--fs-base);
+    line-height: var(--lh-relaxed);
+  }
+
+  .cv-entry__bullets li::marker {
+    color: var(--color-accent);
+  }
+
+  .cv-entry__achievements,
+  .cv-entry__tech {
+    max-width: 68ch;
+    margin: 0 0 var(--space-2);
+    color: var(--color-text-faint);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-relaxed);
+  }
+
+  .cv-entry__achievements strong,
+  .cv-entry__tech strong {
+    color: var(--color-text-secondary);
+  }
+
+  /* ----------------------------------------------------------- credentials */
+
+  .cv__credentials {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-4);
+  }
+
+  .cv__credentials li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding-inline-start: var(--space-4);
+    border-inline-start: 2px solid var(--border-default);
+  }
+
+  .cv__credential-name {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-base);
+    font-weight: 500;
+  }
+
+  .cv__credential-meta {
+    color: var(--color-text-faint);
+    font-size: var(--fs-xs);
+  }
+
+  /* ----------------------------------------------------------------- stack */
+
+  .cv__stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    margin: 0;
+  }
+
+  .cv__stack-group {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .cv__stack-group dt {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+  }
+
+  .cv__stack-group dd {
+    margin: 0;
+  }
+
+  .cv__stack-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  /* ------------------------------------------------------------- languages */
+
+  .cv__languages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-8);
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 48rem) {
+    .cv__stack-group {
+      grid-template-columns: 12rem 1fr;
+      gap: var(--space-4);
+      align-items: start;
+    }
+  }
+
+  /* ============================================================== print ==
+     Ctrl+P should produce a document a recruiter can file, not a screenshot of
+     a dark website. Ink-saving colours, no chrome, no page-break orphans. */
+
+  @media print {
+    .cv {
+      padding: 0;
+    }
+
+    .cv__breadcrumbs,
+    .cv__actions {
+      display: none;
+    }
+
+    .cv__section {
+      padding-block: 1rem;
+      break-inside: avoid;
+    }
+
+    .cv-entry {
+      break-inside: avoid;
+    }
+
+    .cv__name {
+      font-size: 22pt;
+    }
+
+    .cv__section-title {
+      font-size: 9pt;
+    }
+
+    .cv-entry__role {
+      font-size: 12pt;
+    }
+  }
+</style>
+
+<style is:global>
+  /* Global because these targets live in the layout, outside this component. */
+  @media print {
+    :root {
+      --color-bg: #ffffff;
+      --color-surface: #ffffff;
+      --color-text: #000000;
+      --color-text-secondary: #1a1a1a;
+      --color-text-muted: #333333;
+      --color-text-faint: #666666;
+      --color-accent: #b03a10;
+      --border-subtle: #d4d4d4;
+      --border-default: #b8b8b8;
+    }
+
+    header.header,
+    footer.footer,
+    dialog,
+    .skip-link {
+      display: none !important;
+    }
+
+    body {
+      background: #ffffff;
+      font-size: 10pt;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    @page {
+      margin: 1.5cm;
+    }
+  }
+</style>

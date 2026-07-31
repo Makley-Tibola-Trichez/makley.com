@@ -11,8 +11,13 @@
  * - The scroll-progress bar uses a scroll-driven CSS animation, so it costs zero
  *   JavaScript where supported and simply does not render where it is not.
  */
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
 import type { Profile } from '@domain/profile/profile.entity';
+import { getDictionary } from '@i18n/dictionary';
+import { LOCALE_FLAGS, LOCALE_LABELS, LOCALES, resolveLocale } from '@i18n/locales';
 import Button from '@atoms/Button.astro';
+import FlagIcon from '@atoms/FlagIcon.astro';
 import Icon from '@atoms/Icon.astro';
 import Kbd from '@atoms/Kbd.astro';
 import ThemeToggle from '@molecules/ThemeToggle.astro';
@@ -26,24 +31,36 @@ interface Props {
 
 const { profile, isHome = false } = Astro.props as Props;
 
-const NAV_ITEMS = [
-  { label: 'Sobre', hash: '#sobre' },
-  { label: 'Stack', hash: '#stack' },
-  { label: 'Projetos', hash: '#projetos' },
-  { label: 'Trajetória', hash: '#trajetoria' },
-  { label: 'Contato', hash: '#contato' },
-] as const;
+const locale = resolveLocale(Astro.currentLocale);
+const { header: t } = getDictionary(locale);
+const NAV_ITEMS = t.navItems;
+const brandAriaLabel = t.brandAriaLabel.replace('{name}', profile.name);
+const homeHref = getRelativeLocaleUrl(locale, '/');
 
-const href = (hash: string) => (isHome ? hash : `/${hash}`);
+const href = (hash: string) => (isHome ? hash : `${homeHref}${hash}`);
+
+/**
+ * Only the home page exists in every locale so far — inner pages
+ * (`/curriculo`, `/projetos`, ...) are still pt-BR-only. Switching locale
+ * from one of those pages goes to that locale's home instead of a
+ * non-existent translated version of the current page; from the home page
+ * itself, the client script below preserves the current section hash.
+ */
+const localeOptions = LOCALES.map((loc) => ({
+  value: loc,
+  label: LOCALE_LABELS[loc],
+  flag: LOCALE_FLAGS[loc],
+  href: getRelativeLocaleUrl(loc, '/'),
+}));
 ---
 
-<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+<a class="skip-link" href="#conteudo">{t.skipLink}</a>
 
 <header class="header" data-site-header>
   <div class="header__progress" aria-hidden="true"></div>
 
   <div class="header__inner u-container u-container--wide">
-    <a href="/" class="brand" aria-label={`${profile.name} — página inicial`}>
+    <a href={homeHref} class="brand" aria-label={brandAriaLabel}>
       <span class="brand__mark" aria-hidden="true">M</span>
       <span class="brand__text">
         <span class="brand__name">{profile.shortName}</span>
@@ -51,7 +68,7 @@ const href = (hash: string) => (isHome ? hash : `/${hash}`);
       </span>
     </a>
 
-    <nav class="nav" aria-label="Navegação principal">
+    <nav class="nav" aria-label={t.mainNavAriaLabel}>
       <ul class="nav__list u-list-reset">
         {
           NAV_ITEMS.map((item) => (
@@ -70,24 +87,61 @@ const href = (hash: string) => (isHome ? hash : `/${hash}`);
         type="button"
         class="palette-trigger"
         data-palette-open
-        aria-label="Abrir busca e navegação rápida"
+        aria-label={t.searchButtonAriaLabel}
       >
         <Icon name="search" size={15} />
-        <span class="palette-trigger__label">Buscar</span>
+        <span class="palette-trigger__label">{t.searchButtonLabel}</span>
         <Kbd class="palette-trigger__kbd">⌘K</Kbd>
       </button>
+
+      <div class="lang-switcher" data-lang-switcher>
+        <button
+          type="button"
+          class="lang-trigger"
+          data-lang-trigger
+          aria-haspopup="listbox"
+          aria-expanded="false"
+          aria-label={t.languageSwitcherAriaLabel}
+        >
+          <FlagIcon code={LOCALE_FLAGS[locale]} size={18} />
+          <Icon name="chevron-down" size={13} class="lang-trigger__chevron" />
+        </button>
+
+        <ul class="lang-menu" data-lang-menu role="listbox" aria-label={t.languageSwitcherAriaLabel} hidden>
+          {
+            localeOptions.map((option) => (
+              <li role="presentation">
+                <a
+                  role="option"
+                  aria-selected={option.value === locale ? 'true' : 'false'}
+                  href={option.href}
+                  class="lang-option"
+                  data-lang-option
+                  data-preserve-hash={isHome ? 'true' : 'false'}
+                >
+                  <FlagIcon code={option.flag} size={18} />
+                  <span class="lang-option__label">{option.label}</span>
+                  {option.value === locale && (
+                    <Icon name="check" size={14} class="lang-option__check" />
+                  )}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
 
       <ThemeToggle />
 
       <Button href={profile.resumePath} variant="primary" size="sm" icon="download" class="header__cv">
-        Currículo
+        {t.resumeButton}
       </Button>
 
       <button
         type="button"
         class="menu-trigger"
         data-menu-open
-        aria-label="Abrir menu"
+        aria-label={t.menuButtonAriaLabel}
         aria-haspopup="dialog"
       >
         <Icon name="command" size={18} />
@@ -97,16 +151,16 @@ const href = (hash: string) => (isHome ? hash : `/${hash}`);
 </header>
 
 {/* ------------------------------------------------------------ mobile menu */}
-<dialog class="menu" data-menu aria-label="Menu de navegação">
+<dialog class="menu" data-menu aria-label={t.mobileMenuAriaLabel}>
   <div class="menu__panel">
     <div class="menu__head">
-      <span class="u-eyebrow">Navegação</span>
-      <button type="button" class="menu__close" data-menu-close aria-label="Fechar menu">
+      <span class="u-eyebrow">{t.menuHeading}</span>
+      <button type="button" class="menu__close" data-menu-close aria-label={t.closeMenuAriaLabel}>
         <Icon name="x" size={20} />
       </button>
     </div>
 
-    <nav aria-label="Navegação do menu">
+    <nav aria-label={t.menuNavAriaLabel}>
       <ul class="menu__list u-list-reset">
         {
           NAV_ITEMS.map((item) => (
@@ -120,7 +174,7 @@ const href = (hash: string) => (isHome ? hash : `/${hash}`);
         }
         <li>
           <a href="/curriculo" class="menu__link" data-menu-link>
-            <span>Currículo</span>
+            <span>{t.menuResumeLink}</span>
             <Icon name="arrow-up-right" size={16} />
           </a>
         </li>
@@ -324,6 +378,97 @@ const href = (hash: string) => (isHome ? hash : `/${hash}`);
     display: flex;
     align-items: center;
     gap: var(--space-2);
+  }
+
+  .lang-switcher {
+    position: relative;
+  }
+
+  .lang-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 2.5rem;
+    padding-inline: var(--space-3);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    transition:
+      border-color var(--duration-fast) var(--ease-out-quart),
+      color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .lang-trigger:hover {
+    border-color: var(--border-strong);
+    color: var(--color-text);
+  }
+
+  .lang-trigger :global(.lang-trigger__chevron) {
+    transition: transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .lang-trigger[aria-expanded='true'] :global(.lang-trigger__chevron) {
+    transform: rotate(180deg);
+  }
+
+  .lang-menu {
+    position: absolute;
+    inset-block-start: calc(100% + var(--space-2));
+    inset-inline-end: 0;
+    z-index: var(--z-header);
+    width: 10rem;
+    margin: 0;
+    padding: var(--space-2);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-raised);
+    box-shadow: var(--shadow-lg), var(--highlight-top);
+    list-style: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .lang-menu:not([hidden]) {
+      animation: lang-menu-in var(--duration-fast) var(--ease-out-quart);
+    }
+  }
+
+  @keyframes lang-menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  .lang-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      background-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .lang-option:hover {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .lang-option[aria-selected='true'] {
+    color: var(--color-text);
+    font-weight: 500;
+  }
+
+  .lang-option__label {
+    flex: 1;
+  }
+
+  .lang-option :global(.lang-option__check) {
+    color: var(--color-accent);
   }
 
   .palette-trigger {

@@ -50,8 +50,14 @@ const metricSchema = z.object({
   detail: z.string().optional(),
 });
 
+const focusAreaSchema = z.object({ title: z.string(), description: z.string() });
+const languageSchema = z.object({ name: z.string(), level: z.string() });
+
 const profile = defineCollection({
-  loader: glob({ base: './src/content/profile', pattern: '**/*.yaml' }),
+  // Only the canonical file — locale overrides (`main.<locale>.yaml`) live in
+  // the `profileTranslations` collection below, validated against a partial
+  // schema, so they never have to satisfy every required field here.
+  loader: glob({ base: './src/content/profile', pattern: 'main.yaml' }),
   schema: (context) =>
     z.object({
       name: z.string(),
@@ -79,9 +85,9 @@ const profile = defineCollection({
       availability: z.enum(['open', 'selective', 'closed']),
       availabilityNote: z.string(),
       specialties: z.array(z.string()),
-      focusAreas: z.array(z.object({ title: z.string(), description: z.string() })),
+      focusAreas: z.array(focusAreaSchema),
       goals: z.array(z.string()),
-      languages: z.array(z.object({ name: z.string(), level: z.string() })),
+      languages: z.array(languageSchema),
       stats: z.array(metricSchema),
       socials: z.array(
         z.object({
@@ -104,10 +110,48 @@ const profile = defineCollection({
     }),
 });
 
+/**
+ * Optional per-locale override of the profile's translatable prose fields.
+ * Naming convention: `main.<locale>.yaml` (e.g. `main.en.yaml`) — there is no
+ * `main.pt-BR.yaml` because pt-BR *is* `main.yaml`. A missing file for a
+ * locale is not an error: the repository just falls back to the canonical
+ * field, so translators only ever write what actually changes.
+ */
+const profileTranslations = defineCollection({
+  loader: glob({
+    base: './src/content/profile',
+    pattern: 'main.*.yaml',
+    generateId: ({ entry }) => entry.replace(/^main\.(.+)\.yaml$/, '$1'),
+  }),
+  schema: z.object({
+    title: z.string().optional(),
+    headline: z.string().max(120).optional(),
+    heroStatement: z
+      .object({
+        lead: z.string(),
+        emphasis: z.string(),
+        trail: z.string(),
+      })
+      .optional(),
+    heroIntro: z.string().optional(),
+    bio: z.array(z.string()).min(1).optional(),
+    location: z.string().optional(),
+    availabilityNote: z.string().optional(),
+    specialties: z.array(z.string()).optional(),
+    focusAreas: z.array(focusAreaSchema).optional(),
+    goals: z.array(z.string()).optional(),
+    languages: z.array(languageSchema).optional(),
+    stats: z.array(metricSchema).optional(),
+    resumePath: z.string().optional(),
+  }),
+});
+
 const projects = defineCollection({
   // Markdown, not YAML: the body holds the long-form case study rendered on the
-  // detail page, while the frontmatter stays strictly typed.
-  loader: glob({ base: './src/content/projects', pattern: '**/*.md' }),
+  // detail page, while the frontmatter stays strictly typed. The negation
+  // excludes locale overrides (`<slug>.<locale>.md`, handled by
+  // `projectBodyTranslations` below) — see the `experience` collection for why.
+  loader: glob({ base: './src/content/projects', pattern: ['**/*.md', '!*.*.md'] }),
   schema: (context) =>
     z.object({
       title: z.string(),
@@ -133,8 +177,70 @@ const projects = defineCollection({
     }),
 });
 
+/**
+ * Optional per-locale override of a project's translatable fields — covers
+ * both the catalog card (`title`/`tagline`/`results`) and the detail page
+ * (`context`/`problem`/`solution`/`challenges`/`links`). The long-form
+ * markdown body is a separate collection (`projectBodyTranslations` below)
+ * since Content Layer schemas can't mix a YAML frontmatter shape with a
+ * Markdown body in one collection. Naming convention: `<slug>.<locale>.yaml`.
+ */
+const projectTranslations = defineCollection({
+  loader: glob({
+    base: './src/content/projects',
+    pattern: '*.yaml',
+    generateId: ({ entry }) => entry.replace(/\.yaml$/, ''),
+  }),
+  schema: z.object({
+    title: z.string().optional(),
+    tagline: z.string().max(160).optional(),
+    summary: z.string().optional(),
+    role: z.string().optional(),
+    results: z.array(metricSchema).optional(),
+    context: z.string().optional(),
+    problem: z.string().optional(),
+    solution: z.string().optional(),
+    challenges: z.array(z.string()).min(1).optional(),
+    /**
+     * `technologies` is canonical/untranslated for every project except
+     * `llm-em-dispositivos-moveis` and `portfolio`, whose lists use
+     * descriptive pt-BR phrases (e.g. "Inteligência Artificial", "CSS
+     * moderno") in place of real proper-noun tool names.
+     */
+    technologies: z.array(z.string()).min(1).optional(),
+    /**
+     * Only `alt` is overridable — `image` isn't part of this partial shape
+     * on purpose, so the canonical cover image is never accidentally
+     * dropped by the merge (see `mergeProjectTranslation`).
+     */
+    cover: z.object({ alt: z.string().min(8).optional() }).optional(),
+    links: z.array(externalLinkSchema).optional(),
+  }),
+});
+
+/**
+ * Optional per-locale translation of a project's long-form case-study body
+ * (the markdown below the frontmatter in `<slug>.md`). Naming convention:
+ * `<slug>.<locale>.md` (e.g. `agronota.en.md`) — frontmatter is empty or
+ * absent, only the body is read via `render()`. No override for a slug/locale
+ * pair simply falls back to the canonical pt-BR body.
+ */
+const projectBodyTranslations = defineCollection({
+  loader: glob({
+    base: './src/content/projects',
+    pattern: '*.*.md',
+    generateId: ({ entry }) => entry.replace(/\.md$/, ''),
+  }),
+  schema: z.object({}),
+});
+
+const achievementSchema = z.object({ value: z.string(), label: z.string() });
+
 const experience = defineCollection({
-  loader: glob({ base: './src/content/experience', pattern: '**/*.yaml' }),
+  // The negation excludes locale overrides (`<name>.<locale>.yaml`, handled
+  // by `experienceTranslations` below) — without it this pattern would also
+  // match them and fail schema validation (they lack required fields).
+  loader: glob({ base: './src/content/experience', pattern: ['*.yaml', '!*.*.yaml'] }),
   schema: z.object({
     company: z.string(),
     companyUrl: z.string().url().optional(),
@@ -146,14 +252,49 @@ const experience = defineCollection({
     employmentType: z.enum(['clt', 'pj', 'estagio', 'freelance', 'proprio']).default('clt'),
     summary: z.string(),
     responsibilities: z.array(z.string()).min(1),
-    achievements: z.array(z.object({ value: z.string(), label: z.string() })).default([]),
+    achievements: z.array(achievementSchema).default([]),
     technologies: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
   }),
 });
 
+/**
+ * Optional per-locale override of an experience entry's translatable fields.
+ * Naming convention: `<filename>.<locale>.yaml` (e.g. `01-sicredi.en.yaml`).
+ * `company` and `technologies` stay canonical (proper nouns).
+ */
+const experienceTranslations = defineCollection({
+  loader: glob({
+    base: './src/content/experience',
+    pattern: '*.*.yaml',
+    generateId: ({ entry }) => entry.replace(/\.yaml$/, ''),
+  }),
+  schema: z.object({
+    /**
+     * `company` is canonical/untranslated for every entry except
+     * `03-produto-proprio` — that one names a not-yet-public product by its
+     * description ("Own product") rather than a real proper noun, so it's the
+     * lone entry that overrides this optional field.
+     */
+    company: z.string().optional(),
+    role: z.string().optional(),
+    seniority: z.string().optional(),
+    location: z.string().optional(),
+    summary: z.string().optional(),
+    responsibilities: z.array(z.string()).min(1).optional(),
+    achievements: z.array(achievementSchema).optional(),
+    /**
+     * Canonical/untranslated for every entry except `01-sicredi`, whose list
+     * includes "Microsserviços" — a descriptive pt-BR term, not a proper
+     * noun like the rest of the tools around it.
+     */
+    technologies: z.array(z.string()).optional(),
+  }),
+});
+
 const education = defineCollection({
-  loader: glob({ base: './src/content/education', pattern: '**/*.yaml' }),
+  // See the `experience` collection above for why overrides are excluded.
+  loader: glob({ base: './src/content/education', pattern: ['*.yaml', '!*.*.yaml'] }),
   schema: z.object({
     institution: z.string(),
     credential: z.string(),
@@ -165,6 +306,25 @@ const education = defineCollection({
     highlights: z.array(z.string()).default([]),
     credentialUrl: z.string().url().optional(),
     draft: z.boolean().default(false),
+  }),
+});
+
+/**
+ * Optional per-locale override of an education entry's translatable fields.
+ * Naming convention: `<filename>.<locale>.yaml` (e.g.
+ * `01-atitus-ciencia-computacao.en.yaml`). `institution` stays canonical
+ * (proper noun); `field` isn't rendered by `EducationItem` so it's excluded.
+ */
+const educationTranslations = defineCollection({
+  loader: glob({
+    base: './src/content/education',
+    pattern: '*.*.yaml',
+    generateId: ({ entry }) => entry.replace(/\.yaml$/, ''),
+  }),
+  schema: z.object({
+    credential: z.string().optional(),
+    description: z.string().optional(),
+    highlights: z.array(z.string()).optional(),
   }),
 });
 
@@ -185,4 +345,15 @@ const stack = defineCollection({
   }),
 });
 
-export const collections = { profile, projects, experience, education, stack };
+export const collections = {
+  profile,
+  profileTranslations,
+  projects,
+  projectTranslations,
+  projectBodyTranslations,
+  experience,
+  experienceTranslations,
+  education,
+  educationTranslations,
+  stack,
+};

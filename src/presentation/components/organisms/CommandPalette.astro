@@ -12,7 +12,12 @@
  * cursor through the list while real focus stays in the input, and results are
  * announced through a polite live region.
  */
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
 import type { Project } from '@domain/projects/project.entity';
+import { getDictionary } from '@i18n/dictionary';
+import { getProjectHref } from '@i18n/dictionaries/projects';
+import { resolveLocale } from '@i18n/locales';
 import Icon from '@atoms/Icon.astro';
 import Kbd from '@atoms/Kbd.astro';
 
@@ -26,6 +31,13 @@ interface Props {
 
 const { projects, resumePath, email, githubUrl, linkedinUrl } = Astro.props as Props;
 
+const locale = resolveLocale(Astro.currentLocale);
+const { palette: t } = getDictionary(locale);
+
+const homeHref = getRelativeLocaleUrl(locale, '/');
+const projetosHref = getRelativeLocaleUrl(locale, '/projetos');
+const curriculoHref = getRelativeLocaleUrl(locale, '/curriculo');
+
 type PaletteItem = {
   id: string;
   label: string;
@@ -37,47 +49,68 @@ type PaletteItem = {
   keywords: string;
 };
 
+const NAV_KEYWORDS =
+  locale === 'en'
+    ? {
+        home: 'home main',
+        about: 'about bio who profile',
+        stack: 'stack technologies skills',
+        projects: 'projects work cases portfolio',
+        timeline: 'experience career timeline companies',
+        education: 'education academic degree certifications courses',
+        contact: 'contact email talk reach out',
+      }
+    : {
+        home: 'home inicio principal',
+        about: 'sobre bio quem perfil',
+        stack: 'stack tecnologias skills habilidades',
+        projects: 'projetos trabalhos cases portfolio',
+        timeline: 'experiencia carreira timeline trajetoria empresas',
+        education: 'formacao academico faculdade certificacoes cursos',
+        contact: 'contato email falar conversar',
+      };
+
 const items: PaletteItem[] = [
   // ---------------------------------------------------------------- navigate
-  { id: 'nav-home', label: 'Início', href: '/', icon: 'sparkles', group: 'Navegar', keywords: 'home inicio principal' },
-  { id: 'nav-about', label: 'Sobre', href: '/#sobre', icon: 'users', group: 'Navegar', keywords: 'sobre bio quem perfil' },
-  { id: 'nav-stack', label: 'Stack tecnológica', href: '/#stack', icon: 'layers', group: 'Navegar', keywords: 'stack tecnologias skills habilidades' },
-  { id: 'nav-projects', label: 'Projetos', href: '/projetos', icon: 'code', group: 'Navegar', keywords: 'projetos trabalhos cases portfolio' },
-  { id: 'nav-timeline', label: 'Trajetória', href: '/#trajetoria', icon: 'briefcase', group: 'Navegar', keywords: 'experiencia carreira timeline trajetoria empresas' },
-  { id: 'nav-education', label: 'Formação', href: '/#formacao', icon: 'graduation-cap', group: 'Navegar', keywords: 'formacao academico faculdade certificacoes cursos' },
-  { id: 'nav-contact', label: 'Contato', href: '/#contato', icon: 'mail', group: 'Navegar', keywords: 'contato email falar conversar' },
+  { id: 'nav-home', label: t.nav.home, href: homeHref, icon: 'sparkles', group: t.groups.navigate, keywords: NAV_KEYWORDS.home },
+  { id: 'nav-about', label: t.nav.about, href: `${homeHref}#sobre`, icon: 'users', group: t.groups.navigate, keywords: NAV_KEYWORDS.about },
+  { id: 'nav-stack', label: t.nav.stack, href: `${homeHref}#stack`, icon: 'layers', group: t.groups.navigate, keywords: NAV_KEYWORDS.stack },
+  { id: 'nav-projects', label: t.nav.projects, href: projetosHref, icon: 'code', group: t.groups.navigate, keywords: NAV_KEYWORDS.projects },
+  { id: 'nav-timeline', label: t.nav.timeline, href: `${homeHref}#trajetoria`, icon: 'briefcase', group: t.groups.navigate, keywords: NAV_KEYWORDS.timeline },
+  { id: 'nav-education', label: t.nav.education, href: `${homeHref}#formacao`, icon: 'graduation-cap', group: t.groups.navigate, keywords: NAV_KEYWORDS.education },
+  { id: 'nav-contact', label: t.nav.contact, href: `${homeHref}#contato`, icon: 'mail', group: t.groups.navigate, keywords: NAV_KEYWORDS.contact },
 
   // ---------------------------------------------------------------- projects
   ...projects.map((project) => ({
     id: `project-${project.slug.value}`,
     label: project.title,
     hint: project.categoryLabel,
-    href: project.href,
+    href: getProjectHref(project, locale),
     icon: 'arrow-up-right' as const,
-    group: 'Projetos',
+    group: t.groups.projects,
     keywords: `${project.title} ${project.categoryLabel} ${project.technologies.join(' ')}`.toLowerCase(),
   })),
 
   // ----------------------------------------------------------------- actions
-  { id: 'action-resume-online', label: 'Ver currículo online', href: '/curriculo', icon: 'file-text', group: 'Currículo', keywords: 'curriculo cv resume online' },
-  { id: 'action-resume-pdf', label: 'Baixar currículo (PDF)', href: resumePath, icon: 'download', group: 'Currículo', keywords: 'curriculo cv resume pdf baixar download' },
-  { id: 'action-copy-email', label: 'Copiar e-mail', hint: email, action: 'copy-email', icon: 'copy', group: 'Ações', keywords: 'copiar email contato' },
-  { id: 'action-theme', label: 'Alternar tema claro/escuro', action: 'toggle-theme', icon: 'moon', group: 'Ações', keywords: 'tema dark light claro escuro modo' },
-  { id: 'action-theme-system', label: 'Usar o tema do sistema', action: 'system-theme', icon: 'monitor', group: 'Ações', keywords: 'tema sistema automatico system' },
+  { id: 'action-resume-online', label: t.actions.resumeOnline, href: curriculoHref, icon: 'file-text', group: t.groups.resume, keywords: 'resume cv curriculo online' },
+  { id: 'action-resume-pdf', label: t.actions.resumePdf, href: resumePath, icon: 'download', group: t.groups.resume, keywords: 'resume cv curriculo pdf download baixar' },
+  { id: 'action-copy-email', label: t.actions.copyEmail, hint: email, action: 'copy-email', icon: 'copy', group: t.groups.actions, keywords: 'copy copiar email contact contato' },
+  { id: 'action-theme', label: t.actions.toggleTheme, action: 'toggle-theme', icon: 'moon', group: t.groups.actions, keywords: 'theme tema dark light claro escuro' },
+  { id: 'action-theme-system', label: t.actions.systemTheme, action: 'system-theme', icon: 'monitor', group: t.groups.actions, keywords: 'theme tema system sistema automatic automatico' },
 
   // ------------------------------------------------------------------ social
   ...(githubUrl
-    ? [{ id: 'social-github', label: 'GitHub', href: githubUrl, icon: 'github' as const, group: 'Links', keywords: 'github codigo repositorio' }]
+    ? [{ id: 'social-github', label: 'GitHub', href: githubUrl, icon: 'github' as const, group: t.groups.links, keywords: 'github code codigo repository repositorio' }]
     : []),
   ...(linkedinUrl
-    ? [{ id: 'social-linkedin', label: 'LinkedIn', href: linkedinUrl, icon: 'linkedin' as const, group: 'Links', keywords: 'linkedin rede profissional' }]
+    ? [{ id: 'social-linkedin', label: 'LinkedIn', href: linkedinUrl, icon: 'linkedin' as const, group: t.groups.links, keywords: 'linkedin network rede professional profissional' }]
     : []),
 ];
 
 const groups = [...new Set(items.map((item) => item.group))];
 ---
 
-<dialog class="palette" data-palette aria-label="Busca e navegação rápida">
+<dialog class="palette" data-palette aria-label={t.ariaLabel}>
   <div class="palette__panel">
     <div class="palette__search">
       <Icon name="search" size={17} class="palette__search-icon" />
@@ -85,8 +118,8 @@ const groups = [...new Set(items.map((item) => item.group))];
         type="text"
         class="palette__input"
         data-palette-input
-        placeholder="Buscar projetos, seções e ações…"
-        aria-label="Buscar no site"
+        placeholder={t.searchPlaceholder}
+        aria-label={t.searchAriaLabel}
         role="combobox"
         aria-expanded="true"
         aria-controls="palette-listbox"
@@ -94,13 +127,13 @@ const groups = [...new Set(items.map((item) => item.group))];
         autocomplete="off"
         spellcheck="false"
       />
-      <button type="button" class="palette__close" data-palette-close aria-label="Fechar busca">
+      <button type="button" class="palette__close" data-palette-close aria-label={t.closeAriaLabel}>
         <Kbd>esc</Kbd>
       </button>
     </div>
 
     <div class="palette__results" data-palette-results>
-      <ul id="palette-listbox" role="listbox" class="u-list-reset" aria-label="Resultados">
+      <ul id="palette-listbox" role="listbox" class="u-list-reset" aria-label={t.resultsAriaLabel}>
         {
           groups.map((group) => (
             <li role="presentation" class="palette__group" data-palette-group={group}>
@@ -134,14 +167,14 @@ const groups = [...new Set(items.map((item) => item.group))];
       </ul>
 
       <p class="palette__empty" data-palette-empty hidden>
-        Nenhum resultado. Tente “projetos”, “currículo” ou “contato”.
+        {t.emptyState}
       </p>
     </div>
 
     <footer class="palette__foot">
-      <span><Kbd>↑</Kbd><Kbd>↓</Kbd> navegar</span>
-      <span><Kbd>↵</Kbd> abrir</span>
-      <span><Kbd>esc</Kbd> fechar</span>
+      <span><Kbd>↑</Kbd><Kbd>↓</Kbd> {t.footer.navigate}</span>
+      <span><Kbd>↵</Kbd> {t.footer.open}</span>
+      <span><Kbd>esc</Kbd> {t.footer.close}</span>
     </footer>
   </div>
 

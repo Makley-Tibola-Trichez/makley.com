@@ -1,0 +1,60 @@
+---
+/**
+ * Project index (English) — thin locale duplicate of `src/pages/projetos/index.astro`.
+ *
+ * The path segment stays `projetos` on purpose (same convention as the `#sobre`
+ * etc. section ids): only the `/en/` prefix changes, so every other locale-aware
+ * link in the site can keep computing this URL with `getRelativeLocaleUrl`.
+ */
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
+import { useCases } from '@infrastructure/container';
+import BaseLayout from '@presentation/layouts/BaseLayout.astro';
+import ProjectsSection from '@organisms/ProjectsSection.astro';
+import Breadcrumbs from '@molecules/Breadcrumbs.astro';
+import { buildBreadcrumbNode, buildGraph } from '@presentation/seo/structured-data';
+
+const locale = resolveLocale(Astro.currentLocale);
+const { projects: t, common } = getDictionary(locale);
+
+const { projects, filters } = await useCases.getProjectCatalog.execute(locale);
+
+const homeHref = getRelativeLocaleUrl(locale, '/');
+const projetosHref = getRelativeLocaleUrl(locale, '/projetos');
+
+const breadcrumbs = [
+  { name: common.homeLabel, url: homeHref },
+  { name: t.eyebrow, url: projetosHref },
+];
+
+const jsonLd = buildGraph([buildBreadcrumbNode(breadcrumbs)]);
+---
+
+<BaseLayout
+  title={t.catalogPageTitle}
+  description={t.catalogPageDescription}
+  path={projetosHref}
+  jsonLd={jsonLd}
+>
+  <div class="page-top">
+    <div class="u-container u-container--wide">
+      <Breadcrumbs items={breadcrumbs} />
+    </div>
+  </div>
+
+  <ProjectsSection
+    projects={projects}
+    filters={filters}
+    index="—"
+    title={t.catalogTitle}
+    description={t.catalogDescription}
+  />
+</BaseLayout>
+
+<style>
+  .page-top {
+    padding-block-start: var(--space-8);
+  }
+</style>

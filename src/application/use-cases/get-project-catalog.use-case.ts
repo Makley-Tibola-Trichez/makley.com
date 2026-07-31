@@ -1,3 +1,6 @@
+import { DEFAULT_LOCALE, type Locale } from '@i18n/locales';
+import { getDictionary } from '@i18n/dictionary';
+import { getProjectCategoryLabel } from '@i18n/dictionaries/projects';
 import type { Project, ProjectCategory } from '@domain/projects/project.entity';
 import { PROJECT_CATEGORY_LABELS } from '@domain/projects/project.entity';
 import type { ProjectRepository } from '@domain/projects/project.repository';
@@ -23,8 +26,9 @@ export interface ProjectCatalog {
 export class GetProjectCatalogUseCase {
   constructor(private readonly projects: ProjectRepository) {}
 
-  async execute(): Promise<ProjectCatalog> {
-    const projects = await this.projects.findAll();
+  async execute(locale: Locale = DEFAULT_LOCALE): Promise<ProjectCatalog> {
+    const projects = await this.projects.findAll(locale);
+    const { allFilterLabel } = getDictionary(locale).projects;
 
     const counts = new Map<ProjectCategory, number>();
     for (const project of projects) {
@@ -32,14 +36,14 @@ export class GetProjectCatalogUseCase {
     }
 
     const filters: CategoryFilter[] = [
-      { id: 'todos', label: 'Todos', count: projects.length },
+      { id: 'todos', label: allFilterLabel, count: projects.length },
       ...[...counts.entries()]
         .map(([category, count]) => ({
           id: category,
-          label: PROJECT_CATEGORY_LABELS[category],
+          label: getProjectCategoryLabel(category, locale, PROJECT_CATEGORY_LABELS[category]),
           count,
         }))
-        .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'pt-BR')),
+        .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, locale)),
     ];
 
     return { projects, filters };

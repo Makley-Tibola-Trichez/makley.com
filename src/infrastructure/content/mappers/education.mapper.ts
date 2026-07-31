@@ -2,11 +2,9 @@ import type { CollectionEntry } from 'astro:content';
 
 import { Education } from '@domain/education/education.entity';
 
-export function toEducation(entry: CollectionEntry<'education'>): Education {
-  const { data } = entry;
-
+export function toEducation(id: string, data: CollectionEntry<'education'>['data']): Education {
   return Education.create({
-    id: entry.id.replace(/^\d+-/, ''),
+    id: id.replace(/^\d+-/, ''),
     institution: data.institution,
     credential: data.credential,
     kind: data.kind,

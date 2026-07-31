@@ -7,6 +7,8 @@
  * badges buries the lede.
  */
 import type { Education } from '@domain/education/education.entity';
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
 import SectionHeader from '@molecules/SectionHeader.astro';
 import EducationItem from '@molecules/EducationItem.astro';
 
@@ -22,15 +24,18 @@ const primary = education.filter(
 const secondary = education.filter(
   (item) => item.kind !== 'graduacao' && item.kind !== 'publicacao',
 );
+
+const locale = resolveLocale(Astro.currentLocale);
+const { education: t } = getDictionary(locale);
 ---
 
 <section id="formacao" class="u-section education" aria-labelledby="education-title">
   <div class="u-container">
     <SectionHeader
       index="05"
-      eyebrow="Formação"
-      title="Base acadêmica e aprendizado contínuo"
-      description="Bacharelado em Ciência da Computação, pesquisa aplicada e certificações técnicas."
+      eyebrow={t.eyebrow}
+      title={t.title}
+      description={t.description}
       id="education-title"
     />
 
@@ -42,7 +47,7 @@ const secondary = education.filter(
       {
         secondary.length > 0 && (
           <div class="education__secondary">
-            <h3 class="education__subtitle">Certificações, cursos e eventos</h3>
+            <h3 class="education__subtitle">{t.secondaryTitle}</h3>
             <ul class="education__list education__list--compact u-list-reset">
               {secondary.map((item) => (
                 <EducationItem item={item} />

@@ -11,6 +11,8 @@
  * should have.
  */
 import { SITE } from '@config/site';
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
 import { useCases } from '@infrastructure/container';
 import BaseLayout from '@presentation/layouts/BaseLayout.astro';
 import HeroSection from '@organisms/HeroSection.astro';
@@ -28,10 +30,12 @@ import {
   buildWebSiteNode,
 } from '@presentation/seo/structured-data';
 
+const locale = resolveLocale(Astro.currentLocale);
 const { profile, featuredProjects, experiences, education, techGroups, yearsOfExperience } =
-  await useCases.getPortfolioOverview.execute();
+  await useCases.getPortfolioOverview.execute(locale);
 
-const { filters } = await useCases.getProjectCatalog.execute();
+const { filters } = await useCases.getProjectCatalog.execute(locale);
+const { projects: projectsDict, hero: heroDict } = getDictionary(locale);
 
 /** `knowsAbout` gets the core stack — a 40-item list dilutes the signal. */
 const coreSkills = techGroups
@@ -48,7 +52,7 @@ const jsonLd = buildGraph([
 
 <BaseLayout
   title={SITE.title}
-  description={SITE.description}
+  description={heroDict.metaDescription}
   path="/"
   type="profile"
   jsonLd={jsonLd}
@@ -63,7 +67,7 @@ const jsonLd = buildGraph([
     filters={filters}
     showFilters={false}
     showAllLink
-    description="Estudos de caso com problema, solução, desafios e resultados. Cada um deles rodou em produção."
+    description={projectsDict.homeDescription}
   />
 
   <ExperienceSection experiences={experiences} resumePath={profile.resumePath} />

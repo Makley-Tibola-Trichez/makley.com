@@ -1,0 +1,688 @@
+---
+/**
+ * Project detail (English) — thin locale duplicate of
+ * `src/pages/projetos/[slug].astro`. Same structure, same use-case call;
+ * `Astro.currentLocale` resolves to `'en'` from the `/en/...` URL, which is
+ * what makes the dictionary and every content-override repository pick up
+ * the English translation automatically.
+ */
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
+import { getDictionary } from '@i18n/dictionary';
+import { getProjectCategoryLabel, getProjectHref } from '@i18n/dictionaries/projects';
+import { resolveLocale } from '@i18n/locales';
+import { repositories, useCases } from '@infrastructure/container';
+import BaseLayout from '@presentation/layouts/BaseLayout.astro';
+import Badge from '@atoms/Badge.astro';
+import Button from '@atoms/Button.astro';
+import Icon from '@atoms/Icon.astro';
+import TechTag from '@atoms/TechTag.astro';
+import Breadcrumbs from '@molecules/Breadcrumbs.astro';
+import ProjectCard from '@molecules/ProjectCard.astro';
+import {
+  buildBreadcrumbNode,
+  buildGraph,
+  buildProjectNode,
+} from '@presentation/seo/structured-data';
+
+export const getStaticPaths = (async () => {
+  const projects = await repositories.project.findAll();
+
+  return projects.map((project) => ({
+    params: { slug: project.slug.value },
+  }));
+}) satisfies GetStaticPaths;
+
+const { slug } = Astro.params;
+
+const locale = resolveLocale(Astro.currentLocale);
+const { projects: projectsT, projectDetail: t, common } = getDictionary(locale);
+
+const { project, profile, previous, next, related } = await useCases.getProjectDetail.execute(
+  slug as string,
+  locale,
+);
+
+const body = await repositories.project.renderBody(slug as string, locale);
+const Content = body?.Content;
+
+const homeHref = getRelativeLocaleUrl(locale, '/');
+const projetosHref = getRelativeLocaleUrl(locale, '/projetos');
+const projectHref = getProjectHref(project, locale);
+const categoryLabel = getProjectCategoryLabel(project.category, locale, project.categoryLabel);
+
+const breadcrumbs = [
+  { name: common.homeLabel, url: homeHref },
+  { name: projectsT.eyebrow, url: projetosHref },
+  { name: project.title, url: projectHref },
+];
+
+const jsonLd = buildGraph([
+  buildProjectNode(project, project.cover?.image.src),
+  buildBreadcrumbNode(breadcrumbs),
+]);
+
+const CASE_BLOCKS = [
+  { key: 'problema', label: t.problemLabel, icon: 'x' as const, text: project.problem },
+  { key: 'solucao', label: t.solutionLabel, icon: 'check' as const, text: project.solution },
+];
+---
+
+<BaseLayout
+  title={project.title}
+  description={project.tagline}
+  path={projectHref}
+  type="article"
+  image={project.cover?.image.src}
+  imageAlt={project.cover?.alt}
+  jsonLd={jsonLd}
+>
+  <article class="project">
+    <div class="u-container">
+      <Breadcrumbs items={breadcrumbs} class="project__breadcrumbs" />
+
+      <header class="project__header">
+        <div class="project__meta">
+          <Badge tone="accent">{categoryLabel}</Badge>
+          <span class="project__year">{project.year}</span>
+          {
+            project.isConfidential && (
+              <Badge tone="outline" icon="lock" size="sm">
+                {t.privateSourceBadge}
+              </Badge>
+            )
+          }
+        </div>
+
+        <h1 class="project__title">{project.title}</h1>
+        <p class="project__tagline">{project.tagline}</p>
+
+        <dl class="project__attributes">
+          <div>
+            <dt>{t.roleLabel}</dt>
+            <dd>{project.role}</dd>
+          </div>
+          <div>
+            <dt>{t.contextLabel}</dt>
+            <dd>{project.context}</dd>
+          </div>
+          <div>
+            <dt>{t.categoryLabel}</dt>
+            <dd>{categoryLabel}</dd>
+          </div>
+        </dl>
+
+        {
+          project.links.length > 0 && (
+            <div class="project__links">
+              {project.links.map((link) => (
+                <Button
+                  href={link.url}
+                  variant={link.kind === 'website' || link.kind === 'demo' ? 'primary' : 'secondary'}
+                  icon="arrow-up-right"
+                >
+                  {link.label}
+                </Button>
+              ))}
+            </div>
+          )
+        }
+      </header>
+    </div>
+
+    {
+      project.cover && (
+        <div class="u-container u-container--wide">
+          <figure class="project__cover" data-reveal>
+            <Image
+              src={project.cover.image as never}
+              alt={project.cover.alt}
+              widths={[640, 1000, 1400]}
+              sizes="(min-width: 78rem) 1200px, 100vw"
+              loading="eager"
+              fetchpriority="high"
+              class="project__cover-image"
+            />
+          </figure>
+        </div>
+      )
+    }
+
+    <div class="u-container">
+      <p class="project__summary" data-reveal>{project.summary}</p>
+
+      {
+        project.results.length > 0 && (
+          <section class="project__results" aria-labelledby="project-results" data-reveal>
+            <h2 class="project__section-title" id="project-results">
+              <Icon name="gauge" size={17} />
+              {t.resultsHeading}
+            </h2>
+
+            <dl class="project__result-grid">
+              {project.results.map((result) => (
+                <div class="result-card">
+                  <dt class="result-card__value">{result.value}</dt>
+                  <dd class="result-card__body">
+                    <span class="result-card__label">{result.label}</span>
+                    {result.detail && <span class="result-card__detail">{result.detail}</span>}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )
+      }
+
+      <div class="project__case">
+        {
+          CASE_BLOCKS.map((block) => (
+            <section class="case-block" aria-labelledby={`case-${block.key}`} data-reveal>
+              <h2 class="case-block__title" id={`case-${block.key}`}>
+                <span class:list={['case-block__icon', `case-block__icon--${block.key}`]}>
+                  <Icon name={block.icon} size={15} />
+                </span>
+                {block.label}
+              </h2>
+              <p class="case-block__text">{block.text}</p>
+            </section>
+          ))
+        }
+      </div>
+
+      {
+        project.challenges.length > 0 && (
+          <section class="project__challenges" aria-labelledby="project-challenges" data-reveal>
+            <h2 class="project__section-title" id="project-challenges">
+              <Icon name="layers" size={17} />
+              {t.challengesHeading}
+            </h2>
+
+            <ol class="challenge-list u-list-reset">
+              {project.challenges.map((challenge, index) => (
+                <li class="challenge">
+                  <span class="challenge__index" aria-hidden="true">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <p class="challenge__text">{challenge}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )
+      }
+
+      <section class="project__stack" aria-labelledby="project-stack" data-reveal>
+        <h2 class="project__section-title" id="project-stack">
+          <Icon name="code" size={17} />
+          {t.stackHeading}
+        </h2>
+        <ul class="project__tech u-list-reset">
+          {project.technologies.map((technology) => <TechTag>{technology}</TechTag>)}
+        </ul>
+      </section>
+
+      {
+        Content && (
+          <div class="project__body prose" data-reveal>
+            <Content />
+          </div>
+        )
+      }
+
+      {
+        related.length > 0 && (
+          <section class="project__related" aria-labelledby="project-related">
+            <h2 class="project__section-title" id="project-related">
+              <Icon name="sparkles" size={17} />
+              {t.relatedHeading}
+            </h2>
+            <div class="project__related-grid">
+              {related.map((item) => (
+                <ProjectCard project={item} headingLevel={3} />
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      <nav class="project__pager" aria-label={t.pagerAriaLabel}>
+        {
+          previous ? (
+            <a href={getProjectHref(previous, locale)} class="pager pager--prev" rel="prev">
+              <Icon name="arrow-left" size={16} />
+              <span class="pager__body">
+                <span class="pager__label">{t.previousLabel}</span>
+                <span class="pager__title">{previous.title}</span>
+              </span>
+            </a>
+          ) : (
+            <span />
+          )
+        }
+
+        {
+          next && (
+            <a href={getProjectHref(next, locale)} class="pager pager--next" rel="next">
+              <span class="pager__body">
+                <span class="pager__label">{t.nextLabel}</span>
+                <span class="pager__title">{next.title}</span>
+              </span>
+              <Icon name="arrow-right" size={16} />
+            </a>
+          )
+        }
+      </nav>
+
+      <aside class="project__cta" data-reveal>
+        <h2>{t.ctaHeading}</h2>
+        <p>{t.ctaText}</p>
+        <div class="project__cta-actions">
+          <Button href={`${homeHref}#contato`} variant="primary" icon="arrow-right">
+            {t.ctaButton}
+          </Button>
+          <Button href={profile.mailto} variant="secondary" icon="mail" iconPosition="start">
+            {profile.email}
+          </Button>
+        </div>
+      </aside>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .project {
+    padding-block-start: var(--space-8);
+  }
+
+  .project__breadcrumbs {
+    margin-block-end: var(--space-8);
+  }
+
+  /* ---------------------------------------------------------------- header */
+
+  .project__header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-5);
+    max-width: 46rem;
+  }
+
+  .project__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .project__year {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--color-text-faint);
+  }
+
+  .project__title {
+    margin: 0;
+    font-size: var(--fs-4xl);
+    letter-spacing: -0.04em;
+  }
+
+  .project__tagline {
+    max-width: 44ch;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--fs-lg);
+    line-height: var(--lh-relaxed);
+  }
+
+  .project__attributes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    gap: var(--space-5);
+    width: 100%;
+    margin: var(--space-2) 0 0;
+    padding-block: var(--space-5);
+    border-block: 1px solid var(--border-subtle);
+  }
+
+  .project__attributes dt {
+    margin-block-end: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  .project__attributes dd {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--fs-base);
+  }
+
+  .project__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  /* ----------------------------------------------------------------- cover */
+
+  .project__cover {
+    margin: var(--space-12) 0;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--highlight-top), var(--shadow-lg);
+  }
+
+  .project__cover-image {
+    width: 100%;
+    height: auto;
+  }
+
+  /* --------------------------------------------------------------- summary */
+
+  .project__summary {
+    max-width: 62ch;
+    margin: 0 0 var(--space-16);
+    color: var(--color-text-secondary);
+    font-size: var(--fs-xl);
+    line-height: var(--lh-relaxed);
+    text-wrap: pretty;
+  }
+
+  /* -------------------------------------------------------- section titles */
+
+  .project__section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-6);
+    font-size: var(--fs-xl);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .project__section-title :global(.icon) {
+    color: var(--color-accent);
+  }
+
+  /* --------------------------------------------------------------- results */
+
+  .project__results,
+  .project__challenges,
+  .project__stack,
+  .project__related {
+    margin-block-end: var(--space-16);
+  }
+
+  .project__result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: var(--space-4);
+    margin: 0;
+  }
+
+  .result-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-6);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(
+        ellipse 100% 80% at 0% 0%,
+        color-mix(in oklab, var(--color-accent) 8%, transparent),
+        transparent 70%
+      ),
+      var(--color-surface);
+    box-shadow: var(--highlight-top);
+  }
+
+  .result-card__value {
+    font-size: var(--fs-2xl);
+    font-weight: 560;
+    line-height: 1;
+    letter-spacing: var(--tracking-tighter);
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .result-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin: 0;
+  }
+
+  .result-card__label {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-base);
+  }
+
+  .result-card__detail {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
+    text-wrap: pretty;
+  }
+
+  /* ------------------------------------------------------------ case study */
+
+  .project__case {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    margin-block-end: var(--space-16);
+  }
+
+  .case-block {
+    padding: var(--space-6);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--highlight-top);
+  }
+
+  .case-block__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    font-size: var(--fs-lg);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .case-block__icon {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .case-block__icon--problema {
+    background-color: color-mix(in oklab, var(--aurora-rose) 16%, transparent);
+    color: var(--aurora-rose);
+  }
+
+  .case-block__icon--solucao {
+    background-color: color-mix(in oklab, var(--color-positive) 16%, transparent);
+    color: var(--color-positive);
+  }
+
+  .case-block__text {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--fs-md);
+    line-height: var(--lh-relaxed);
+    text-wrap: pretty;
+  }
+
+  /* ------------------------------------------------------------ challenges */
+
+  .challenge-list {
+    display: flex;
+    flex-direction: column;
+    counter-reset: challenge;
+  }
+
+  .challenge {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    padding-block: var(--space-5);
+    border-block-start: 1px solid var(--border-subtle);
+  }
+
+  .challenge:last-child {
+    border-block-end: 1px solid var(--border-subtle);
+  }
+
+  .challenge__index {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    line-height: 1.7;
+    color: var(--color-accent);
+  }
+
+  .challenge__text {
+    max-width: 66ch;
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: var(--lh-relaxed);
+    text-wrap: pretty;
+  }
+
+  /* ------------------------------------------------------------------ tech */
+
+  .project__tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  /* --------------------------------------------------------------- related */
+
+  .project__related-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  /* ----------------------------------------------------------------- pager */
+
+  .project__pager {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    padding-block: var(--space-8);
+    border-block-start: 1px solid var(--border-subtle);
+  }
+
+  .pager {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    transition:
+      border-color var(--duration-fast) var(--ease-out-quart),
+      color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .pager:hover {
+    border-color: var(--border-strong);
+    color: var(--color-text);
+  }
+
+  .pager--next {
+    justify-content: flex-end;
+    text-align: end;
+  }
+
+  .pager__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .pager__label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-text-faint);
+  }
+
+  .pager__title {
+    font-size: var(--fs-base);
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  /* ------------------------------------------------------------------- cta */
+
+  .project__cta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-block-start: var(--space-8);
+    padding: clamp(var(--space-6), 4vw, var(--space-10));
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    background:
+      radial-gradient(
+        ellipse 90% 130% at 100% 0%,
+        color-mix(in oklab, var(--color-accent) 10%, transparent),
+        transparent 62%
+      ),
+      var(--color-surface);
+    box-shadow: var(--highlight-top);
+  }
+
+  .project__cta h2 {
+    margin: 0;
+    font-size: var(--fs-2xl);
+    letter-spacing: var(--tracking-tighter);
+  }
+
+  .project__cta p {
+    max-width: 48ch;
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: var(--lh-relaxed);
+  }
+
+  .project__cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-block-start: var(--space-3);
+  }
+
+  /* ------------------------------------------------------------ responsive */
+
+  @media (min-width: 48rem) {
+    .project__case {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .project__related-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .project__pager {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

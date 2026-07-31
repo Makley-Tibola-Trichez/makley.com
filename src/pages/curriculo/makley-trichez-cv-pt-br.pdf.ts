@@ -18,9 +18,15 @@ export const prerender = true;
 
 export const GET: APIRoute = async () => {
   const { profile, experiences, education, techGroups } =
-    await useCases.getPortfolioOverview.execute();
+    await useCases.getPortfolioOverview.execute('pt-BR');
 
-  const document = buildResumeDocument({ profile, experiences, education, techGroups });
+  const document = buildResumeDocument({
+    profile,
+    experiences,
+    education,
+    techGroups,
+    locale: 'pt-BR',
+  });
   const buffer = await renderToBuffer(document);
 
   return new Response(new Uint8Array(buffer), {

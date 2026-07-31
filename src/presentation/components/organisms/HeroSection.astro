@@ -16,6 +16,9 @@
  *   element in would delay the metric it is measured by.
  */
 import type { Profile } from '@domain/profile/profile.entity';
+import { getDictionary } from '@i18n/dictionary';
+import { getAvailabilityLabel } from '@i18n/dictionaries/hero';
+import { resolveLocale } from '@i18n/locales';
 import Badge from '@atoms/Badge.astro';
 import Button from '@atoms/Button.astro';
 import Icon from '@atoms/Icon.astro';
@@ -29,6 +32,11 @@ interface Props {
 
 const { profile, yearsOfExperience } = Astro.props as Props;
 const { heroStatement } = profile;
+
+const locale = resolveLocale(Astro.currentLocale);
+const { hero: t } = getDictionary(locale);
+const experienceMeta = t.experienceMeta.replace('{years}', String(yearsOfExperience));
+const availabilityLabel = getAvailabilityLabel(profile.availability, locale, profile.availabilityLabel);
 ---
 
 <section class="hero" aria-labelledby="hero-title">
@@ -44,7 +52,7 @@ const { heroStatement } = profile;
       pulse={profile.isAvailable}
       class="hero__status"
     >
-      {profile.availabilityLabel}
+      {availabilityLabel}
     </Badge>
 
     <h1 class="hero__title" id="hero-title">
@@ -60,10 +68,10 @@ const { heroStatement } = profile;
 
     <div class="hero__actions">
       <Button href="/#projetos" variant="primary" size="lg" icon="arrow-right">
-        Ver projetos
+        {t.viewProjects}
       </Button>
       <Button href={profile.resumePath} variant="secondary" size="lg" icon="download" download>
-        Baixar currículo
+        {t.downloadResume}
       </Button>
       <SocialLinks profile={profile} scope="primary" class="hero__socials" />
     </div>
@@ -86,11 +94,11 @@ const { heroStatement } = profile;
       <Icon name="map-pin" size={14} />
       <span>{profile.location}</span>
       <span class="hero__meta-sep" aria-hidden="true">·</span>
-      <span>{yearsOfExperience} anos de experiência profissional</span>
+      <span>{experienceMeta}</span>
     </p>
   </div>
 
-  <a class="hero__scroll" href="#sobre" aria-label="Ir para a seção Sobre">
+  <a class="hero__scroll" href="#sobre" aria-label={t.scrollToAbout}>
     <span class="hero__scroll-line" aria-hidden="true"></span>
     <Icon name="chevron-down" size={16} />
   </a>

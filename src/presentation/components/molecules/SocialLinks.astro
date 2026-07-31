@@ -7,6 +7,7 @@
  * than in the profile content, keeping presentation out of the data.
  */
 import type { Profile, SocialPlatform } from '@domain/profile/profile.entity';
+import { resolveLocale, type Locale } from '@i18n/locales';
 import Icon, { type IconName } from '@atoms/Icon.astro';
 
 interface Props {
@@ -36,16 +37,28 @@ const PLATFORM_ICONS: Record<SocialPlatform, IconName> = {
   resume: 'file-text',
 };
 
-const PLATFORM_LABELS: Record<SocialPlatform, string> = {
-  github: 'GitHub',
-  linkedin: 'LinkedIn',
-  instagram: 'Instagram',
-  email: 'E-mail',
-  phone: 'Telefone',
-  hackerrank: 'HackerRank',
-  resume: 'Currículo',
+const PLATFORM_LABELS: Record<Locale, Record<SocialPlatform, string>> = {
+  'pt-BR': {
+    github: 'GitHub',
+    linkedin: 'LinkedIn',
+    instagram: 'Instagram',
+    email: 'E-mail',
+    phone: 'Telefone',
+    hackerrank: 'HackerRank',
+    resume: 'Currículo',
+  },
+  en: {
+    github: 'GitHub',
+    linkedin: 'LinkedIn',
+    instagram: 'Instagram',
+    email: 'Email',
+    phone: 'Phone',
+    hackerrank: 'HackerRank',
+    resume: 'Resume',
+  },
 };
 
+const locale = resolveLocale(Astro.currentLocale);
 const socials = scope === 'primary' ? profile.primarySocials : profile.socials;
 ---
 
@@ -61,10 +74,10 @@ const socials = scope === 'primary' ? profile.primarySocials : profile.socials;
         >
           <Icon name={PLATFORM_ICONS[social.platform]} size={size === 'sm' ? 16 : 18} />
           {showLabels ? (
-            <span class="socials__label">{PLATFORM_LABELS[social.platform]}</span>
+            <span class="socials__label">{PLATFORM_LABELS[locale][social.platform]}</span>
           ) : (
             <span class="u-visually-hidden">
-              {PLATFORM_LABELS[social.platform]} — {social.handle}
+              {PLATFORM_LABELS[locale][social.platform]} — {social.handle}
             </span>
           )}
         </a>

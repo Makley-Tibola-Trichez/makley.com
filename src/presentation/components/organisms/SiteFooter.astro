@@ -5,7 +5,11 @@
  * Doubles as the last conversion point: a recruiter who scrolled this far
  * should not have to scroll back up to find an e-mail address.
  */
+import { getRelativeLocaleUrl } from 'astro:i18n';
+
 import type { Profile } from '@domain/profile/profile.entity';
+import { getDictionary } from '@i18n/dictionary';
+import { resolveLocale } from '@i18n/locales';
 import Icon from '@atoms/Icon.astro';
 import SocialLinks from '@molecules/SocialLinks.astro';
 
@@ -17,23 +21,28 @@ const { profile } = Astro.props as Props;
 
 const year = new Date().getUTCFullYear();
 
+const locale = resolveLocale(Astro.currentLocale);
+const { footer: t } = getDictionary(locale);
+const brandAriaLabel = t.brandAriaLabel.replace('{name}', profile.name);
+
+// `/#sobre` etc. are absolute, so a visitor on `/en/curriculo` (once that
+// page exists) would otherwise land back on the pt-BR home instead of
+// staying on their locale — prefixing with the locale-correct root fixes
+// that. `/curriculo` and `/projetos` stay unprefixed on purpose: those pages
+// are pt-BR-only for now (out of scope for this i18n phase).
+const homeHref = getRelativeLocaleUrl(locale, '/');
+
 const SITEMAP = [
   {
-    title: 'Navegação',
-    links: [
-      { label: 'Sobre', href: '/#sobre' },
-      { label: 'Stack', href: '/#stack' },
-      { label: 'Projetos', href: '/#projetos' },
-      { label: 'Trajetória', href: '/#trajetoria' },
-      { label: 'Contato', href: '/#contato' },
-    ],
+    title: t.navGroupTitle,
+    links: t.navLinks.map((item) => ({ label: item.label, href: `${homeHref}${item.hash}` })),
   },
   {
-    title: 'Recursos',
+    title: t.resourcesGroupTitle,
     links: [
-      { label: 'Currículo online', href: '/curriculo' },
-      { label: 'Baixar currículo (PDF)', href: '/curriculo/makley-trichez-cv-pt-br.pdf' },
-      { label: 'Todos os projetos', href: '/projetos' },
+      { label: t.resumeOnlineLink, href: '/curriculo' },
+      { label: t.resumePdfLink, href: profile.resumePath },
+      { label: t.allProjectsLink, href: '/projetos' },
     ],
   },
 ] as const;
@@ -45,7 +54,7 @@ const SITEMAP = [
   <div class="u-container u-container--wide">
     <div class="footer__grid">
       <div class="footer__identity">
-        <a href="/" class="footer__brand" aria-label={`${profile.name} — página inicial`}>
+        <a href={homeHref} class="footer__brand" aria-label={brandAriaLabel}>
           <span class="footer__mark" aria-hidden="true">M</span>
           <span>{profile.name}</span>
         </a>
@@ -79,16 +88,16 @@ const SITEMAP = [
       }
 
       <div class="footer__column">
-        <h2 class="footer__column-title">Onde me encontrar</h2>
+        <h2 class="footer__column-title">{t.findMeTitle}</h2>
         <SocialLinks profile={profile} scope="all" size="sm" showLabels class="footer__socials" />
       </div>
     </div>
 
     <div class="footer__bottom">
-      <p>© {year} {profile.name}. Todos os direitos reservados.</p>
+      <p>© {year} {profile.name}. {t.copyrightSuffix}</p>
       <p class="footer__colophon">
-        Feito com <a href="https://astro.build" target="_blank" rel="noopener noreferrer">Astro</a>
-        e TypeScript — sem framework de UI no cliente.
+        {t.colophonPrefix} <a href="https://astro.build" target="_blank" rel="noopener noreferrer">Astro</a>
+        {t.colophonSuffix}
       </p>
     </div>
   </div>
